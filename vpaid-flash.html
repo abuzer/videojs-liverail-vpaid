@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+
+</head>
+
+<body>
+
+    <div style="text-align:center">
+        <button id="trigger" style="font-size:14px;padding:3px;" disabled>
+            TriggerFlashAd
+        </button>
+        <div id="adElement" style="width:480px; height:270px;background: #000;margin: 20pxauto;"></div>
+    </div>
+
+
+</body>
+<script type="text/javascript">
+/*var vpaidLoader: Loader = newLoader();
+vpaidLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onVPAIDLoadComplete);
+vpaidLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onVPAIDLoadError);
+vpaidLoader.load(newURLRequest("http://cdn-static.liverail.com/swf/v4/admanager.swf"));
+
+*/
+(function() {
+    var LiveRailVPAID,
+        vpaidFrame,
+        vpaidLoader,
+        adElement = document.getElementById('adElement'),
+        trigger = document.getElementById('trigger');
+    //Definead initialization
+    trigger.onclick = function() {
+        var creativeData = {},
+            environmentVars = {
+                slot: adElement,
+                LR_ENVIRONMENT: 'flash',
+                LR_PUBLISHER_ID: 1331,
+                LR_TAGS: 'demo'
+            };
+        trigger.setAttribute('disabled', 'disabled');
+        //Initializean ad
+        LiveRailVPAID.initAd(adElement.offsetWidth, adElement.offsetHeight, 'normal', 512, creativeData, environmentVars);
+    }
+    //DefineinitialVPAID setup
+    function onVPAIDLoad() {
+        //Subscribetoevents
+        LiveRailVPAID.subscribe(function() {
+            LiveRailVPAID.startAd();
+        }, 'AdLoaded');
+        LiveRailVPAID.subscribe(function() {
+            trigger.removeAttribute('disabled');
+        }, 'AdStopped');
+        LiveRailVPAID.subscribe(function() {
+            trigger.removeAttribute('disabled');
+        }, 'AdError');
+        //Enabletrigger
+        trigger.removeAttribute('disabled');
+    }
+    //Loadthe LiveRail VPAIDadunit
+    vpaidFrame = document.createElement('iframe');
+    vpaidFrame.style.display = 'none';
+    vpaidFrame.onload = function() {
+        vpaidLoader = vpaidFrame.contentWindow.document.createElement('script');
+        vpaidLoader.src = 'http://cdn-static.liverail.com/js/LiveRail.AdManager-1.0.js';
+        vpaidLoader.onload = function() {
+            LiveRailVPAID = vpaidFrame.contentWindow.getVPAIDAd();
+            LiveRailVPAID.handshakeVersion('2.0');
+
+            onVPAIDLoad();
+        };
+        vpaidFrame.contentWindow.document.body.appendChild(vpaidLoader);
+    };
+    document.body.appendChild(vpaidFrame);
+}());
+</script>
+
+</html>

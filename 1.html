@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AB Video Player</title>
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript">
+    
+    $(function(){
+    	var abPlayer ;
+    	/*abPlayer.options = {
+    		'height' : 300,
+    		'width' : 300,
+    		'poster': '',
+    	};*/
+
+
+    	abPlayer.addEventListener("playing"), function(){
+    		console.log('playing');
+    	}
+
+    	
+    	var abPlayer.player = false;
+    	abPlayer = document.getElementById('ab_player');
+    	$('.vdo-play').click(function(){
+    		abPlayer.play(); 		
+    		abPlayer.player = true;
+    	});
+    	$('.vdo-pause').click(function(){
+    		abPlayer.pause(); 		
+    	});
+    });
+    </script>
+</head>
+
+<body>
+
+
+
+
+<div class="ab-player" style="margin:0 auto; float:none;">
+    <video id='ab_player' width="400"  preload poster="http://media.w3.org/2010/05/sintel/poster.png">
+      <source id='mp4' src="http://media.w3.org/2010/05/sintel/trailer.mp4" type='video/mp4'>
+      <source id='webm' src="http://media.w3.org/2010/05/sintel/trailer.webm" type='video/webm'>
+      <source id='ogv' src="http://media.w3.org/2010/05/sintel/trailer.ogv" type='video/ogg'>
+      <p>Your user agent does not support the HTML5 Video element.</p>
+    </video>
+</div>
+
+
+
+<!-- <div class="ab-player">
+    <video id='ab_player' width="400"  preload poster="http://media.w3.org/2010/05/sintel/poster.png">
+      <source id='mp4' src="http://media.w3.org/2010/05/sintel/trailer.mp4" type='video/mp4'>
+      <source id='webm' src="http://media.w3.org/2010/05/sintel/trailer.webm" type='video/webm'>
+      <source id='ogv' src="http://media.w3.org/2010/05/sintel/trailer.ogv" type='video/ogg'>
+      <p>Your user agent does not support the HTML5 Video element.</p>
+    </video>
+	<div class="ab-controls">
+		<div class="vdo-play">Play</div>
+		<div class="vdo-pause">Pause</div>
+		<div class="seek">
+			<div class="elapsed"></div>
+		</div>
+		<div class="vdo-fullscreen">FS</div>
+		<div class="vdo-exit-fullscreen">Exit-FS</div>
+		<div class="vdo-volumn">Vol</div>
+		<div class="vdo-mute">Mute</div>
+
+	</div>
+
+</div>
+ -->
+
+
+</body>
+
+</html>
