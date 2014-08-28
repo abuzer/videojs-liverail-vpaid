@@ -123,7 +123,7 @@
         vpaidFrame.style.display = 'none';
         vpaidFrame.onload = function() {
             vpaidLoader = vpaidFrame.contentWindow.document.createElement('script');
-            vpaidLoader.src = 'http://cdn-static.liverail.com/js/LiveRail.AdManager-1.0.js';
+            vpaidLoader.src = 'LiveRail.AdManager-1.0.js';
             vpaidLoader.onload = function() {
                 LiveRailVPAID = vpaidFrame.contentWindow.getVPAIDAd();
                 LiveRailVPAID.handshakeVersion('2.0');
