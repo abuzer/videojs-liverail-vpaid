@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Video.js | HTML5 Video Player</title>
+
+    <!-- Chang URLs to wherever Video.js files will be hosted -->
+    <link href="video-js.css" rel="stylesheet" type="text/css">
+    <!-- video.js must be in the <head> for older IEs to work. -->
+    <script src="video.js"></script>
+    <script src="api.js"></script>
+    <script src="vpaid.js"></script>
+
+    <!-- Unless using the CDN hosted version, update the URL to the Flash SWF -->
+    <script>
+    videojs.options.flash.swf = "video-js.swf";
+    log = function(obj) {
+        console.log(obj);
+    }
+    </script>
+
+
+</head>
+
+<body>
+    <div id="videoWrapper">
+
+        <video id="vid1" class="video-js vjs-default-skin" controls muted preload="none" width="640" height="264" poster="http://video-js.zencoder.com/oceans-clip.png">
+            <source src="282076105.mp4" type='video/mp4' />
+
+            <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+            </p>
+        </video>
+
+    </div>
+
+
+    <script type="text/javascript">
+    var vid1 = videojs('vid1');
+
+    environmentVars = {
+        slot: 'videoWrapper',
+        videoSlot: 'videoElement',
+        videoSlotCanAutoPlay: true,
+        LR_PUBLISHER_ID: 1331,
+        LR_TAGS: 'demo',
+        LR_MUTED: 1,
+        LR_LAYOUT_SKIN_MESSAGE: 'Advertisement. Video will resume in {COUNTDOWN} seconds.',
+    };
+    vid1.ads();
+    vid1.vpaid(environmentVars);
+
+    
+    var LiveRailVPAID,
+    vpaidFrame, vpaidLoader, videoWrapper = document.getElementById('videoWrapper'),
+    videoElement = document.getElementById('vid1'),
+    initAdButton = document.getElementById('initAdButton'),
+    startAdButton = document.getElementById('startAdButton'),
+    initAdButton = document.getElementById('initAdButton');
+
+
+    vpaidFrame = document.createElement('iframe');
+    vpaidFrame.style.display = 'none';
+    vpaidFrame.onload = function() {
+        vpaidLoader = vpaidFrame.contentWindow.document.createElement('script');
+        vpaidLoader.src = 'LiveRail.AdManager-1.0.js';
+        vpaidLoader.onload = function() {
+            LiveRailVPAID = vpaidFrame.contentWindow.getVPAIDAd();
+            LiveRailVPAID.handshakeVersion('2.0');
+            onVPAIDLoad();
+        };
+        vpaidFrame.contentWindow.document.body.appendChild(vpaidLoader);
+    };
+    document.body.appendChild(vpaidFrame);
+
+    function playerReset() {
+        // videoElement.src = 'http://video-js.zencoder.com/oceans-clip.mp4';
+        // videoElement.load();
+        console.log('playerReset ');
+        //initAdButton.removeAttribute('disabled');
+    }
+    //DefineinitialVPAID setup
+    function onVPAIDLoad() {
+        LiveRailVPAID.subscribe(function() {
+            log('ad Loaded')
+            LiveRailVPAID.startAd();
+        }, 'AdLoaded');
+        LiveRailVPAID.subscribe(function() {
+            playerReset();
+            videojs("videoElement").play();
+        }, 'AdStopped');
+        LiveRailVPAID.subscribe(function() {
+            playerReset();
+        }, 'AdError');
+        LiveRailVPAID.subscribe(function(message) {
+            console.log(message);
+        }, 'AdLog');
+        LiveRailVPAID.subscribe(function(message) {
+
+        }, 'AdComplete');
+        playerReset();
+    }
+
+    /*
+     var vid = videojs("vid1", {
+        plugins : { vpaidPlugin : {} }
+      }, function() {
+         videoPlayer = this;
+       });*/
+    </script>
+
+</body>
+
+</html>

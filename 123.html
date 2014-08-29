@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+
+
+    <script src="LiveRail.AdManager-1.0.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript">
+    var LiveRailVPAID;
+    $(function() {
+        LiveRailVPAID = getVPAIDAd();
+        LiveRailVPAID.handshakeVersion('2.0');
+
+        /* setTimeout(function(){
+            onVPAIDLoad();
+        },5000);*/
+
+        var creativeData = {},
+            environmentVars = {
+                slot: videoWrapper,
+                videoSlot: videoElement,
+                videoSlotCanAutoPlay: true,
+                LR_PUBLISHER_ID: 1331,
+                LR_TAGS: 'demo',
+                LR_MUTED: 1,
+                LR_LAYOUT_SKIN_MESSAGE: 'Advertisement. Video will resume in {COUNTDOWN} seconds.',
+            };
+        //initAdButton.setAttribute('disabled', 'disabled');
+        //Initializean ad
+        LiveRailVPAID.initAd(videoElement.offsetWidth, videoElement.offsetHeight, 'normal', 512, creativeData, environmentVars);
+
+        LiveRailVPAID.subscribe(function() {
+            LiveRailVPAID.startAd();
+            console.log('ad loaded');
+        }, 'AdLoaded');
+
+    });
+
+    function playerReset() {
+        //Load content(playercantakecontrolatthispoint)
+        // if (videoElement.canPlayType('video/mp4') === '' && videoElement.canPlayType('video/webm') !== '') {
+        //     videoElement.src = 'http://cdn-static.liverail.com/sample/html5/uivideo.webm';
+        // } else {
+        //     videoElement.src = 'http://cdn-static.liverail.com/sample/html5/uivideo.mp4';
+
+        //     videoElement.src = 'http://video-js.zencoder.com/oceans-clip.mp4';
+
+
+        // }
+        // videoElement.load();
+        console.log('playerReset ');
+        //initAdButton.removeAttribute('disabled');
+    }
+    //DefineinitialVPAID setup
+    function onVPAIDLoad() {
+        //Subscribetoevents
+        console.log('-----');
+        LiveRailVPAID.subscribe(function() {
+            /* startAdButton.removeAttribute('disabled');
+            videojs("videoElement", {}, function() {
+                // Player (this) is initialized and ready.
+            });*/
+            LiveRailVPAID.startAd();
+        }, 'AdLoaded');
+        LiveRailVPAID.subscribe(function() {
+            playerReset();
+            videojs("videoElement").play();
+        }, 'AdStopped');
+        LiveRailVPAID.subscribe(function() {
+            playerReset();
+        }, 'AdError');
+        LiveRailVPAID.subscribe(function(message) {
+            console.log(message);
+            console.log('message');
+        }, 'AdLog');
+        LiveRailVPAID.subscribe(function(message) {
+
+            console.log('------------ complete');
+        }, 'AdComplete');
+        playerReset();
+    }
+    </script>
+
+</head>
+
+<body>
+
+    <div id="videoWrapper" style="">
+        <video id="videoElement" class="video-js vjs-default-skin" controls preload="none" width="640" height="264" poster="http://video-js.zencoder.com/oceans-clip.png">
+            <source src="http://video-js.zencoder.com/oceans-clip.mp4" type='video/mp4' />
+        </video>
+    </div>
+
+</body>
+
+</html>
