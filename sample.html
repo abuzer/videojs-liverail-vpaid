@@ -30,12 +30,12 @@
             $('#videoElement').attr('src', video1);
             $('#videoSource').attr('src', video1);
             $('#videoElement')[0].play();
-            video1played = true;
+            video1Played = true;
         });
 
 
         $('#videoElement').bind('ended', function() {
-            if (video1played && !video2Played) {
+            if (video1Played && !video2Played) {
 
                 $('#videoElement').attr('src', video2);
                 $('#videoSource').attr('src', video2);
