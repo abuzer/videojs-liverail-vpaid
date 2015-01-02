@@ -1,0 +1,78 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+
+
+    <!-- Chang URLs to wherever Video.js files will be hosted -->
+  <link href="video-js.css" rel="stylesheet" type="text/css">
+  <!-- video.js must be in the <head> for older IEs to work. -->
+  <script src="video.js"></script>
+
+  <!-- Unless using the CDN hosted version, update the URL to the Flash SWF -->
+  <script>
+    videojs.options.flash.swf = "video-js.swf";
+  </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript">
+    video1 = 'https://d3hh3bpy3h68fd.cloudfront.net/processed_videos/47fad7e0-7477-0132-8e95-123139254ded/_preview_640x480_2932_edit.mp4';
+    video2 = 'https://drgta5lwz3cck.cloudfront.net/uploads-public-videos/fd6eefe0-73cc-0132-a03a-12313b07582a/640x480.mp4';
+    video1Played = false;
+    video2Played = false;
+
+    $(function() {
+
+        $('#playAd').on('click', function() {
+            $('#playAd').hide();
+            $('#videoElement').attr('src', video1);
+            $('#videoSource').attr('src', video1);
+            $('#videoElement')[0].play();
+            video1played = true;
+        });
+
+
+        $('#videoElement').bind('ended', function() {
+            if (video1played && !video2Played) {
+
+                $('#videoElement').attr('src', video2);
+                $('#videoSource').attr('src', video2);
+
+                $('#videoElement')[0].load();
+                $('#videoElement')[0].play();
+                video2played = true;
+            }
+        });
+        $('.videoElement').bind('progress', function(e) {
+            $('#state').hide();
+        });
+
+        $('.videoElement').bind('waiting', function(e) {
+            $('#state').show();
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <button type="button" id="playAd">Click to Play</button>
+
+
+    <div id="videoWrapper" style="">
+	    <div id="state" style="display:none; text-align: center">
+	        <img style="-webkit-user-select: none" src="http://www.loadinfo.net/images/preview/14_cyrle_four_24.gif?1384388177">
+	    </div>
+        <video  x-webkit-airplay="allow" id="videoElement" class="video-js videoElement vjs-default-skin" height="50%" width="100%" controls src="" poster="">
+            <source id="videoSource" src="" type="video/mp4">
+        </video>
+        <!--   <video data-setup="{}" x-webkit-airplay="allow" id="videoElement1" class="video-js videoElement1 vjs-default-skin" height="50%" width="100%" controls src="" poster="">
+            <source id="videoSource" src="https://d3hh3bpy3h68fd.cloudfront.net/processed_videos/47fad7e0-7477-0132-8e95-123139254ded/_preview_640x480_2932_edit.mp4" type="video/mp4">
+        </video>
+ 		-->
+    </div>
+
+</body>
+
+</html>
