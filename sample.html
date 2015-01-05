@@ -35,6 +35,9 @@
 
 
         $('#videoElement').bind('ended', function() {
+            if( video1Played && video2Played ){
+                $('#videoElement')[0].webkitExitFullScreen()
+            }
             if (video1Played && !video2Played) {
 
                 $('#videoElement').attr('src', video2);
@@ -44,9 +47,7 @@
                 $('#videoElement')[0].play();
                 video2Played = true;
             }
-            if( video1Played && video2Played ){
-                $('#videoElement')[0].webkitExitFullScreen()
-            }
+            
         });
         $('.videoElement').bind('progress', function(e) {
             $('#state').hide();
