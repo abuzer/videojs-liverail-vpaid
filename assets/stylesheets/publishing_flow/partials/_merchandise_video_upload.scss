@@ -1,0 +1,105 @@
+@import "../variables";
+
+// Hack to make upload input under button to be bigger than button
+// The excess is cleared by the overflow:hidden in #video-upload-btn
+@mixin hideFileInput() {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    opacity: 0.0;
+    filter: alpha(opacity=0); 
+    font-size: 300px; 
+    height: 200px;
+}
+
+
+#merchandise-upload {
+  .merch-name, .merch-url, .merch-desc {
+		width:200px;
+		margin: 0 0 10px 0;
+	}
+
+  .merch-price {
+		width:110px;
+		display:inline-block;
+		margin:0;
+	}
+  .product-btn .product-btn-label {
+    float: left;
+    font-family: "open sans",sans-serif;
+    font-size: 0.85em;
+    margin: 30px 15px 0;
+  }
+
+  #upload-merch-image, .upload-merch-image {
+		position:absolute;
+		width:140px;
+	 	height:111px;
+	 	font-size:.9em;
+	 	bottom:inherit;
+	 	letter-spacing:0;
+	 	background:transparent;
+		border: rgba(7, 7, 7, 0.25) solid 1px;
+		font-weight:500;
+		color:black;
+		text-align:center;
+		&:hover {background: rgba(7, 7, 7, 0.15);}
+	}
+
+    #upload-merch-image img {
+      width: 140px;
+      height: 110px;
+    }
+
+	.upload-btn-txt {
+		padding:36px 0px;
+	}
+
+
+  .add-merch-button {
+		width:150px;
+		height:30px;
+		display:inline-block;
+        float: left;
+		margin-top:25px;
+		border-radius:2px;
+    background:$blue;
+    color:white;
+    line-height: 2.3;
+    text-align:center;
+    cursor:pointer;
+    text-decoration: none;
+    &:hover {
+        background-color: darken($blue,1%)
+    }
+	}
+
+  .product-image, #upload-merchandise-image-input {
+		@include hideFileInput();
+		height:95px;
+	}
+
+  .product-form {
+    margin-bottom: 15px;
+  }
+
+  .products {
+    padding-top: 20px;
+  }
+}
+.label-add-merch {
+  padding-top: 20px;
+}
+
+#navigation-btn { margin-top: 125px;}
+
+#merchandise_tab .details-box {
+  display: inline-block;
+  letter-spacing: normal;
+  text-rendering: auto;
+  vertical-align: top;
+  width: 74%;
+  word-spacing: normal;
+}
+

@@ -1,0 +1,25 @@
+.welcome_h3{ color: black; font-size: 27px; font-weight: normal; margin: 31px 0 0 0; padding: 0;}
+.questions { display:block; background:#fff; border:solid 1px #d7d7d7; border-radius:5px; margin:10px 0;padding-top:35px; padding-bottom: 35px;}
+
+.questions .access1, .questions .access2, .questions .access3, .questions .access4 { display:inline-table; height:75px;}
+
+.questions .access1{ background:url(upload-icon.png) center top no-repeat; width:96px;}
+.questions .access2{ background:url(vault-icon.png) center top no-repeat; width:101px;}
+.questions .access3{ background:url(dashboard-icon.png) center top no-repeat; width:81px;}
+.questions .access4{ background:url(ico-public-video-ads.png) center top no-repeat; width:81px;}
+
+.questions .access1:hover, .questions .access2:hover, .questions .access3:hover, .questions .access4:hover{ background-position:center bottom;}
+
+.questions h3{ display:block; font-weight:bold; font-size:21px;color:black; margin:5px 0 0 0;}
+.questions p{ display:block;  padding:0;text-align: center; margin: 0px 20%;}
+.following-cat { display:block; text-align:center;}
+.issues {display: block;margin: 0 auto;max-width: 65%;padding-top: 43px;}
+
+.issues p {
+    float: left;
+    font-size: 17px;
+    margin: 10px 0;
+    margin-right: 10px;
+}
+
+#welcome_page{min-height:475px;}

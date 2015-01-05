@@ -6,14 +6,50 @@
 
 
     <!-- Chang URLs to wherever Video.js files will be hosted -->
-  <link href="video-js.css" rel="stylesheet" type="text/css">
-  <!-- video.js must be in the <head> for older IEs to work. -->
-  <script src="video.js"></script>
+    <link href="video-js.css" rel="stylesheet" type="text/css">
+    <link href="vjs.css" rel="stylesheet" type="text/css">
+    <!-- video.js must be in the <head> for older IEs to work. -->
+    <script src="video.js"></script>
+    <style type="text/css">
+    .vjs-loading-spinner {
+        z-index: 999;
+    }
+    .ad-message {
+        display: none;
+        position: absolute;
+        right: 10;
+        top: 0;
+    }
+    .loading {
+        background: url(http://www.loadinfo.net/images/preview/13_cyrle_three_24.gif?1384388177) no-repeat;
+        display: none;
+        position: absolute;
+        top: 48%;
+        left: 48%;
+        height: 24px;
+        width: 24px;
+    }
+    .runtime{
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        padding: 2px 4px;
+        color: #fff;
+        position: absolute;
+        border-radius: 2px;
+    }
+   /* .vjs-poster{
+        z-index: 10001;
+    }
+    .vjs-big-play-button{
+        z-index: 999999;
+    }*/
+    </style>
 
-  <!-- Unless using the CDN hosted version, update the URL to the Flash SWF -->
-  <script>
+    <!-- Unless using the CDN hosted version, update the URL to the Flash SWF -->
+    <script>
     videojs.options.flash.swf = "video-js.swf";
-  </script>
+    </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -24,22 +60,39 @@
     video2Played = false;
 
     $(function() {
-
-        $('#playAd').on('click', function() {
+        playVideo = function(){
+            $('#videoElement').show();
+            $('#videoElement').attr('width', '100%')
+            $('.ad-message').show();
+            $('.runtime').hide();
+            $('.vjs-poster').hide();
             $('#playAd').hide();
+            $('.vjs-big-play-button').hide();
             $('#videoElement').attr('src', video1);
             $('#videoSource').attr('src', video1);
             $('#videoElement')[0].play();
             video1Played = true;
+        }
+        $('#playAd').on('click', function() {
+            playVideo();
+        });
+
+        $('.vjs-poster').on('click', function() {
+            playVideo();
+        });
+        $('.vjs-big-play-button').on('click', function() {
+            playVideo();
         });
 
 
         $('#videoElement').bind('ended', function() {
-            if( video1Played && video2Played ){
+            if (video1Played && video2Played) {
                 $('#videoElement')[0].webkitExitFullScreen()
+                $('.vjs-poster').show();
+                $('.vjs-big-play-button').show();
             }
             if (video1Played && !video2Played) {
-
+                $('#videoElement')[0].webkitExitFullScreen()
                 $('#videoElement').attr('src', video2);
                 $('#videoSource').attr('src', video2);
 
@@ -47,10 +100,11 @@
                 $('#videoElement')[0].play();
                 video2Played = true;
             }
-            
+
         });
         $('.videoElement').bind('progress', function(e) {
             $('#state').hide();
+            $('.ad-message').hide();
         });
 
         $('.videoElement').bind('waiting', function(e) {
@@ -61,20 +115,31 @@
 </head>
 
 <body>
-    <button type="button" id="playAd">Click to Play</button>
 
-
-    <div id="videoWrapper" style="">
-	    <div id="state" style="display:none; text-align: center">
-	        <img style="-webkit-user-select: none" src="http://www.loadinfo.net/images/preview/14_cyrle_four_24.gif?1384388177">
-	    </div>
-        <video  x-webkit-airplay="allow" id="videoElement" class="video-js videoElement vjs-default-skin" height="50%" width="100%" controls src="" poster="">
+    <div id="videoWrapper" style="" class="vjs-default-skin video-js vjs-big-play-centered">
+        <video x-webkit-airplay="allow" style="position: absolute; top:0; display:none;" width="1" id="videoElement" class="video-j1s videoElement vjs-default-skin" controls src="" poster="">
             <source id="videoSource" src="" type="video/mp4">
         </video>
+        <div class="vjs-poster" tabindex="-1" style="display: block; background-image: url(https://drgta5lwz3cck.cloudfront.net/uploads-public-videos/184b6620-730c-0132-a037-12313b07582a/TIMELINE_PLAYER_1280x720_0000.jpg);">
+        </div>
+        <div class="ad-message">
+            <p align="center">Ad Video will play first</p>
+        </div>
+        <div class="runtime">
+            <span>00:30</span>
+        </div>
+
+        <div class="vjs-big-play-button" role="button " aria-live="polite" tabindex="0" aria-label="play video" style="display: block;"><span aria-hidden="true"></span>
+        </div>
+        <div class="loading" id="state" style="display: none;"></div>
+
+        <!-- <div id="state" style="display:none; text-align: center">
+            <img style="-webkit-user-select: none" src="http://www.loadinfo.net/images/preview/14_cyrle_four_24.gif?1384388177">
+        </div> -->
         <!--   <video data-setup="{}" x-webkit-airplay="allow" id="videoElement1" class="video-js videoElement1 vjs-default-skin" height="50%" width="100%" controls src="" poster="">
             <source id="videoSource" src="https://d3hh3bpy3h68fd.cloudfront.net/processed_videos/47fad7e0-7477-0132-8e95-123139254ded/_preview_640x480_2932_edit.mp4" type="video/mp4">
         </video>
- 		-->
+        -->
     </div>
 
 </body>

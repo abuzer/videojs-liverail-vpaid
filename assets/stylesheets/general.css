@@ -1,0 +1,12 @@
+.checkbox-all{
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+.field_with_errors .message {
+    color: #ff0000;
+    margin-left: 242px;
+    font-size: 12px;
+    padding-top: 5px;
+}
+

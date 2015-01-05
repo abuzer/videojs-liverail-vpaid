@@ -1,0 +1,50 @@
+@import "../variables";
+
+.free-video {
+	// Overrdies mostly from CSS from older version
+	 ol.steps li {
+	 	// width:284px;
+	 }
+
+	 #video-upload-btn {
+	 	top:170px;
+	 }
+
+	 #video-link-input {
+	 	display:none;
+	 	width:300px;
+	 	margin:100px auto;
+
+	 	.or-box {
+	 		text-align:center;
+	 		margin-top:12px;
+	 	}
+
+	 }
+
+	 textarea {
+	 	background-color: #F8F8F8;
+		border: 1px solid #CACACA;
+		border-radius: 4px 4px 4px 4px;
+		color: #787878;
+		font-size: 13px;
+		padding: 5px;
+		width: 320px;
+		resize: none;
+	 }
+}
+
+
+#video-link-btn {
+    width:100px;
+    height:30px;
+    border-radius:2px;
+    background:$blue;
+    color:white;
+    margin:0 auto;
+    line-height: 2.3;
+    margin-top: 5px;
+    &:hover {
+        background-color: darken($blue,1%)
+    }
+}

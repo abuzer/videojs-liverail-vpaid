@@ -1,0 +1,84 @@
+var FacebookPermissionsModule = (function () {
+  var my = {},
+       isFBPermissionsGrantedForPublishVideo = function(callback) {
+
+          FB.init({appId: <%=APP_CONFIG["THIRD_PARTY"]["FACEBOOK"]["APP_KEY"] %>,cookie: true});
+          FB.getLoginStatus(function(response) {
+            if (response.status === "connected") {
+              FB.api("/me/permissions", function(response) {
+                var permissions;
+                if (response && response.data && response.data.length) {
+                  permissions = response.data.shift();
+
+                  if (permissions.manage_pages)
+                    getUserFBPages();
+
+                  if (permissions.publish_stream)
+                    $('#post_wall_fb_div').show();
+                  return callback(permissions.publish_stream && permissions.manage_pages);
+                }
+              });
+            } else
+              return callback(false);
+          });
+        };
+
+      my.check_fb_permission = function(){
+
+        $('#fb_get_permissions_button').unbind("click")
+        $('#fb_get_permissions_button').click(function() {
+            FB.login(function(response) {
+               isFBPermissionsGrantedForPublishVideo(function(fb_permission_response) {
+                if (fb_permission_response) {
+                  $(".waiting_state_div").hide();
+                  $(".permission_buttons_div").hide();
+                  $("#tos").show();
+                } else {
+                  $(".waiting_state_div").hide();
+                  $(".permission_buttons_div").show();
+                }
+              });
+            }, {scope: "publish_stream,manage_pages"});
+          });
+
+        isFBPermissionsGrantedForPublishVideo(function(fb_permission_response) {
+          if (fb_permission_response) {
+            $(".waiting_state_div").hide();
+            $(".permission_buttons_div").hide();
+            $("#tos").show();
+          } else {
+            $(".waiting_state_div").hide();
+            $(".permission_buttons_div").show();
+          }
+        });
+      }
+
+        getUserFBPages = function() {
+           FB.api({method: 'fql.query',
+            query: 'select page_id, pic, pic_small, name, page_url from page where page_id in (select page_id from page_admin where uid = ' + $('#users_fb_id').prop("value") + ') order by name'
+          }, function(data) {
+            var fb_pages_li_data;
+            fb_pages_li_data = "";
+            $(data).each(function(index) {
+              if ($('#video_new_record').prop("value") === "true") {
+                return fb_pages_li_data += "<li><input name='facebook_pages[" + this.page_id + "]' type='hidden' value='0'><input type='checkbox' class='facebook_page_ckb' id='facebook_pages_" + this.page_id + "' name='facebook_pages[" + this.page_id + "]' value='1' /><label class='label-a' for='1'></label><img src='" + this["pic"] + "' width='32px' heigh='32px'/>&nbsp;" + this.name + "</li>";
+              } else {
+                return fb_pages_li_data += "<li><img src='" + this["pic"] + "' width='32px' heigh='32px'/>&nbsp;" + this.name + " </li>";
+              }
+            });
+            if (fb_pages_li_data !== "") {
+              $('#user_pages_list_div').show();
+              $('#ul_facebook_pages').html(fb_pages_li_data);
+              $('#ul_facebook_pages li').click(function() {
+                var status;
+                status = $(this).children("input[type=checkbox]").is(":checked");
+                $(this).children("input[type=checkbox]").prop("checked", !status);
+              });
+            }
+            if(typeof(set_publish_tab_heights) == "function"){ //Calling this function to set heights of tabs on FC pub tab
+              set_publish_tab_heights()
+            }
+          });
+        };
+  return my;
+}());

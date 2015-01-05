@@ -1,0 +1,51 @@
+$(window).load(function () {
+    $().UItoTop({
+        scrollSpeed: 500,
+        easingType: 'linear'
+    });
+
+    var navigation = responsiveNav("#collapse-nav", {
+        customToggle: "#toggle",
+        animate: true,
+        transition: 400,
+        init: function () {
+        },   // Function: Init callback
+        open: function () {
+        },   // Function: Open callback
+        close: function () {
+        }   // Function: Close callback
+    });
+
+});
+
+$(document).click(function (e) {
+    if (!$(e.target).closest('.name-header').length)
+        $('#account-menu').hide();
+});
+
+
+$(document).ready(function () {
+    $('#account-menu').hide();
+    $('#h-account').unbind("click")
+    $('#h-account').click(function () {
+        $('#account-menu').toggle();
+    });
+    $(".auth-logoutlink").click(function () {
+        FB.init({
+            appId: '<%=APP_CONFIG["THIRD_PARTY"]["FACEBOOK"]["APP_KEY"] %>',
+            cookie: true
+        });
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
+                FB.logout(function (response) {
+                    document.location = "/signout";
+                });
+            }
+            else {
+                document.location = "/signout";
+            }
+        });
+        $('#account-menu').hide();
+        return false;
+    });
+});

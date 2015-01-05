@@ -1,0 +1,1580 @@
+ie = navigator.userAgent.indexOf("MSIE") > 0;
+
+FreeVideosController = Paloma.controller('FreeVideos');
+
+function set_position_of_thumb_and_video()
+{
+  $('#free_video_thumbnail_to_s3_form').css({"top": $("#fan_connect_thumbnail").position().top + 20 + "px"});
+  $("#free_preview_to_s3_form").css({"top": $("#fan_connect_preview").position().top + 20 + "px"});
+}
+
+function set_position_of_banner_image()
+{
+  $('#banner_image_form_holder').css({"top": $("#fan_connect_banner_image").position().top + 20 + "px"});
+}
+FreeVideosController.prototype.edit= function(){
+
+    user_has_submitted_form = false;
+    action_button = 'Update';
+    preview_upload_completed = true;
+
+    convert_local_time();
+    $("#session_refresh").fancybox({
+      'width': '75%',
+      'height': '75%',
+      'autoScale': false,
+      'transitionIn': 'none',
+      'transitionOut': 'none',
+      'type': 'iframe',
+      afterLoad: function() {
+        $("meta[name='csrf-token']").prop("content", JSON.parse($(".fancybox-iframe").contents().find("body").find("pre").html()).csrfToken);
+        $('[name=authenticity_token]').prop("value", JSON.parse($(".fancybox-iframe").contents().find("body").find("pre").html()).csrfToken);
+        $("#free_video_publishing_form").submit();
+      },
+      beforeShow: function() {
+        return $('.fancybox-wrap').hide();
+      }
+    });
+
+  var user_agent = navigator.userAgent.toLowerCase();
+  windows_ff_patch = 0;
+  $(document).ready(function(){
+    if(user_agent.indexOf("firefox") > -1 && user_agent.indexOf("windows") > -1){
+      $("#main_forms_holder #free_preview_to_s3_form span.helping_text").css("margin-right", "4px");
+      OS = 'windows';
+      set_position_of_thumb_and_video();
+      windows_ff_patch = 20;
+    }
+  });
+
+  $('#free_preview_to_s3_form #file').change(function(){
+      valid_video_file_extensions = ["3gp", "mp4", "avi", "flv", "mov", "wmv", "m4v", "mkv"]
+      file_extension = $("#free_preview_to_s3_form #file" ).val().split(".").pop().toLowerCase();
+      if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+        return false;
+      }
+      $("#free_video_original_preview_file_name").val($('#free_preview_to_s3_form #file').val());
+      $('#free_preview_to_s3_form').submit();
+  });
+
+  $('#free_preview_to_s3_form').ajaxForm({
+    beforeSerialize: function($form, options) {
+      file_extension = $("#free_preview_to_s3_form #file").val().toLowerCase().split(".").pop()
+      key_with_extension = $("#free_preview_to_s3_form #key").val() + "." + file_extension;
+      $("#free_preview_to_s3_form #key").val(key_with_extension);
+    },
+    beforeSend: function(xhr){
+        preview_upload_completed = false;
+        $("#new_preview_uploader_progress").show();
+        if(typeof preview_xhr != "undefined"){
+          preview_xhr.abort();
+          $('#preview-upload-error').hide();
+        }
+        preview_xhr = xhr;
+    },
+    uploadProgress: function(event, position, total, percentComplete){
+        in_progress = true;
+        percentVal = percentComplete + "%";
+        $("#new_preview_bar").width(percentVal);
+        $("#new_preview_percent").html(percentVal);
+        window.document.title = "(" + percentVal + ") Publish Video | LittleCast"
+    },
+    success:function(responseText, statusText, xhr, $form){
+      $('#p-percent img').hide();
+      $('#free_video_preview_button').hide();
+
+      $('#free_video_preview_key').val($(responseText).find("Key").text());
+
+      $('#preview_status_message').show();
+      $('#preview_status_message').html($('#free_preview_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+      $('#free_preview_to_s3_form span.helping_text').css("color", "white");
+      preview_upload_completed = true;
+      auto_submit_form();
+    },
+    complete:function (xhr){},
+    error:function(xhr){
+        $('#p-percent img').hide();
+
+        $('#preview-upload-error').show()
+        if ($($.parseXML(xhr. responseText)).find("Message").text() == "")
+            error_message = "Timeout"
+        else
+            error_message = $($.parseXML(xhr. responseText)).find("Message").text();
+
+        $('#preview-upload-error span').html("(" +error_message + ")");
+        $('html, body').animate({scrollTop:0}, 'slow');
+        $('#new_preview_bar').css("width", 0);
+    }
+  });
+
+  $('#ul_user_timeline li, #ul_facebook_pages li').click(function(){
+    $(this).children("input").prop("checked", !$(this).children("input[type=checkbox]").is(":checked"));
+  })
+
+  validate_free_video_form = function(){
+    if(typeof(popupWindow) != "undefined")
+      return true;
+    convert_timezone();
+    error_counter = 0;
+    error_message = null;
+
+     if(!$('#free_video_post_on_wall').prop("checked") && $('.facebook_page_ckb:checked').size()==0){
+        error_counter += 1;
+        $('.fb-pages').parent("div").addClass("error-field")
+      }else
+        $('.fb-pages').parent("div").removeClass("error-field")
+
+    if( $('#schedule-post').prop('checked') && $('#post_time').val().length == 0 ) {
+          error_counter += 1;
+          $('#post_time').addClass("error-field");
+          error_message = "Please select scheduling date."
+    }else{$('#post_time').removeClass("error-field");}
+
+    if($('#free_video_itunes_link').val().trim().length > 0){
+        link = $('#free_video_itunes_link').val().trim()
+        prefix = 'http'
+        if (link.substr(0, prefix.length) !== prefix)
+        {
+          prefix = 'http://'
+          link= prefix + link
+        }
+        $('#free_video_itunes_link').val(link)
+     }
+
+
+    $('html, body').animate({scrollTop:0}, 'slow');
+
+    if(error_counter > 0)
+    {
+        if(error_message == null)
+            $('.error-dv').html("Please enter the correct values in highlighted fields ")
+        else
+            $('.error-dv').html(error_message);
+
+        $('.error-dv').show();
+        return false;
+    }
+    else
+    {
+      $("#free_form_submit").css("background", "grey");
+        $("#free_form_submit").html("UPDATED");
+        $("#free_form_submit").val("UPDATED");
+      $('#free_video_publish_tab_back_button').unbind("click");
+      $("#free_video_publish_tab_back_button").css("background", "grey");
+      $("#free_video_publish_tab_back_button").css("color", "white");
+      $('.error-dv').html("Video is still being uploaded! Please keep browser and window open until completed.");
+      $('.error-dv').show();
+      $('html, body').animate({scrollTop: 0}, 'slow');
+      $("#upload_continue_message").show();
+      $("#main_forms_holder").css("z-index", - 1);
+      $("#tab_5").css("z-index", 1);
+
+      user_has_submitted_form = true;
+      $('.merch-price').each(function() {
+          $(this).val($(this).val().replace('US$ ', '').replace(',', ''));
+      });
+
+      if(all_files_upload_to_s3_completed()){
+        $('.error-dv').hide();
+        $.get("/check_session_status").success(function(xhr){
+          if(xhr.is_session_alive){
+            popupWindow = window;
+            $("#free_video_publishing_form").submit();
+          }
+          else{
+            popupWindow = window;
+            $("#session_refresh").click();
+          }
+        })
+        return false;
+
+      }else{
+        return false;
+      }
+    }
+  }
+
+  auto_submit_form = function(){
+    if(all_files_upload_to_s3_completed() && user_has_submitted_form){
+      $('.error-dv').hide();
+      $('#free_video_publishing_form').submit();
+    }
+  }
+
+  all_files_upload_to_s3_completed = function(){
+    if( typeof(banner_ladda) != "undefined" && banner_ladda.isLoading())
+      return false;
+
+    else if(!preview_upload_completed)
+      return false;
+
+    else
+      return true;
+  }
+
+  bind_schedule_post_checkbox();
+  custom_thumbnail_upload();
+
+  /*
+  videoUploadStarted = function(){
+      $("#public_video_original_video_file_name").val($('#video_file').val());
+      file_name = $("#video_file" ).val().split(/(\\|\/)/g).pop().split(".")[0];
+
+      $('#video-upload-btn').hide();
+
+      $("#tab_tos_and_video_upload").hide();
+
+      $("#video_details").show();
+      $("#public_video_thumbnail_to_s3_form").show();
+      set_position_of_public_thumbnail();
+
+      $('.step2').addClass("current");
+      $('.step1').removeClass("current");
+      $('.step3').removeClass("current");
+
+      $("#video_title_h1").html(file_name);
+      $("#video_title_char_count").val();
+      $("#public_video_title").prop("value", file_name);
+      $("#video_title_char_count").html(parseInt($("#video_title_char_count").html()) - $('#public_video_title').val().length);
+      $('.error-dv').hide();
+      $('#restart-video').show();
+    };*/
+
+  $('.delete-banner-img a').click(function(){
+    $('#banner_img').remove()
+
+    $('#free_video_banner_image_button').show();
+    $('#free_video_banner_image_key').val("");
+    $('#banner_image_status_message').hide();
+    $('#banner_image_status_message').html("");
+    $('#banner-text, #banner-text span').css("color", "black");
+    $('.delete-banner-img').hide();
+    $('#free_video_banner_image_to_s3_form').stop();
+    $('#free_video_banner_image_to_s3_form #file').val("");
+    $('#free_video_banner_image_to_s3_form #file').css("width", 142);
+
+    if(typeof(banner_ladda) != "undefined")
+    {
+      $("#free_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+      banner_ladda.stop();
+      banner_xhr.abort();
+    }else{
+      $("#free_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+    }
+  })
+
+  $('#free_video_banner_image_to_s3_form #file').change(function(){
+      valid_video_file_extensions = ["jpg", "jpeg", "png"]
+      file_extension = $("#free_video_banner_image_to_s3_form #file" ).val().split(".").pop().toLowerCase();
+      if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+        return false;
+      }
+    if(typeof(banner_ladda) != "undefined"){
+      $('#free_video_banner_image_button').show();
+      $('#free_video_banner_image_key').val("");
+      $('#banner_image_status_message').hide();
+      $("#free_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+    }
+
+    $('#free_video_banner_image_to_s3_form').submit();
+  });
+
+  $('#free_video_banner_image_to_s3_form').ajaxForm({
+    beforeSerialize: function($form, options) {
+      original_banner_key_name = $("#free_video_banner_image_to_s3_form #key").val();
+      file_extension = $("#free_video_banner_image_to_s3_form #file").val().toLowerCase().split(".").pop()
+      key_with_extension = $("#free_video_banner_image_to_s3_form #key").val() + "_" + Math.random().toString(36).substring(14) + "." + file_extension;
+      $("#free_video_banner_image_to_s3_form #key").val(key_with_extension);
+      $('#banner_img').remove();
+    },
+    beforeSend: function(xhr){
+      banner_xhr = xhr;
+      banner_ladda  = Ladda.create($('#free_video_banner_image_button')[0]);
+      banner_ladda.start();
+      $('.delete-banner-img').show();
+    },
+    uploadProgress: function(event, position, total, percentComplete){
+        banner_ladda.setProgress(percentComplete/100);
+    },
+    success:function(responseText, statusText, xhr, $form){
+      banner_ladda.stop();
+      $('#free_video_banner_image_button').hide();
+      $('#free_video_banner_image_key').val($(responseText).find("Key").text());
+      $('#banner_image_status_message').show();
+      $('#banner_image_status_message').html($('#free_video_banner_image_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+      $('#banner-text, #banner-text span').css("color", "white");
+      $('#free_video_banner_image_to_s3_form #file').val("");
+      $('#free_video_banner_image_to_s3_form #file').css("width", $('#banner_image_status_message').width());
+    },
+    complete:function (xhr){},
+    error:function(xhr){banner_ladda.stop; }
+  });
+
+  $("#main_forms_holder").tooltip();
+  $('#publishing_container select').not("#video_video_identifier_id, #theater_collection, #free_video_video_identifier_id ").selectBox('settings', {hideOnWindowScroll: false});
+
+  free_video_bind_key_up_and_down_events();
+
+  setTimeout(function(){
+      total_no_of_pages = $("#ul_facebook_pages li").size();
+
+      buffer_height = 35
+
+      if(total_no_of_pages == 1){
+        $('#facebook_pages_wrapper ul').css("columns", "1");
+        $('#facebook_pages_wrapper ul').css("-webkit-columns", "1");
+        $('#facebook_pages_wrapper ul').css("-moz-columns", "1");
+      }
+
+      new_height = (Math.ceil(total_no_of_pages/2)  > 5 ? 5 : Math.ceil(total_no_of_pages/2) ) * buffer_height;
+      additional_height = new_height - 25;
+
+      $('#facebook_pages_wrapper').css("height", new_height + "px");
+      //$('#banner_image_form_holder').css("top", parseInt($('#banner_image_form_holder').css("top").slice(0,3))+ additional_height+ windows_ff_patch);
+      set_position_of_banner_image();
+      //$('.banner-img').css("margin-top", parseInt($('.banner-img').css("margin-top").slice(0,2)) + additional_height);
+      $('.r-box h4.link-to-itunes').css("margin-top", parseInt($('.r-box h4.link-to-itunes').css("margin-top").slice(0,2))+ additional_height);
+      $('#publish_tab .f-box').css("height",  additional_height + 535 + "px" ) ;
+      $('#publish_tab .r-box').css("height",  additional_height + 505 + "px" ) ;
+
+      if(total_no_of_pages > 10)
+      $('#facebook_pages_wrapper').css("overflow-y", "scroll");
+      $('.fb-pages li').css("width", "310px")
+
+  }, 3000)
+
+  $("#singleFieldTags").tagHandler({maxTags: 10,delimiter: ',', assignedTags: $('#existing_tags').val().split(","), afterDelete: function(tag) {set_position_of_thumb_and_video();}})
+  $("#video_tags").val($('#existing_tags').val());
+  $("#video_title_char_count").html(parseInt($("#video_title_char_count").html()) - $('#free_video_title').val().length)
+  $("#video_description_char_count").html(parseInt($("#video_description_char_count").html()) - $('#free_video_description').val().length);
+  $("#video_sharing_message_char_count").html(parseInt($("#video_sharing_message_char_count").html()) - $('#free_video_sharing_message').val().length);
+
+  $('.step2').addClass('current');
+  $('.step1').removeClass('current');
+  $("#tab_tos_and_video_upload").hide()
+  $('#free_preview_to_s3_form, #free_video_thumbnail_to_s3_form, #video_details').show();
+  set_position_of_thumb_and_video();
+
+
+  $("#singleFieldTags").on("keyup change", function(){
+    currentTags = $("#singleFieldTags").tagHandler("getSerializedTags")
+    $("#video_tags").val(currentTags);
+    set_position_of_thumb_and_video();
+  })
+
+  $("#owner_video_permission").change(function(){
+    if($("#owner_video_permission").prop("checked") && $("#terms").prop("checked")){
+        $("#tos").hide();
+        $("#free_video_to_s3_form").show();
+        $("#video-upload-btn").fadeIn();
+      }
+  });
+
+  $("#terms").change(function(){
+      if($("#owner_video_permission").prop("checked") && $("#terms").prop("checked")){
+        $("#tos").hide();
+        $("#free_video_to_s3_form").show();
+        $("#video-upload-btn").fadeIn();
+      }
+    });
+
+  $("#free_video_title").on("keyup change", function(){
+    $("#video_title_h1").text($(this).val());
+  })
+
+    $('.next-button').click(function(element){ next_button_click(element); });
+    $('.back-button').click(function(element){ back_button_click(element); });
+
+    $('#video_details .f-box').css({'height': '820px'});
+    $('#video_details .r-box').css({'height': '790px'});
+
+    toggle_product_tab();
+    bind_product_checkbox_click();
+    remove_fields();
+    read_product_image();
+    apply_price_format();
+    page_leave_confirmation();
+    if($('.products .product-form').length == 0){
+        $('.add-merch-button').click();
+        disabled_product_form();
+    }
+
+    if($('.products .product-form').length == 3) {
+        $('#merchandise_tab .pure-g .pure-u-3-4 .f-box').css({'height': '750px'});
+        $('#merchandise_tab .pure-g .pure-u-1-4 .r-box').css({'height': '720px'});
+        $('.product-btn').hide();
+    }
+}
+
+FreeVideosController.prototype.new = function(){
+
+    // FB.login(function(response) {}, {scope: "video_upload"})
+
+  action_button = 'Publish';
+  $("#session_refresh").fancybox({
+    'width': '75%',
+    'height': '75%',
+    'autoScale': false,
+    'transitionIn': 'none',
+    'transitionOut': 'none',
+    'type': 'iframe',
+    afterLoad: function() {
+      $("meta[name='csrf-token']").prop("content", JSON.parse($(".fancybox-iframe").contents().find("body").find("pre").html()).csrfToken);
+      $('[name=authenticity_token]').prop("value", JSON.parse($(".fancybox-iframe").contents().find("body").find("pre").html()).csrfToken);
+      $("#free_video_publishing_form").submit();
+    },
+    beforeShow: function() {
+      return $('.fancybox-wrap').hide();
+    }
+  });
+
+  var user_agent = navigator.userAgent.toLowerCase();
+  preview_upload_completed = true;
+
+  windows_ff_patch = 0;
+
+  $(document).ready(function(){
+    if(user_agent.indexOf("firefox") > -1 && user_agent.indexOf("windows") > -1){
+      OS = 'windows';
+      $("#main_forms_holder #free_preview_to_s3_form span.helping_text").css("margin-right", "4px");
+//      $("#video_details .label-description").css("margin-bottom", "135px");
+
+      //$("#free_video_thumbnail_to_s3_form").css("top", "440px");
+      //$("#free_preview_to_s3_form").css("top", "493px");
+      set_position_of_thumb_and_video();
+
+      //$("#publish_tab .label-fb").css("margin-top", "113px");
+      windows_ff_patch = 20;
+    }
+  });
+
+  user_has_submitted_form = false;
+
+  $('#ul_user_timeline li, #ul_facebook_pages li').click(function(){
+    $(this).children("input").prop("checked", !$(this).children("input[type=checkbox]").is(":checked"));
+  })
+
+  FacebookPermissionsModule.check_fb_permission();
+  $("#main_forms_holder").tooltip();
+  $('#publishing_container select').not("#video_video_identifier_id, #theater_collection, #free_video_video_identifier_id ").selectBox('settings', {hideOnWindowScroll: false});
+
+  free_video_bind_key_up_and_down_events();
+
+  bind_key_up_and_down_event = function () {
+    $('#free_video_title, #free_video_description, #free_video_sharing_message').keyup(function () {
+        key_up_and_down_event($(this));
+    });
+
+    $('#free_video_title, #free_video_description, #free_video_sharing_message' ).keydown(function () {
+        key_up_and_down_event($(this));
+    });
+  }
+
+  set_publish_tab_heights = function(){
+    console.log("wrapping pages css")
+    FB.api({
+      method: 'fql.query',
+      query: 'select page_id, pic, pic_small, name, page_url from page where page_id in (select page_id from page_admin where uid = ' + $('#users_fb_id').prop("value") + ') order by name'
+
+    }, function(response){
+      total_no_of_pages = response.length;
+
+      if(total_no_of_pages == 0){
+        $('#publish_tab .r-box').css("height",  570 + "px" ) ;
+        $('#publish_tab .f-box').css("height",   600 + "px" ) ;
+        $('.r-box h4.link-to-itunes').css("margin-top", 90 )
+        return;
+      }else if(total_no_of_pages == 1){
+        $('#facebook_pages_wrapper ul').css("columns", "1");
+        $('#facebook_pages_wrapper ul').css("-webkit-columns", "1");
+        $('#facebook_pages_wrapper ul').css("-moz-columns", "1");
+      }
+
+      new_height = (Math.ceil(total_no_of_pages/2)  > 5 ? 5 : Math.ceil(total_no_of_pages/2) )* 35;
+      additional_height = new_height - 20;
+
+      $('#facebook_pages_wrapper').css("height", new_height + "px");
+
+      //$('').css("margin-top", 35 + additional_height);
+      //$('#banner_image_form_holder').css("top", 288 + windows_ff_patch + additional_height);
+      set_position_of_banner_image();
+
+      $('.r-box h4.link-to-itunes').css("margin-top", 30 + additional_height);
+      $('#publish_tab .f-box').css("height",  additional_height + 535 + "px" ) ;
+      $('#publish_tab .r-box').css("height",  additional_height + 505 + "px" ) ;
+
+      if(total_no_of_pages > 10)
+      $('#facebook_pages_wrapper').css("overflow-y", "scroll");
+  })
+  }
+
+  // setTimeout(set_publish_tab_heights(), 3000)
+
+  $("#is_paid_video").click(function(){
+    if($("#is_paid_video").prop("checked")){
+      $(".lbl-video-duration, .lbl-video-price, #video_duration_li, #video_price_li, #video_duration, .price_attributess, .video-runtime").show();
+      $(".lbl-video-duration, .lbl-video-price, #video_duration_li, #video_price_li, #video_duration, .price_attributess, .video-runtime").prop("disbaled", false);
+
+    }else{
+      $('#free_video_video_identifier_id').removeClass("error-field");
+      $(".lbl-video-duration, .lbl-video-price, #video_duration_li, #video_price_li, #video_duration, .price_attributess, .video-runtime").hide();
+      $(".lbl-video-duration, .lbl-video-price, #video_duration_li, #video_price_li, #video_duration, .price_attributess, .video-runtime").prop("disbaled", true);
+    }
+  });
+
+    $("#owner_video_permission").change(function(){
+      if($("#owner_video_permission").prop("checked") && $("#terms").prop("checked")){
+          $("#tos").hide();
+          $("#free_video_to_s3_form").show();
+          $('#video-upload-btn').fadeIn();
+        }
+    });
+
+  $("#terms").change(function(){
+      if($("#owner_video_permission").prop("checked") && $("#terms").prop("checked")){
+        $("#tos").hide();
+        $("#free_video_to_s3_form").show();
+        $('#video-upload-btn').fadeIn();
+      }
+    });
+
+  $("#singleFieldTags").tagHandler({maxTags: 10,delimiter: ',', afterDelete: function(tag) {set_position_of_thumb_and_video();}})
+
+  $("#singleFieldTags").on("keyup change", function(){
+    currentTags = $("#singleFieldTags").tagHandler("getSerializedTags")
+    $("#video_tags").val(currentTags)
+    set_position_of_thumb_and_video();
+  })
+
+  $("#free_video_title").on("keyup change", function(){
+    $("#video_title_h1").text($(this).val());
+  })
+
+  $('#free_preview_to_s3_form #file').change(function(){
+      valid_video_file_extensions = ["3gp", "mp4", "avi", "flv", "mov", "wmv", "m4v", "mkv"]
+      file_extension = $("#free_preview_to_s3_form #file" ).val().split(".").pop().toLowerCase();
+      if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+        return false;
+      }
+      $("#free_video_original_preview_file_name").val($('#free_preview_to_s3_form #file').val());
+      if($('#video_file').val() ==  $('#free_preview_to_s3_form #file').val()){
+          $('.error-dv').html("You have already selected same file on step 1 for video, please use another file.")
+          $('.error-dv').show();
+          $('html, body').animate({scrollTop:0}, 'slow');
+          return false;
+      } else {
+          $('.error-dv').html("")
+          $('.error-dv').hide();
+      }
+      $('#free_preview_to_s3_form').submit();
+  });
+
+  bind_schedule_post_checkbox();
+  custom_thumbnail_upload();
+
+  $('#free_video_banner_image_to_s3_form #file').change(function(){
+      valid_video_file_extensions = ["jpg", "jpeg", "png"]
+      file_extension = $("#free_video_banner_image_to_s3_form #file" ).val().split(".").pop().toLowerCase();
+      if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+        return false;
+      }
+    if(typeof(banner_ladda) != "undefined"){
+      $('#free_video_banner_image_button').show();
+      $('#free_video_banner_image_key').val("");
+      $('#banner_image_status_message').hide();
+      $("#free_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+    }
+
+    $('#free_video_banner_image_to_s3_form').submit();
+  });
+
+
+  $('#video_file').change(function(){
+        valid_video_file_extensions = ["3gp", "mp4", "avi", "flv", "mov", "wmv", "m4v", "mkv"]
+        file_extension = $("#video_file" ).val().split(".").pop().toLowerCase();
+
+        if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+          message = "You have chosen an unsupported file format. Please upload a file with one of the following extensions: 3gp, mp4, avi, flv, mov, wmv, m4v, and mkv";
+          $(".error-dv").html(message);
+          $(".error-dv").show();
+          return false;
+        }else {
+            $(".error-dv").hide();
+        }
+
+        $('.video-upload-button').click();
+  });
+
+  restart_video_upload = function(){
+    $('.percent-u').show()
+    $('#video-upload-error').hide()
+    in_progress = false;
+    $('#free_video_to_s3_form').submit();
+    $('html, body').animate({scrollTop:0}, 'slow');
+  }
+
+
+  /*$('#free_video_to_s3_form').ajaxForm({
+    beforeSerialize: function($form, options) {
+      file_extension = $("#video_file").val().toLowerCase().split(".").pop()
+      key_with_extension = $("#free_video_to_s3_form #key").val() + "." + file_extension;
+      $("#free_video_to_s3_form #key").val(key_with_extension);
+    },
+    beforeSend: function(xhr){
+      $("#new_video_uploader_progress").show();
+      if( typeof(in_progress) == "boolean" && in_progress==true)
+        xhr.abort();
+    },
+    uploadProgress: function(event, position, total, percentComplete){
+      in_progress = true;
+      percentVal = percentComplete + "%";
+      $("#new_video_bar").width(percentVal);
+      $("#new_video_percent").html(percentVal);
+      window.document.title = "(" + percentVal + ") Publish Video | LittleCast"    ;
+    },
+    success: function(responseText, statusText, xhr, $form){
+      $('#free_video_s3_key').val($(responseText).find("Key").text());
+      $('.percent-u img').hide();
+      auto_submit_form();
+    },
+    complete: function(xhr){
+    },
+    error: function(xhr){
+      $('.percent-u').hide()
+      $('#video-upload-error').show()
+
+      if ($($.parseXML(xhr. responseText)).find("Message").text() == "")
+        error_message = "Timeout"
+      else
+        error_message = $($.parseXML(xhr. responseText)).find("Message").text();
+
+      $('#video-upload-error span').html("(" +error_message + ")");
+      $('html, body').animate({scrollTop:0}, 'slow');
+      $('#new_video_bar').css("width", 0);
+    }
+  })*/
+    videoUploadStarted = function(){
+        //price calculation
+          file = $('#video_file')[0].files[0];
+          bytes_to_extract = parseInt(file.size * 0.01);
+
+          if(file.type == 'video/quicktime' || file.type == 'video/3gpp' || bytes_to_extract > 1024*1024 * 6){
+
+          }else{
+            blob = file.slice(0,bytes_to_extract);
+
+            xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+              var resp;
+              if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                  resp = jQuery.parseJSON(xhr.response);
+                  $(".lbl-video-duration, #video_duration_li, .video-runtime").remove();
+                  updatePricing(resp);
+                  $("#video_duration").val(resp.data.duration / 60);
+                } else {
+                  $("#price_status").text("Error occured, please select video again from step 1");
+                  $("#price_status").addClass("error-dv");
+                  return $("#price_loading_image").hide();
+                }
+              }
+            };
+
+            temp_file_name = Math.random().toString(36).substring(7) + "." + file.name.split(".").pop();
+
+            xhr.open("POST", $('#calculate_runtime_url').val(), true);
+            xhr.setRequestHeader("X-File-Name", temp_file_name);
+            xhr.setRequestHeader("X-File-Size", file.size);
+            xhr.setRequestHeader("Content-Type", "application/octet-stream");
+            xhr.setRequestHeader("X-CSRF-Token", $("meta[name='csrf-token']").attr("content"));
+            xhr.send(blob);
+          }
+
+          resetPriceSelection = function() {
+            $("#free_video_video_identifier_id option").first().prop("selected", true);
+            $("#free_video_video_identifier_id").prop("disabled", true);
+            $("#price_status").text("Please wait while we select price ranges...");
+            $("#price_status").removeClass("error-dv");
+            $("#price_loading_image").show();
+            $("#video_video_identifier_id option").each(function() {
+              return $(this).show();
+            });
+            $(".v-properties").hide();
+            $(".v-charges").hide();
+            return $(".drop-down").prop("disabled", false);
+          };
+
+          updatePricing = function(rsp) {
+            updatePriceSelection(rsp.data.min_price);
+            $("#price_loading_image").hide();
+            $("#free_video_video_identifier_id").prop("disabled", false);
+            $("#price_status").text("");
+            $("#price_status").removeClass("error-dv");
+            $(".v-properties").show();
+            $(".v-charges").show();
+            return setPricingInfo(rsp.data.duration, rsp.data.output_formats, rsp.data.payment_percent, rsp.data.payment_fee, rsp.data.streams, rsp.data.downloads);
+          };
+
+          updatePriceSelection = function(min_price) {
+            var item, key, price_counter, _results;
+            price_counter = 1;
+            $("#free_video_video_identifier_id option").remove();
+            $("#free_video_video_identifier_id").append(new Option("Select Price"));
+            _results = [];
+            for (item in min_price) {
+              _results.push((function() {
+                var _results1;
+                _results1 = [];
+                for (key in min_price[item]) {
+                  _results1.push($("#free_video_video_identifier_id").append(new Option(min_price[item][key], key)));
+                }
+                return _results1;
+              })());
+            }
+            return _results;
+          };
+
+          setPricingInfo = function(duration, output_formats, payment_percent, payment_fee, streams, downloads) {
+            var hour, min, sec;
+            hour = Math.floor(duration / (60 * 60) % 60);
+            hour = (hour < 10 ? "0" + hour : hour);
+            min = Math.floor(duration / 60 % 60);
+            min = (min < 10 ? "0" + min : min);
+            sec = Math.floor(duration % 60);
+            sec = (sec < 10 ? "0" + sec : sec);
+            $("#duration_span").html(hour + " : " + min + " : " + sec);
+            $("#format_span").html(output_formats);
+            $("#streams_span").html(streams);
+            return $("#downloads_span").html(downloads);
+          };
+
+          getPriceRange = function() {
+            var request;
+            request = $.ajax({
+              url: "/publish_video/pricing_range",
+              type: "GET",
+              data: {
+                custom_duration: $("#video_duration").val()
+              },
+              dataType: "json"
+            });
+            request.done(function(rsp) {
+              return updatePricing(rsp);
+            });
+            return request.fail(function(jqXHR, textStatus) {
+              $("#price_status").text("Error occured, please enter video run-time again.");
+              $("#price_status").addClass("error-dv");
+              return $("#price_loading_image").hide();
+            });
+          };
+
+        $("#video_duration").focusout(function(){
+          if(validateCustomDuration()){
+            $("#shares_calculation_status").hide()
+            resetPriceSelection()
+            getPriceRange()
+          }
+        });
+
+        validateCustomDuration = function(){
+            if($("#video_duration").val() <= 0 || isNaN($("#video_duration").val()) || $("#video_duration").val()==""){
+              $("#video_duration").addClass('error-field')
+              return false}
+            else if(parseFloat($('#video_duration').val()) > 300){
+              $("#video_duration").addClass('error-field')
+              $("#video_runtime_error").html("Video run-time cannot be more than 300 minutes i.e. 5 hours")
+              return false}
+            else{
+              $("#video_runtime_error").html("")
+              $("#video_duration").removeClass('error-field')
+              return true}
+        }
+
+        //price calculation ends
+
+        $("#free_video_original_video_file_name").val($('#video_file').val());
+        file_name = $("#video_file" ).val().split(/(\\|\/)/g).pop().split(".")[0];
+
+        $('#free_video_to_s3_form').hide();
+        $('#free_video_to_s3_form').submit();
+
+        $("#tab_tos_and_video_upload").hide()
+        $('#video-upload-btn').hide();
+
+        $("#video_details").show();
+        $("#free_video_thumbnail_to_s3_form, #free_preview_to_s3_form").show();
+        set_position_of_thumb_and_video();
+
+        enable_tab(2);
+
+        $("#video_title_h1").html(file_name);
+        $("#video_title_char_count").val()
+        $("#free_video_title").prop("value", file_name)
+        $("#video_title_char_count").html(parseInt($("#video_title_char_count").html()) - $('#free_video_title').val().length)
+        $("#custom-error").hide();
+        $('#restart-video').show();
+    }
+
+    $(function() {
+      $(".video-upload-button").unbind("click");
+      $(".video-upload-button").click(function() { // The button class passed into multipart_uploader_form (see "Getting Started")
+        $('#custom-error').hide();
+        if (! navigator.onLine)
+        {
+          $('#custom-error').show();
+          $('#custom-error').html("There is some network issue. Please try again");
+        }
+        is_paused = false;
+        mul_part_video =  new window.S3MP({
+          bucket: "<%= S3.bucket %>",
+          fileInputElement: "#video_file",
+          fileList: $("#video_file").get(0).files, // An array of files to be uploaded (see "Getting Started")
+          onStart: function(upload) {
+            console.log("File %d has started uploading", upload.key);
+            console.log(upload);
+            $("#new_video_uploader_progress").show();
+            videoUploadStarted();
+            $('.error-dv').css("color", "#c94d4d");
+            $('.error-dv').hide();
+            $('.error-dv').html("");
+          },
+          onComplete: function(upload) {
+            console.log("File %d successfully uploaded", upload.key)
+            console.log(upload);
+            window.document.title = "(100%) Publish Video | LittleCast";
+            bar.width("100%");
+            percent_bar.html("100%");
+            //$('#video_uploader_web_video').removeClass('error-field');
+            $('#free_video_s3_key').val(upload.object_name);
+            $('.percent-u img').hide();
+            auto_submit_form();
+          },
+          onPause: function(key) {
+            console.log("File %d has been paused", key);
+          },
+          onResume: function(key) {
+               $('.error-dv').hide();
+               console.log("Now it is resumeing %d File", key);
+          },
+          onCancel: function(key) {
+            console.log("File upload %d was canceled", key);
+          },
+          onError: function(err, part) {
+            if (err.message == "File size is too small") {
+              error_message = "File-size is too small must be atleast 5MB";
+              $('.error-dv').html(error_message);
+              $('.error-dv').show();
+              $('.error-dv').css("color", "#444");
+              $('html, body').animate({scrollTop:0}, 'slow');
+              $('#new_video_bar').css("width", 0);
+              return;
+            }
+            console.log('Received params in Error function');
+            console.log(err);
+            console.log(part);
+            console.log("There was an error, resuming it again");
+            part.activate();
+          },
+          onProgress: function(num, size, done, percent, speed) {
+
+            if ( (! navigator.onLine) && ! is_paused)
+            {
+              console.log('going to pause!!');
+              is_paused = true;
+              error_message = "please make sure availability of internet connection";
+              mul_part_video.pause(0);
+              $('.error-dv').show();
+              $('.error-dv').css("color", "#444");
+              $('.error-dv').html(error_message + ' <a href="javascript:;"> Resume</a>').click(function(){ resume_video_uploading()});
+              $('html, body').animate({scrollTop: 0}, 'slow');
+            }
+            percent = parseInt(percent) + "%";
+            bar = $("#new_video_bar");
+            percent_bar = $("#new_video_percent");
+            status = $("#status");
+
+            bar.width(percent);
+            percent_bar.html(percent);
+            window.document.title = "(" + percent + ") Publish Video | LittleCast";
+          }
+        });
+      });
+    });
+  $('.delete-banner-img a').click(function(){
+    banner_ladda.stop();
+    $('#free_video_banner_image_button').show();
+    $('#free_video_banner_image_key').val("");
+    $('#banner_image_status_message').hide();
+    $('#banner_image_status_message').html("");
+    $('#banner-text, #banner-text span').css("color", "black");
+    $('.helping_text').show();
+    $('.delete-banner-img').hide();
+    $('#free_video_banner_image_to_s3_form').stop();
+    $('#free_video_banner_image_to_s3_form #file').val("");
+    banner_xhr.abort();
+    $("#free_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+    $('#free_video_banner_image_to_s3_form #file').css("width", 142);
+  })
+
+  $('#free_video_banner_image_to_s3_form').ajaxForm({
+    beforeSerialize: function($form, options) {
+      original_banner_key_name = $("#free_video_banner_image_to_s3_form #key").val();
+      file_extension = $("#free_video_banner_image_to_s3_form #file").val().toLowerCase().split(".").pop()
+      key_with_extension = $("#free_video_banner_image_to_s3_form #key").val() + "." + file_extension;
+      $("#free_video_banner_image_to_s3_form #key").val(key_with_extension);
+    },
+    beforeSend: function(xhr){
+      banner_xhr = xhr;
+      banner_ladda  = Ladda.create($('#free_video_banner_image_button')[0]);
+      banner_ladda.start();
+      $('.delete-banner-img').show();
+    },
+    uploadProgress: function(event, position, total, percentComplete){
+        banner_ladda.setProgress(percentComplete/100);
+    },
+    success:function(responseText, statusText, xhr, $form){
+      banner_ladda.stop();
+      $('#free_video_banner_image_button, .helping_text').hide();
+      $('#free_video_banner_image_key').val($(responseText).find("Key").text());
+      $('#banner_image_status_message').show();
+      $('#banner_image_status_message').html($('#free_video_banner_image_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+      $('#banner-text, #banner-text span').css("color", "white");
+      $('#free_video_banner_image_to_s3_form #file').val("");
+      $('#free_video_banner_image_to_s3_form #file').css("width", $('#banner_image_status_message').width());
+      auto_submit_form();
+    },
+
+    complete:function (xhr){},
+
+    error:function(xhr){
+      banner_ladda.stop();
+      $('.delete-banner-img').hide();
+      $('html, body').animate({scrollTop:0}, 'slow');
+      $('.error-dv').html("Banner Image upload failed, please try again.");
+      $('.error-dv').show().delay(3000).fadeOut("slow");
+    }
+  });
+
+  $('#free_preview_to_s3_form').ajaxForm({
+    beforeSerialize: function($form, options) {
+      file_extension = $("#free_preview_to_s3_form #file").val().toLowerCase().split(".").pop()
+      key_with_extension = $("#free_preview_to_s3_form #key").val() + "." + file_extension;
+      $("#free_preview_to_s3_form #key").val(key_with_extension);
+    },
+    beforeSend: function(xhr) {
+        preview_upload_completed = false;
+      $("#new_preview_uploader_progress").show();
+      if(typeof preview_xhr != "undefined"){
+        preview_xhr.abort();
+        $('#preview-upload-error').hide();
+      }
+      preview_xhr = xhr;
+
+    },
+    uploadProgress: function(event, position, total, percentComplete){
+        in_progress = true;
+        percentVal = percentComplete + "%";
+        $("#new_preview_bar").width(percentVal);
+        $("#new_preview_percent").html(percentVal);
+        window.document.title = "(" + percentVal + ") Publish Video | LittleCast"
+    },
+    success:function(responseText, statusText, xhr, $form){
+      $('#p-percent img').hide();
+      $('#free_video_preview_button').hide();
+
+      $('#free_video_preview_key').val($(responseText).find("Key").text());
+
+      $('#preview_status_message').show();
+      $('#preview_status_message').html($('#free_preview_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+      $('#free_preview_to_s3_form span.helping_text').css("color", "white");
+        preview_upload_completed = true;
+      auto_submit_form();
+    },
+    complete:function (xhr){},
+    error:function(xhr){
+      $('#p-percent img').hide();
+
+      $('#preview-upload-error').show()
+      if ($($.parseXML(xhr. responseText)).find("Message").text() == "")
+        error_message = "Timeout"
+      else
+        error_message = $($.parseXML(xhr. responseText)).find("Message").text();
+
+      $('#preview-upload-error span').html("(" +error_message + ")");
+      $('html, body').animate({scrollTop:0}, 'slow');
+      $('#new_preview_bar').css("width", 0);
+    }
+  });
+
+  validate_free_video_form = function(){
+
+    if(typeof(popupWindow) != "undefined")
+      return true;
+
+    convert_timezone();
+    error_counter = 0;
+    error_message = null;
+
+     if(!$('#free_video_post_on_wall').prop("checked") && $('.facebook_page_ckb:checked').size()==0){
+        error_counter += 1;
+        $('.fb-pages').parent("div").addClass("error-field")
+      }else
+        $('.fb-pages').parent("div").removeClass("error-field")
+
+    if( !$("#free_video_scocial_share_type_email_share").is(":checked") && !$("#free_video_scocial_share_type_social_share").is(":checked")){
+      error_counter += 1;
+      error_message = "Please select access gate for full video.";
+      $(".access-gate").addClass("error-field");
+    }
+    else
+    {
+     $(".access-gate").removeClass("error-field");
+    }
+
+    if($('#free_video_itunes_link').val().trim().length > 0){
+       link = $('#free_video_itunes_link').val().trim();
+       prefix = 'http';
+       if (link.substr(0, prefix.length) !== prefix)
+       {
+         prefix = 'http://';
+         link= prefix + link;
+       }
+       $('#free_video_itunes_link').val(link);
+    }
+    if( $('#schedule-post').prop('checked') && $('#post_time').val().length == 0 ) {
+      error_counter += 1;
+      $('#post_time').addClass("error-field");
+      error_message = "Please select scheduling date."
+    }else{$('#post_time').removeClass("error-field");}
+
+
+
+    if(error_counter > 0)
+    {
+        $('html, body').animate({scrollTop:0}, 'slow');
+        if(error_message == null)
+          $('.error-dv').html("Please enter the correct values in highlighted fields ")
+        else
+          $('.error-dv').html(error_message);
+
+        $('.error-dv').show();
+        return false;
+    } else {
+        $("#free_form_submit").css("background", "grey");
+        $("#free_form_submit").html("PUBLISHED");
+        $("#free_form_submit").val("PUBLISHED");
+        $('#free_video_publish_tab_back_button').unbind("click");
+        $("#free_video_publish_tab_back_button").css("background", "grey");
+        $("#free_video_publish_tab_back_button").css("color", "white");
+        $('.error-dv').html("Video is still being uploaded! Please keep browser and window open until completed.");
+        $('.error-dv').show();
+        $('html, body').animate({scrollTop: 0}, 'slow');
+        $("#upload_continue_message").show();
+        $("#main_forms_holder").css("z-index", - 1);
+        $("#tab_5").css("z-index", 1);
+
+        user_has_submitted_form = true;
+    }
+
+      $('.merch-price').each(function() {
+          $(this).val($(this).val().replace('US$ ', '').replace(',', ''));
+      });
+    if(all_files_upload_to_s3_completed()){
+      $('.error-dv').hide();
+
+      $.get("/check_session_status").success(function(xhr){
+        if(xhr.is_session_alive){
+          popupWindow = window;
+          $("#free_video_publishing_form").submit();
+        }
+        else{
+          popupWindow = window;
+          $("#session_refresh").click();
+        }
+      })
+      return false;
+
+    }else{
+      return false;
+    }
+  }
+
+  auto_submit_form = function(){
+    if(all_files_upload_to_s3_completed() && user_has_submitted_form){
+      $('.error-dv').hide();
+      $('#free_video_publishing_form').submit();
+    }
+  }
+
+  all_files_upload_to_s3_completed = function(){
+    if($('#free_video_s3_key').val() == "")
+      return false;
+
+    else if( typeof(banner_ladda) != "undefined" && banner_ladda.isLoading())
+      return false;
+
+    else if(!preview_upload_completed )
+      return false;
+
+    else if( typeof(thumbnail_ladda) != "undefined" && thumbnail_ladda.isLoading())
+      return false;
+
+    else
+      return true;
+  }
+
+    $('.next-button').click(function(element){ next_button_click(element); });
+    $('.back-button').click(function(element){ back_button_click(element); });
+    $('li.step4 span .numbers').html(3);
+
+    bind_product_checkbox_click();
+    disabled_product_form();
+    remove_fields();
+    read_product_image();
+    apply_price_format();
+    page_leave_confirmation();
+};
+
+//COMMON FUNCTION
+
+$(document).ready(function(){
+  $('.access-gate li').unbind("click")
+  $('.access-gate li').click(function(){
+    radio_button_status = $(this).children("input[type=radio]").is(":checked");
+    if(!radio_button_status)
+      $(this).children("input[type=radio]").prop("checked", !radio_button_status);
+
+  });
+});
+
+enable_tab = function(tab_number){
+      $.each([1,2,3,4], function(index, val){$('.step' + val).removeClass("current");})
+      $('.step' + tab_number).addClass("current");
+}
+
+free_video_bind_key_up_and_down_events = function () {
+    $('#free_video_title, #free_video_description, #free_video_sharing_message, .merch-name, .merch-desc').keyup(function () {
+        key_up_and_down_event($(this));
+    });
+
+    $('#free_video_title, #free_video_description, #free_video_sharing_message, .merch-name, .merch-desc' ).keydown(function () {
+        key_up_and_down_event($(this));
+    });
+}
+
+key_up_and_down_event = function(element) {
+    maxlimit = parseInt(element.attr('data_size'));
+    cntfield = element.next();
+
+    if (element.val().length > maxlimit) // if too long...trim it!
+        element.val(element.val().substring(0, maxlimit));
+    // otherwise, update 'characters left' counter
+    else
+        cntfield.html(maxlimit - element.val().length);
+}
+
+custom_thumbnail_upload = function(){
+
+    $('#free_video_thumbnail_to_s3_form #file').change(function(){
+        valid_video_file_extensions = ["jpg", "jpeg", "png"]
+        file_extension = $("#free_video_thumbnail_to_s3_form #file" ).val().split(".").pop().toLowerCase();
+        if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+            return false;
+        }
+
+        $('#free_video_thumbnail_to_s3_form').submit();
+    });
+
+    $('#free_video_thumbnail_to_s3_form').ajaxForm({
+        beforeSerialize: function($form, options) {
+            file_extension = $("#free_video_thumbnail_to_s3_form #file").val().toLowerCase().split(".").pop()
+            key_with_extension = $("#free_video_thumbnail_to_s3_form #key").val() + "." + file_extension;
+            $("#free_video_thumbnail_to_s3_form #key").val(key_with_extension);
+        },
+        beforeSend: function(){
+            thumbnail_ladda = Ladda.create($('#free_video_thumbnail_button')[0]);
+            thumbnail_ladda.start();
+        },
+        uploadProgress: function(event, position, total, percentComplete){
+            thumbnail_ladda.setProgress(percentComplete/100);
+        },
+        success:function(responseText, statusText, xhr, $form){
+            thumbnail_ladda.stop();
+            $('#free_video_thumbnail_button').hide()
+
+            $('#free_video_custom_thumbnail_key').val($(responseText).find("Key").text());
+
+            $('#thumbnail_status_message').show();
+            $('#thumbnail_status_message').html($('#free_video_thumbnail_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+            $('#free_video_thumbnail_to_s3_form  span.helping_text').css("color", "white");
+
+            new_thumbnail_file = $("#free_video_thumbnail_to_s3_form #file")[0].files[0];
+            var imageType = /image.*/;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = $("#video_edit_thumbnail img");
+                $(img).prop("src", reader.result);
+                $(img).css("height", "112px");
+            }
+            reader.readAsDataURL(new_thumbnail_file);
+
+            auto_submit_form();
+        },
+        complete:function (xhr){},
+        error:function(xhr){
+            thumbnail_ladda.stop();
+            $('html, body').animate({scrollTop:0}, 'slow');
+            $('.error-dv').html("Thumbnail Image upload failed, please try again.");
+            $('.error-dv').show().delay(3000).fadeOut("slow");
+        }
+    });
+}
+
+validate_video_details_tab = function() {
+
+    error_counter = 0;
+    custom_message = ""
+
+    if($('#free_video_title').val().trim() == ""){
+        $('#free_video_title').addClass('error-field')
+        error_counter += 1;
+    }
+    else
+        $('#free_video_title').removeClass('error-field')
+
+    if($('#free_video_title').val().trim().length  > 50){
+        $('#free_video_title').addClass('error-field')
+        error_counter += 1;
+        $("#video_title_error").html("Title length should not exceed 50 characters");
+    }
+
+    if($('#free_video_description').val().trim() == ""){
+        $('#free_video_description').addClass('error-field')
+        error_counter += 1;
+    }
+    else
+        $('#free_video_description').removeClass('error-field')
+
+
+    if($('#free_video_description').val().trim().length  > 800){
+        $('#free_video_description').addClass('error-field')
+        error_counter += 1;
+        $("#video_description_error").html("Description of video should not exceed 800 characters");
+    }
+
+    if($('#free_video_category_name').val().trim() == "Select Category"){
+        $('#free_video_category_name').addClass('error-field')
+        error_counter += 1;
+    }
+    else
+        $('#free_video_category_name').removeClass('error-field')
+
+    if($('#free_video_rating').val().trim() == "Select Rating"){
+        $('#free_video_rating').addClass('error-field')
+        error_counter += 1;
+    }
+    else
+        $('#free_video_rating').removeClass('error-field')
+
+    if($('#singleFieldTags').children().size() <4 ){
+        $('#singleFieldTags').addClass('error-field')
+        if (error_counter == 0)
+          custom_message = "Please enter minimum 3 tags."
+        error_counter += 1;
+    }
+    else
+        $('#singleFieldTags').removeClass('error-field')
+
+
+    return [ error_counter, custom_message ];
+}
+
+validate_products_tab = function() {
+    var error = 0;
+    jQuery.each(['.merch-name', '.merch-desc'], function(index, value){
+        $(value).each(function() {
+            if($(this).val().trim()== '') {
+                $(this).addClass('error-field');
+                error += 1;
+            } else {
+                $(this).removeClass('error-field');
+            }
+        });
+    });
+    $('.product-image').each(function() {
+        if($(this).attr('value').trim()== '') {
+            $(this).next().find('.upload-btn-txt').addClass('error-field').html("Product Image cannot be blank");
+            error += 1;
+        }
+    });
+    $('.merch-url').each(function() {
+        if($(this).val().match(/(http:\/\/|https:\/\/|www)(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/)) {
+            $(this).removeClass('error-field');
+        } else {
+            $(this).addClass('error-field');
+            error += 1;
+        }
+    });
+    return error;
+}
+
+read_product_image = function() {
+    $('.product-image').each(function() {
+        var fileInput = document.getElementById($(this).attr('id'));
+
+        var fileDisplayArea = document.getElementById($(this).attr('id').split('_')[4] + '_image');
+        fileInput.addEventListener('change', function(e) {
+            var file = fileInput.files[0];
+            var imageType = /image.*/;
+            if (file.type.match(imageType)) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image;
+                    img.src = reader.result;
+                    fileDisplayArea.innerHTML = '';
+                    fileDisplayArea.appendChild(img);
+                    fileInput.setAttribute('value', fileInput.value);
+                }
+                reader.readAsDataURL(file);
+            } else {
+                fileInput.value= '';
+                fileDisplayArea.innerHTML = '<div class="upload-btn-txt error-field">File not supported! Upload Image Again</div>';
+                fileInput.setAttribute('value','');
+            }
+        });
+    });
+}
+
+apply_price_format = function() {
+    $('.merch-price').priceFormat();
+}
+
+add_fields = function(link, association, content) {
+    if($('.products .product-form').length < 3) {
+        var new_id = new Date().getTime();
+        var regexp = new RegExp("new_" + association, "g")
+        $('.' + association).append(content.replace(regexp, new_id));
+        remove_fields();
+        read_product_image();
+        $('.merch-name, .merch-desc').keyup(function () {
+            key_up_and_down_event($(this));
+        });
+        $('.merch-name, .merch-desc' ).keydown(function () {
+            key_up_and_down_event($(this));
+        });
+        $('.merch-price').priceFormat();
+    }
+
+    if($('.products .product-form').length == 3) {
+        $('#merchandise_tab .pure-g .pure-u-3-4 .f-box').css({'height': '750px'});
+        $('#merchandise_tab .pure-g .pure-u-1-4 .r-box').css({'height': '720px'});
+        $('.product-btn').hide();
+    }
+}
+
+remove_fields = function(element) {
+    $('.remove-product-link').click(function() {
+        $('.product-btn').show();
+        if($('.products .product-form').length > 1) {
+            if($(this).parent().parent().find('input[type=hidden]').length > 0) {
+                $(this).parent().parent().find('input[type=hidden]').val(1);
+                $(this).parent().parent().removeClass('product-form');
+                $(this).parent().parent().hide();
+            } else {
+                $(this).parent().parent().remove();
+            }
+            if($('.products .product-form').length == 2) {
+                $('#merchandise_tab .pure-g .pure-u-3-4 .f-box').css({'height': '593px'})
+                $('#merchandise_tab .pure-g .pure-u-1-4 .r-box').css({'height': '563px'});
+            }
+        }
+    });
+}
+
+show_video_details_tab = function(){
+    $('.error-dv').hide();
+    $('#video_details').show();
+    $("#free_preview_to_s3_form, #free_video_thumbnail_to_s3_form").show();
+    set_position_of_thumb_and_video();
+    enable_tab(2)
+}
+
+hide_video_details_tab = function(){
+    $("#free_preview_to_s3_form, #free_video_thumbnail_to_s3_form").hide();
+    $('#video_details').hide();
+}
+
+show_products_tab = function(){
+    enable_tab(3)
+    $('.error-dv').hide();
+    $('#merchandise_tab').show();
+}
+
+hide_products_tab = function(){
+    $('#merchandise_tab').hide();
+}
+
+show_publish_tab = function(){
+    $('.error-dv').hide();
+    $("#publish_tab").show();
+    enable_tab(4);
+    $('#free_video_banner_image_to_s3_form, #banner_image_status_message, #banner_image_form_holder').show();
+    set_position_of_banner_image();
+}
+
+hide_publish_tab = function(){
+    $("#publish_tab").hide();
+    $('#free_video_banner_image_to_s3_form, #banner_image_status_message, #banner_image_form_holder').hide();
+}
+
+disabled_product_form = function() {
+    $('.merch-name, .product-image, .merch-url, .merch-desc, .merch-price').attr('disabled', true);
+}
+
+enabled_product_form = function() {
+    $('.merch-name, .product-image, .merch-url, .merch-desc, .merch-price').removeAttr('disabled');
+}
+
+toggle_product_tab = function() {
+    if($('#products_attached').prop('checked')) {
+        enabled_product_form();
+        $('#publish-steps .step1').css('width', '201px');
+        $('#publish-steps .step2').css('width', '200px');
+        $('#publish-steps .step3').css('width', '200px').fadeIn();
+        $('#publish-steps .step4').css('width', '201px');
+        $('li.step4 span .numbers').html(4);
+        if($('.product-form').find('input[type=hidden]').length > 0)
+            $('.product-form').find('input[type=hidden]').val(0);
+    } else {
+        $('#publish-steps .step1').css('width', '');
+        $('#publish-steps .step2').css('width', '');
+        $('#publish-steps .step3').css('width', '').hide();
+        $('#publish-steps .step4').css('width', '');
+        $('li.step4 span .numbers').html(3);
+        if($('.product-form').find('input[type=hidden]').length > 0)
+            $('.product-form').find('input[type=hidden]').val(1);
+        disabled_product_form();
+    }
+}
+
+bind_product_checkbox_click = function(){
+    $('#products_attached').click(function(){
+        toggle_product_tab();
+    });
+}
+
+next_button_click = function(element){
+    var tab_name = $(element.target).data().tab_name;
+    $('html, body').animate({scrollTop:0}, 'slow');
+    switch(tab_name) {
+        case 'video_details':
+            errors = validate_video_details_tab();
+            error_counter = errors[0];
+            custom_message = errors[1];
+            if (error_counter > 0){
+                if(custom_message == "")
+                    $('.error-dv').html("Please enter the correct values in highlighted fields ");
+                else
+                    $('.error-dv').html(custom_message);
+                $('.error-dv').show();
+            } else {
+                hide_video_details_tab();
+                if($('#products_attached').prop('checked'))
+                    show_products_tab();
+                else
+                    show_publish_tab();
+            }
+            break;
+        case 'products_tab':
+            error_counter = validate_products_tab();
+            if(error_counter > 0){
+                $('.error-dv').html("Please enter the correct values in highlighted fields ")
+                $('.error-dv').show();
+            } else {
+                hide_products_tab();
+                show_publish_tab();
+            }
+            break;
+    }
+}
+
+back_button_click = function(element) {
+    var tab_name = $(element.target).data().tab_name;
+    $('.error-dv').hide();
+    switch(tab_name) {
+        case "products_tab":
+            hide_products_tab();
+            show_video_details_tab();
+            break;
+        case 'publish_tab':
+            hide_publish_tab();
+            if($('#products_attached').prop('checked'))
+                show_products_tab();
+            else
+                show_video_details_tab();
+            break;
+    }
+}
+
+bind_schedule_post_checkbox = function(){
+
+    $('#post_time').datetimepicker({ minDate: 0,allowBlank: true });
+    $('#schedule-post').click(function(){ show_calender_change_action_button(); });
+}
+
+convert_timezone= function() {
+    time_str = $("#post_time").val()
+    now = new Date(time_str);
+    nowUtc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+    $("#time_zone").val(nowUtc)
+
+}
+
+convert_local_time= function(){
+    old_time =$("#post_time").val().toString();
+    if (old_time.length > 1) {
+        d = old_time.replace(/-/g, "/")
+        new_date = new Date(d)
+        $("#post_time").val(new_date.dateFormat("Y/m/d") + " " +new_date.toTimeString().substr(0, 5));
+        $("#datepicker").show();
+    }
+}
+
+show_calender_change_action_button= function() {
+    if( $('#schedule-post').prop('checked'))
+    {
+        $('#datepicker').show();
+        local_time = new Date();
+        display_time = local_time.format0().toString()+ " " + local_time.format1().toString();
+        $("#post_time").val(display_time);
+        $('#free_form_submit').val('Schedule')
+    }else{
+        $("#post_time").val("");
+        $('#free_form_submit').val(action_button)
+        $('#datepicker').hide();
+    }
+}
+page_leave_confirmation = function(){
+    var ie = navigator.userAgent.indexOf("MSIE") > 0;
+
+        $(window).bind("beforeunload", function(event) {
+            var e, msg;
+            if (ie) {
+                return;
+            }
+            if (!all_files_upload_to_s3_completed() || !user_has_submitted_form) {
+                e = event || window.event;
+                msg = "Video upload is in progress!";
+                if (e) {
+                    e.returnValue = msg;
+                }
+                return msg;
+            }
+        });
+}
+
+restart_preview_upload = function(){
+    $('#preview-upload-error').hide()
+    $('#preview_to_s3_form').submit();
+    $('html, body').animate({scrollTop:0}, 'slow');
+}

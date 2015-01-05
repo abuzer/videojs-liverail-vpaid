@@ -1,0 +1,258 @@
+// Place all the styles related to the free_videos controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+.access-gate{
+  padding:20px 15px 40px 30px;
+  li{
+    float: left;
+    width:215px;
+        input, img {float: left; margin-left:5px;}
+        label{ float: left;margin-left: 5px; font-weight: normal;}
+  }
+}
+
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+#banner-button-holder{
+
+  .or-box{
+      display:inline-block;
+      position:relative;
+      font-size:.85em;
+      margin: 15px 0 0px 200px;
+      float: left;
+  }
+}
+
+#facebook_pages_wrapper{
+  height: 25px;
+  ul{
+    columns: 2;
+    -webkit-columns: 2;
+    -moz-columns: 2;
+  }
+  li{
+    img{
+      height: 32px;
+    }
+  }
+}
+
+.ladda-button{font-size: 13px !important;
+}
+
+div#new-header .h-nav .n-upload a{
+  margin-top:-3px !important;
+}
+div#new-header .h-nav li .upload-ico{
+  margin-top:3px !important;
+}
+div#new-header .h-nav .name-header{
+  margin-top:5px !important;
+}
+div#new-header .h-nav .name-header .arrow-ico {
+ margin-top:7px !important;
+}
+
+.free-video-previews-list{
+  li{
+    p{float:left; margin-top:30px !important;margin-bottom:0px !important;margin-left:10px !important;}
+    img{float:left;}
+    span{float: right;margin-top:30px;}
+  }
+}
+
+.selectBox-options li a{
+  color:black;
+  text-decoration: none;
+}
+
+.selectBox-options li a:hover{
+  color:black;
+  text-decoration: none;
+}
+
+#main_forms_holder{
+.banner_image_form_holder_paid{
+      position: absolute;
+      top: 448px;
+      left: 200px;
+      width: 200px;
+      span.delete-banner-img{
+      float: left;
+      margin-left: 10px;
+     }
+   }
+  #banner_image_form_holder{
+    position: absolute;
+    top: 298px;
+    left: 200px;
+    width: 490px;
+   span.delete-banner-img{
+    float: left;
+    margin-left: 10px;
+   }
+   span.helping_text{
+    font-size: 0.7em;
+    float: right;
+    width: 290px;
+   }
+
+    #merchandise_video_banner_image_to_s3_form, #free_video_banner_image_to_s3_form, #paid_video_banner_image_to_s3_form, #public_video_banner_image_to_s3_form {
+      float: left;
+      input{
+        position: absolute;
+        top: -5px;
+        left: 0px;
+        cursor: pointer;
+        opacity: -6;
+        height: 29px;
+        z-index: 123;
+        width: 142px;
+      }
+    }
+  }
+  #merchandise_video_thumbnail_to_s3_form, #free_video_thumbnail_to_s3_form, #paid_video_thumbnail_to_s3_form, #public_video_thumbnail_to_s3_form{
+    span.helping_text {
+      float: right;
+      font-size: 0.85em;
+    }
+
+    width: 50%;
+    position: absolute;
+    top: 425px;
+    left: 201px;
+    input{
+      position: absolute;
+      top: -8px;
+      left: 0px;
+      cursor: pointer;
+      opacity: -6;
+      height: 35px;
+      z-index: 123;
+      width: 154px;
+    }
+  }
+#public_video_thumbnail_to_s3_form {
+    position: absolute;
+    top: 380px;
+    left: 201px;
+    input{
+      position: absolute;
+      top: -8px;
+      right: 0px;
+      cursor: pointer;
+      opacity: -6;
+      height: 35px;
+      z-index: 123;
+      width: 154px;
+    }
+  }
+  #merchandise_video_thumbnail_to_s3_form {
+    position: absolute;
+    top: 380px;
+    left: 201px;
+    input{
+      position: absolute;
+      top: -8px;
+      right: 0px;
+      cursor: pointer;
+      opacity: -6;
+      height: 35px;
+      z-index: 123;
+      width: 154px;
+    }
+  }
+
+  #merchandise_preview_to_s3_form, #free_preview_to_s3_form, #public_video_preview_to_s3_form{
+    span.helping_text{
+      float: right;
+      margin-right: 8px;
+      font-size: 0.85em;
+    }
+
+    width: 50%;
+    position: absolute;
+    top: 480px;
+    left: 201px;
+    input{
+      position: absolute;
+      top: -8px;
+      left: 0px;
+      cursor: pointer;
+      opacity: -6;
+      height: 35px;
+      z-index: 123;
+      width: 154px;
+    }
+  }
+}
+
+#merchandise_video_to_s3_form #file, #free_video_to_s3_form #file, #public_video_to_s3_form #file{
+
+  cursor: pointer;
+  opacity: 0;
+  position: absolute;
+  height: 60px;
+  width: 306px;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  font-size:100px \9;
+  -moz-opacity: 0;
+  filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0)
+}
+
+
+#facebook_pages_list {
+  height: 100% !important;
+  max-height: 185px;
+  width: 100%;
+  overflow-x: auto;
+  ul {
+    overflow: hidden;
+    width: 100%;
+  }
+  li {
+    width: 48%;
+    line-height: 1.5em;
+    float: left;
+    display: inline;
+  }
+  label {
+    margin-right: 2px;
+  }
+  img {
+    height: 32px;
+  }
+}
+
+ @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+ #banner-button-holder{
+    height: 103px;
+  }
+}
+
+#edit_preview_form_holder form{
+  top: 565px;
+}
+
+#video-upload-btn{
+  #video_file{
+    opacity: 0;
+    top:0px;
+    left:0px;
+    position:absolute;
+    width:300px;
+    height: 64px;
+    cursor:pointer;
+  }
+}

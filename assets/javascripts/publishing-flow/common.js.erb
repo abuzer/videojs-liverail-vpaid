@@ -1,0 +1,233 @@
+$(document).ready(function () {
+    $(".auth-logoutlink").click(function () {
+        FB.init();
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
+                FB.logout(function (response) {
+                    document.location = "/signout";
+                });
+            }
+            else {
+                document.location = "/signout";
+            }
+        });
+        $('#account-menu').hide();
+        return false;
+    });
+});
+
+function check_theater_duplicate_name(asynchronous) {
+    if ($("#new_theater_name").is(":visible") == false)
+        return
+
+    if (typeof(asynchronous) == 'undefined') {
+        asynchronous = false;
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: "/theaters/check_duplicate_theater.json",
+        data: {
+            theater_name: $("#new_theater_name").val()
+        },
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
+        },
+        success: function (data) {
+            if (data.success == true) {
+                $('#new_theater_name').removeClass('error-field');
+                $("#theater_name_error").html("");
+                $("#theater_name_error").hide();
+
+                if ($('.error-field').size() == 0) {
+                    $('.error-dv').hide();
+                }
+            }
+        },
+        error: function (data) {
+            // Note: console.log creates issues in IE
+            //console.log(data.responseText);
+            var parsed_json = $.parseJSON(data.responseText);
+            // Note: console.log creates issues in IE
+            // console.log(parsed_json.success);
+            if (parsed_json.success == false) {
+                $('#new_theater_name').addClass('error-field');
+                $("#theater_name_error").html(parsed_json.message);
+                $("#theater_name_error").show();
+                $('.error-dv').html("Please enter the correct values in highlighted fields ")
+                $('.error-dv').show();
+            }
+        },
+        async: asynchronous
+    });
+}
+
+
+load_theater_contact_info = function (theater_id) {
+    var request_url = "/theaters/" + theater_id + "/get_theater_contacts_info"
+
+    $.ajax({
+        url: request_url,
+        beforeSend: function () {
+            $('#contacts_import_buttons_area').fadeTo('slow', 0.2);
+        }
+    }).done(function (data) {
+                $('#contacts_import_buttons_area').fadeTo('slow', 1);
+                if (data.success) {
+                    result = data.data.result
+                    for (i = 0; i < default_contact_importers.length; i++) {
+                        if (result.theater_contacts[default_contact_importers[i]]) {
+                            $("#" + default_contact_importers[i] + "_contacts_ckb").prop("disabled", true);
+                            $("#" + default_contact_importers[i] + "_contacts_ckb").prop("checked", true);
+
+                            $("#" + default_contact_importers[i] + "_selected_contacts_count").parent("span").show();
+                            contacts_count = result.theater_contacts[default_contact_importers[i]]
+                            if (contacts_count > 1)
+                                $("#" + default_contact_importers[i] + "_selected_contacts_count").html(contacts_count + " Contacts have");
+                            else
+                                $("#" + default_contact_importers[i] + "_selected_contacts_count").html(contacts_count + " Contact has");
+
+                            $("#" + default_contact_importers[i] + "_contacts_edit_link").show();
+                            $("#" + default_contact_importers[i] + "_contacts_sync_link").show();
+                            $("#" + default_contact_importers[i] + "_edit_link_sperator").show();
+                        }
+                        else {
+                            $("#" + default_contact_importers[i] + "_contacts_ckb").prop("checked", false);
+                            $("#" + default_contact_importers[i] + "_contacts_ckb").prop("disabled", false);
+                            $("#" + default_contact_importers[i] + "_contacts_edit_link").hide();
+                            $("#" + default_contact_importers[i] + "_selected_contacts_count").parent("span").hide();
+                            $("#" + default_contact_importers[i] + "_selected_contacts_count").html(0);
+                            $("#" + default_contact_importers[i] + "_contacts_sync_link").hide();
+                            $("#" + default_contact_importers[i] + "_edit_link_sperator").hide();
+                            $("#" + default_contact_importers[i] + "_selected_contacts").val();
+                        }
+                    }
+                    $("#invitees_custom_message").val(result.theater_message);
+                }
+            });
+}
+
+function verify_video_upload(xhr, percent, status, bar) {
+    var file_name = $('#video_uploader_web_video').val().replace(/^.*[\\\/]/, '');
+    $('#video_s3_key').val($('#video_uploader_key').val());
+    $('#video_s3_key').val($('#video_s3_key').val().replace("${filename}", file_name));
+
+    video_being_uploaded = false;
+
+    if (verify_file_on_s3($('#video_uploader_key').val())) {
+        $('#video_uploader_web_video').removeClass('error-field');
+        video_upload_failed = false;
+        video_upload_completed = true;
+        $.uploadFinished(xhr, percent, status, bar);
+    }
+    else {
+        $('#video_uploader_web_video').addClass('error-field');
+        video_upload_failed = true;
+        percent.html("<center><b>Error uploading video your connection timed out</b> - <a href='javascript:;' onclick='show_error_on_video_fail();'>Restart upload</a></center>");
+        status.html(xhr.responseText);
+        percentVal = '100%';
+        bar.width(percentVal);
+        reset_error_message();
+    }
+}
+
+
+function verify_file_on_s3(uploaded_video_file_name, asynchronous) {
+    var is_file_exists = false;
+
+    if (typeof(asynchronous) == 'undefined') {
+        asynchronous = false;
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: "/videos/verify_s3_file.json",
+        data: {
+            file_name: uploaded_video_file_name
+        },
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
+        },
+        success: function (data) {
+            if (data.success == true)
+                is_file_exists = true;
+        },
+        error: function (data) {
+            // Note: console.log creates issues in IE
+            console.log(data.responseText);
+            console.log("Request has failed ::: We need to send request again" + uploaded_video_file_name);
+            if (data.responseText) {
+                var parsed_json = $.parseJSON(data.responseText);
+                console.log(parsed_json.success);
+            }
+            // Note: console.log creates issues in IE
+        },
+        async: asynchronous
+    });
+
+    return is_file_exists;
+}
+
+
+function validateCustomDuration() {
+    if ($("#video_runtime_duration_div").css('display') !== 'none') {
+        if ($("#video_duration").val() <= 0 || isNaN($("#video_duration").val()) || $("#video_duration").val() === "") {
+            $("#video_duration").addClass('error-field');
+            return false;
+        } else if (parseFloat($('#video_duration').val()) > 300) {
+            $("#video_duration").addClass('error-field');
+            $("#video_runtime_error").html("Video run-time cannot be more than 300 minutes i.e. 5 hours");
+            return false;
+        } else {
+            $("#video_runtime_error").html("");
+            $("#video_duration").removeClass('error-field');
+            return true;
+        }
+    } else {
+        return true;
+    }
+}
+
+
+function launch_sponage(source) {
+    if ($('#' + source + "_contacts_ckb").is(":checked")) {
+        $("#" + source+ "_contacts_ckb").prop("checked", false);
+        cloudsponge.launch(source);
+        if (source != "yahoo" && source != "gmail") {
+            $('#fbBox').center();
+            $('#fbBox').show();
+        }
+    }
+    else {
+        $("#" + source + "_selected_contacts").html("");
+        $("#" + source + "_selected_contacts").val("");
+        $("#" + source + "_selected_contacts_count").html("0");
+        $("#" + source + "_selected_contacts_count").parent("span").hide();
+        $("#" + source + "_contacts_sync_link").hide();
+
+    }
+}
+
+//  verify_video_upload(xhr,percent,status,bar)
+function verify_video_preview_upload(xhr, percent, status, bar) {
+    var file_name = $('#preview_uploader_web_video').val().replace(/^.*[\\\/]/, '');
+    $('#video_preview_key').val($('#preview_uploader_key').val());
+    $('#video_preview_key').val($('#video_preview_key').val().replace("${filename}", file_name));
+    preview_being_uploaded = false;
+
+    if (verify_file_on_s3($('#preview_uploader_key').val())) {
+        preview_upload_completed = true
+        video_preview_upload_failed = false;
+        $('#preview_uploader_web_video').removeClass('error-field');
+        $.previewUploadFinished(xhr, percent, status, bar);
+    }
+    else {
+        $('#preview_uploader_web_video').addClass('error-field');
+        video_preview_upload_failed = true;
+        percent.html("<center><b>Error uploading video preview your connection timed out</b> - <a href='javascript:;' onclick='show_error_on_video_preview_fail();'>Restart upload</a></center>");
+        status.html(xhr.responseText);
+        percentVal = '100%';
+        bar.width(percentVal);
+        reset_error_message();
+    }
+}

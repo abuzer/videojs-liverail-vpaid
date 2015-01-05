@@ -1,0 +1,65 @@
+// Place all the styles related to the contents controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+.slidingDiv {
+  background-color: #a60404;
+  /*padding: 20px;*/
+  margin-top: 30px;
+  position: absolute;
+  width: 295px;
+  padding: 20px;
+  color: #ffffff;
+  z-index: 999;
+}
+.rightr{
+  right: 89px;
+}
+
+.slidingDiv .text-contents {
+  width: 285px;
+}
+
+.cross-icon {
+
+  float: right;
+  position: relative;
+  margin-right: -20px;
+  margin-top: -20px;
+}
+
+
+ul#general_listing li{
+    background: url("/assets/sprite.png") no-repeat scroll -88px -442px transparent;
+    padding-left: 20px;
+    color: #333;
+    line-height: 16px;
+    margin-bottom: 5px;    
+}
+
+#video_uploading_best_practice h3{
+  margin:10px;
+  font-weight: normal;
+  margin-left: 0px;
+  margin-top: 25px;
+}
+#video_uploading_best_practice h4{
+ margin:10px; 
+ font-weight: normal;
+ margin-left: 0px;
+ margin-top: 25px;
+}
+
+#video_uploading_best_practice h5{
+  font-size: 1.45em;
+  font-weight: normal;
+  margin:10px;
+  margin-left: 0px;
+  margin-top: 15px;
+}
+
+#facebook_permissions_guide h4{
+  font-size: 25px;
+}
+#facebook_permissions_guide h5{
+  font-size: 20px;
+}

@@ -1,0 +1,137 @@
+@import "../variables";
+
+#publishing_container ul.steps {
+    margin: 53px 0 60px;
+    border-bottom: 0px;
+
+
+    // Here
+    display:none;
+
+}
+
+#publishing_container ul.steps li.first {
+    background: url(/assets/backgrounds/line-first-default.png) 118px 0 no-repeat;
+}
+
+#publishing_container ul.steps li.first-active {
+    background: url(/assets/backgrounds/line-first-active.png) 118px 0 no-repeat;
+}
+
+#publishing_container ul.steps li.center {
+    background: url(/assets/backgrounds/line-center-default.png) -4px 0 no-repeat;
+}
+
+#publishing_container ul.steps li.center-active {
+    background: url(/assets/backgrounds/line-center-active.png) -4px 0 no-repeat;
+}
+
+#publishing_container ul.steps li.last {
+    background: url(/assets/backgrounds/line-last-default.png) 4px 0 no-repeat;
+}
+
+#publishing_container ul.steps li.last-active {
+    background: url(/assets/backgrounds/line-last-active.png) 4px 0 no-repeat;
+}
+
+#publishing_container ul.steps li {
+    display: inline-block;
+    padding: 25px 81px 10px;
+    margin: 0;
+    margin-right: -9px;
+    text-align: center;
+}
+
+#publishing_container ul.steps li span.number {
+    background: url(/assets/backgrounds/steps-default.png) top center no-repeat;
+    text-align: center;
+    color: #fff;
+    font-size: 38px;
+    font-weight: bold;
+    padding-top: 22px;
+    width: 78px;
+    height: 40px;
+    display: block;
+}
+
+#publishing_container ul.steps li.first-active span.number, #publishing_container ul.steps li.center-active span.number, #publishing_container ul.steps li.last-active span.number {
+    background: url(/assets/backgrounds/steps-active.png) top center no-repeat;
+    text-align: center;
+    color: #fff;
+    font-size: 38px;
+    font-weight: bold;
+    padding-top: 22px;
+    width: 78px;
+    height: 40px;
+    display: block;
+}
+
+#publishing_container ul.steps li span.title {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 16px;
+    display: block;
+}
+
+
+// Upload progress bar
+
+#new_preview_uploader_progress {
+    position:relative;
+}
+
+.progress-u {
+    position: relative;
+    /*top:175px;
+    left:189px;*/
+    width: 100%;
+
+    text-align: center;
+    z-index: 199;
+}
+
+.progress-u {
+    height: 21px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    background-color: white;
+    border-radius:5px;
+    background-repeat: repeat-x;
+}
+
+.percent-u {
+    position: absolute;
+    display: inline-block;
+    top: 1px;
+    left: 8px;
+    color: #fff;
+    font-size: .8em;
+    font-family: "Open Sans", sans-serif;
+    letter-spacing:1px;
+}
+
+.progress-u .bar {
+    float: left;
+    width: 0;
+    height: 100%;
+    font-size: 12px;
+    color: #ffffff;
+    text-align: center;
+    border-radius:5px;
+    background-color: #085eb5;
+    background-repeat: repeat-x;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-transition: width 0.6s ease;
+    -moz-transition: width 0.6s ease;
+    -o-transition: width 0.6s ease;
+    transition: width 0.6s ease;
+}
+
+.video-progress-bar {
+    z-index: 99;
+    width: 960px;
+    top: 231px;
+    border: 0px solid #ff0000;
+}

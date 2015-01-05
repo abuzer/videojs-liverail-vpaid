@@ -1,0 +1,208 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+
+
+    <!-- Chang URLs to wherever Video.js files will be hosted -->
+    <link href="video-js.css" rel="stylesheet" type="text/css">
+    <link href="vjs.css" rel="stylesheet" type="text/css">
+    <!-- video.js must be in the <head> for older IEs to work. -->
+    <script src="LiveRail.AdManager-1.0.js"></script>
+    <script src="video.js"></script>
+    <style type="text/css">
+    .vjs-loading-spinner {
+        z-index: 999;
+    }
+    .ad-message {
+        display: none;
+        position: absolute;
+        right: 10;
+        top: 0;
+    }
+    .loading {
+        background: url(http://www.loadinfo.net/images/preview/13_cyrle_three_24.gif?1384388177) no-repeat;
+        display: none;
+        position: absolute;
+        top: 48%;
+        left: 48%;
+        height: 24px;
+        width: 24px;
+    }
+    .runtime {
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 2px 4px;
+        color: #fff;
+        position: absolute;
+        border-radius: 2px;
+    }
+    /* .vjs-poster{
+        z-index: 10001;
+    }
+    .vjs-big-play-button{
+        z-index: 999999;
+    }*/
+    /*video::-webkit-media-controls {
+        display:none !important;
+    }*/
+    </style>
+
+    <!-- Unless using the CDN hosted version, update the URL to the Flash SWF -->
+    <script>
+    videojs.options.flash.swf = "video-js.swf";
+    </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript">
+    var LiveRailVPAID;
+    $(function() {
+        LiveRailVPAID = getVPAIDAd();
+        LiveRailVPAID.handshakeVersion('2.0');
+
+        /* setTimeout(function(){
+            onVPAIDLoad();
+        },5000);*/
+
+        var creativeData = {},
+            environmentVars = {
+                slot: videoWrapper,
+                videoSlot: videoElement,
+                videoSlotCanAutoPlay: true,
+                LR_PUBLISHER_ID: 1331,
+                LR_TAGS: 'demo',
+                LR_MUTED: 1,
+                LR_LAYOUT_SKIN_MESSAGE: 'Advertisement. Video will resume in {COUNTDOWN} seconds.',
+            };
+        //initAdButton.setAttribute('disabled', 'disabled');
+        //Initializean ad
+        LiveRailVPAID.initAd(videoElement.offsetWidth, videoElement.offsetHeight, 'normal', 512, creativeData, environmentVars);
+
+        LiveRailVPAID.subscribe(function() {
+
+            console.log('ad loaded');
+        }, 'AdLoaded');
+
+        LiveRailVPAID.subscribe(function(message) {
+            if (video1Played && !video2Played) {
+                
+                $('#videoElement').attr('src', video2);
+                $('#videoSource').attr('src', video2);
+
+                $('#videoElement')[0].load();
+                $('#videoElement')[0].webkitExitFullScreen()
+                $('#videoElement')[0].play();
+                video2Played = true;
+            }
+            console.log('------------ complete');
+        }, 'AdStopped');
+        LiveRailVPAID.subscribe(function(message) {
+            if (video1Played && video2Played) {
+                $('#videoElement')[0].webkitExitFullScreen()
+                $('.vjs-poster').show();
+                $('.vjs-big-play-button').show();
+            }
+            console.log('------------ complete');
+        }, 'AdError');
+
+    });
+
+
+
+    video1 = 'https://d3hh3bpy3h68fd.cloudfront.net/processed_videos/47fad7e0-7477-0132-8e95-123139254ded/_preview_640x480_2932_edit.mp4';
+    video2 = 'https://drgta5lwz3cck.cloudfront.net/uploads-public-videos/fd6eefe0-73cc-0132-a03a-12313b07582a/640x480.mp4';
+
+    video2 = 'https://d3hh3bpy3h68fd.cloudfront.net/uploads-public-videos/79da28a0-418a-0132-2f94-22000a1d2f02/640x480.mp4';
+    
+    
+    //video2 = 'http://media.blacktrash.org/stsp.m3u8';
+
+    video1Played = false;
+    video2Played = false;
+
+    $(function() {
+        playVideo = function() {
+            
+            $('#videoElement').show();
+            $('#videoElement').attr('width', '100%');
+            $('#videoElement').attr('height', '100%');
+            
+            $('.runtime').hide();
+            $('.vjs-poster').hide();
+            $('.vjs-big-play-button').hide();
+
+            if (!video1Played && !video2Played) {
+                LiveRailVPAID.startAd();
+                $('.ad-message').show();
+            }else{
+                $('#videoElement')[0].play();
+            }
+
+            // $('#videoElement').attr('src', video1);
+            // $('#videoSource').attr('src', video1);
+
+            video1Played = true;
+        }
+
+        $('.vjs-poster, .vjs-big-play-button').on('click', function() {
+            playVideo();
+        });
+
+        $('#videoElement').bind('ended', function() {
+            if (video1Played && video2Played) {
+                $('#videoElement')[0].webkitExitFullScreen()
+                $('.vjs-poster').show();
+                $('.vjs-big-play-button').show();
+            }
+
+        });
+        $('.videoElement').bind('progress', function(e) {
+            $('#state').hide();
+            $('.ad-message').hide();
+        });
+
+        $('.videoElement').bind('waiting', function(e) {
+            $('#state').show();
+        });
+        $('.videoElement').bind('pause', function(e) {
+            $('#state').hide();
+        });
+    });
+    </script>
+</head>
+
+<body>
+
+    <div id="videoWrapper" style="" class="vjs-default-skin video-js vjs-big-play-centered">
+        <video x-webkit-airplay="allow" style="position: absolute; top:0; display:none;" width="1" id="videoElement" class="video-j1s videoElement vjs-default-skin" controls src="" poster="">
+            <source id="videoSource" src="" type="video/mp4">
+        </video>
+        <div class="vjs-poster" tabindex="-1" style="display: block; background-image: url(https://drgta5lwz3cck.cloudfront.net/uploads-public-videos/184b6620-730c-0132-a037-12313b07582a/TIMELINE_PLAYER_1280x720_0000.jpg);">
+        </div>
+        <div class="ad-message">
+            <p align="center">Ad Video will play first</p>
+        </div>
+        <div class="runtime">
+            <span>00:30</span>
+        </div>
+
+        <div class="vjs-big-play-button" role="button " aria-live="polite" tabindex="0" aria-label="play video" style="display: block;"><span aria-hidden="true"></span>
+        </div>
+        <div class="loading" id="state" style="display: none;"></div>
+
+        <!-- <div id="state" style="display:none; text-align: center">
+            <img style="-webkit-user-select: none" src="http://www.loadinfo.net/images/preview/14_cyrle_four_24.gif?1384388177">
+        </div> -->
+        <!--   <video data-setup="{}" x-webkit-airplay="allow" id="videoElement1" class="video-js videoElement1 vjs-default-skin" height="50%" width="100%" controls src="" poster="">
+            <source id="videoSource" src="https://d3hh3bpy3h68fd.cloudfront.net/processed_videos/47fad7e0-7477-0132-8e95-123139254ded/_preview_640x480_2932_edit.mp4" type="video/mp4">
+        </video>
+        -->
+    </div>
+
+
+</body>
+
+</html>

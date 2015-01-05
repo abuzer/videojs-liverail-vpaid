@@ -1,0 +1,12 @@
+// Colors (explicit variables):
+$red: #c40707; .red{color:$red}
+$darkred:#a3201f; .darkred{color:$darkred}
+$white:#fefefe; .white{color:$white;}
+$lightgray: #a4a2a2;
+$gray: #cccccc; .gray {color:$gray}
+$darkgray: #999999; .darkgray {color:$darkgray}
+$lightblue: #3498DB; .lightblue {color:$lightblue}
+$blue: #2980B9; .blue {color:$blue;}
+
+// Clors (funcitonal variables):
+$border: rgba(7,7,7,.25);

@@ -1,0 +1,113 @@
+/*
+Header Area
+*/
+
+.site-header {
+    background-color: #000;
+    background-image: url("../comedian/bg.jpg");
+    background-repeat: no-repeat;
+    background-size: initial;
+    -webkit-background-size: initial;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    padding: 150px 0;
+}
+
+.site-header h1 {
+    color: #fff;
+    font-size: 55px;
+    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+    padding-bottom: 20px;
+}
+
+.bordered-button {
+    display: inline-block;
+    text-align: center;
+    padding: 15px 45px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    border: 3px solid #00ce30;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    background-color: #00ce30;
+    margin-top: 35px;
+}
+
+.bordered-button:hover {
+    color: #fff;
+    border-color: #03b42c;
+    background-color: #03b42c;
+}
+
+/*
+Content Items
+*/
+
+.circled-image-1, .circled-image-2, .circled-image-3 {
+    position: relative;
+    display: block;
+    border-radius: 50%;
+    width: 240px;
+    height: 240px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 300px;
+    overflow: hidden;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+.circled-image-1 {
+    background-image: url("../comedian/circle1.jpg");
+}
+
+.circled-image-2 {
+    background-image: url("../comedian/circle2.jpg");
+}
+
+.circled-image-3 {
+    background-image: url("../comedian/circle3.jpg");
+}
+
+/*
+Sign-Up Section
+*/
+
+.section-signup {
+    background-color: #272727;
+}
+
+.site-section {
+    padding-top: 90px;
+    padding-bottom: 90px;
+}
+/*Mobile Responsive*/
+@media (max-width:1800px) {
+    #mobile-landing{
+        display:block;
+        width:100%;
+        height:120px;
+        position:fixed;
+        bottom:0;
+        z-index: 9999;
+        background:#c40707;
+        text-align:center;}
+    #mobile-landing img{max-width: 40%; height: auto;}
+    .mobile-header{
+        font-size:16px;
+        font-weight:bold;
+        text-align:center;
+        color:white;
+        padding-top:10px;
+        padding-bottom:20px;}
+}
+
+

@@ -1,0 +1,227 @@
+@import "new/rules";
+
+	header {
+		@import "new/pure-min";
+
+		min-height:45px;
+		border-bottom: 0px;
+		height: 0px;
+		background-color:$red;
+
+		.pure-g-r{
+			.pure-u-4-5{
+				width:79%;
+				height: 45px;
+			}
+		}
+
+		.h-logo {
+			padding-top:.8em;
+		}
+		.pure-menu.pure-menu-open {
+			background:transparent;
+		}
+		.h-nav {
+			width:100%;
+			float:right;
+			margin-right:15px;
+			@media (max-width: 767px) {
+				float:left;
+				ul {padding-left:0;padding-top:16px;}
+			}
+
+			#h-account {
+				cursor:pointer;
+				height:18px;
+				@media (max-width: 767px) {width:100%;}
+			}
+
+			a, .name-header {
+				text-decoration:none;
+				padding:14px 18px 14px 18px;
+				color:$white;
+				font-weight:400;
+				font-size:1em;
+				text-decoration:none;
+				display:inline-block;
+				&:hover {background:rgba(255,255,255,.11);}
+				.profile_link{padding:0px;}
+			}
+			@media (max-width:900px) {
+				a, .name-header {
+					padding:14px 9px 14px 9px;
+				}
+			}
+			.nav {margin:0;
+				.face-mask {
+					width: 25px;
+					height: 25px;
+					-webkit-border-radius: 25px; /* Saf3+, Chrome */
+					border-radius: 5px; /* Opera 10.5, IE 9 */
+					/*-moz-border-radius: 30px; Disabled for FF1+ */
+					margin-top: -7px;
+					margin-left:6px;
+					vertical-align: -37%;
+				}
+			}
+			@media (min-width:768px) {.responsive{display:none;}}
+
+			.btn-fix {
+				margin-right:3px;
+			}
+
+			li, .name-header {
+				@media (min-width:768px) {border-left: 1px solid $darkred;float:right; padding-bottom: 0px;}
+				height:25px;
+				text-align:center;
+				color:$white;
+				font-weight:400;
+				font-size:1em;
+
+				@media (min-width: 768px){display:inline-block;}
+				@media (max-width: 767px) {
+					text-align:left;
+					border-top:1px solid rgba(255,255,255,.4);
+					font-size:1.1em;
+				}
+				img {display:inline-block;}
+				.upload-ico {
+					margin-left:12px;
+					margin-top:1px;
+				}
+				.n-name {
+					font-weight:600;
+				}
+
+
+
+				.n-sign-up {
+					background:$white;
+					color:$red;
+					height:22px;
+					font-size:1.05em;
+					padding:14px 20px 14px 20px;
+					border-radius:0 0 5px 5px;
+					text-transform:uppercase;
+					font-weight:bold;
+				}
+
+				.arrow-ico {
+					margin-left:6px;
+					margin-top:5px;
+
+				}
+
+			}
+
+			.n-upload{
+				border-radius: 4px;
+				background: rgb(187, 42, 36);
+				border: 1px solid rgb(163, 32, 31);
+				margin: 7px 0 0px 0;
+				height: 30px;
+				&:hover {background:rgba(255,255,255,.11)};
+
+				a {
+					margin-top:-7px;
+					&:hover {background:none;}
+				}
+			}
+			@media (max-width: 767px) {
+					.n-upload {
+					height:45px;
+					a {margin-top:0;}
+				}
+			}
+		}
+		@media (min-width: 768px) {
+			#toggle {display:none;}
+
+		}
+		@media screen and (max-width: 767px) {
+			#collapse-nav {
+				clip: rect(0 0 0 0);
+				max-height: 0;
+				position: absolute;
+				display: block;
+				overflow: hidden;
+			}
+			#collapse-nav {
+				top: 0;
+				width: 100%;
+				position: relative;
+			}
+
+			#collapse-nav.opened { max-height: 9999px }
+			#collapse-nav a:hover { background: transparent }
+			#collapse-nav .active a:hover { color: #fff; background: rgba(0,0,0, .3) }
+			#toggle {
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				display: block;
+				width: 70px;
+				height: 24px;
+				float: right;
+				margin: 0px 0 0 0;
+				text-indent: -9999px;
+				overflow: hidden;
+				background: #fefefe url("new/hamburger.gif") no-repeat 50% 50%;
+			}
+		}
+			#account-menu {
+			position: relative;
+			z-index: 10000;
+			background:$red;
+			top:12px;
+			margin: 0 -19px;
+      width:165px;
+			display:none;
+			@media(max-width:767px) {ul{display:none;}}
+		}
+		#account-menu ul {
+			padding:0;
+			display: block;
+			margin-top:-2px;
+		}
+		#account-menu ul li {
+			display:block;
+			height: 33px;
+			line-height: 33px;
+			float:none;
+		}
+		#account-menu ul li:hover {
+			background-color: #930000;
+		}
+		#account-menu ul li a {
+			color: white;
+			display: block;
+			height: 33px;
+			line-height: 30px;
+			padding: 0 5px 0 30px;
+			text-decoration: none;
+			text-align:left;
+		}
+		#account-menu ul li a#vault {
+			background: url("/assets/sprite.png") 0 -1573px no-repeat;
+		}
+		#account-menu ul li a#dashboard {
+			background: url("/assets/sprite.png") 0 -1604px no-repeat;
+		}
+        #account-menu ul li a#mcn-subscriber {
+          background: url("/assets/sprite.png") 0 -1732px no-repeat;
+        }
+        #account-menu ul li a#email-subscriber {
+          background: url("/assets/sprite.png") 0 -1697px no-repeat;
+        }
+		#account-menu ul li a#settings {
+			background: url("/assets/sprite.png") 0 -1637px no-repeat;
+		}
+		#account-menu ul li a#logout {
+			background: url("/assets/sprite.png") 0 -514px no-repeat;
+		}
+	}
+
+	// HEADER - END

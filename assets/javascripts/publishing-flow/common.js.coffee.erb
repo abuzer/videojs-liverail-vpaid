@@ -1,0 +1,8 @@
+$ -> 
+
+  ua = navigator.userAgent.toString().toLowerCase();
+  ie_ind = ua.indexOf("msie");
+  if (ie_ind > 0) 
+    ie_v = parseInt(ua.substr(ie_ind + 4, 8));
+  if (ie_v < 9)
+    alert("This website is best viewed on Internet Explorer version 9 or above. \n\nPlease upgrade to a latest version or try using latest Chrome/Firefox");

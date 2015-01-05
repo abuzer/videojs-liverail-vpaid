@@ -1,0 +1,29 @@
+.welcome_h3{ color: black; font-size: 27px; font-weight: normal; margin: 31px 0 0 0; padding: 0;}
+.questions { display:block; background:#fff; border:solid 1px #d7d7d7; border-radius:5px; margin:10px 0;padding-top:35px; overflow: hidden;}
+
+.questions .access1, .questions .access2, .questions .access3, .questions .access4{ display:inline-table; }
+.questions .access1{ background:url(/assets/ico-paidvideo.png) center top no-repeat; width:96px;height:70px;margin-top: 8px; margin-bottom: 10px;}
+.questions .access2{ background:url(/assets/ico-fanconnect.png) center top no-repeat; width:142px;height:70px;margin-top: 8px; margin-bottom: 10px;}
+.questions .access3{ background:url(/assets/ico-shopconnect.png) center top no-repeat; width:81px;height:90px;}
+.questions .access4{ background:url(/assets/ico-public-video-ads.png) center top no-repeat; width:100px; height:90px;}
+.questions .access1:hover, .questions .access2:hover, .questions .access3:hover, .questions .access4:hover{ background-position:center bottom;}
+
+.questions h3{ display:block; font-weight:bold; font-size:20px;color:black; margin:5px 0 0 0;}
+.questions button{ margin: 10px 32%; font-weight: normal;}
+.questions p{ display:block;  padding:0;text-align: center; margin: 0px 10%;}
+.following-cat { display:block; text-align:center;}
+.following-cat .modal-body {padding-left: 0; }
+.following-cat .issues {display: block;margin: 0 auto;max-width: 65%;}
+
+.issues p {
+    float: left;
+    font-size: 17px;
+    margin: 10px 0;
+    margin-right: 10px;
+}
+
+#welcome_page{min-height:475px; width: 1100px;}
+#welcome_page div.loading-div{height: 50px;text-align:center;}
+#welcome_page div.loading-div img{display:none; height: 50px;margin-left: 25px;}
+
+div.caption a{ display: inline-block; float: none; font-weight: normal; margin: 11px auto;}

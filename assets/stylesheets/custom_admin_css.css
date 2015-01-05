@@ -1,0 +1,20 @@
+body.active_admin .table_tools {
+display: block;
+margin-bottom: 16px;
+width: 100%;
+height: 110px;
+}
+
+
+body.active_admin ul, body.active_admin ol { margin:0; padding-left: 0;}
+body.active_admin ul { list-style-type:none !important;}
+
+#hdSpanBar ul li a, #hdSpanBar ul li a:visited, #fscr ul li a, #fscr ul li a:visited, #lcTip ul li a, #lcTip ul li a:visited, #volTip ul li a, #volTip ul li a:visited, .hdSpanBar ul li a, .hdSpanBar ul li a:visited, .fscr ul li a, .fscr ul li a:visited, .lcTip ul li a, .lcTip ul li a:visited, .volTip ul li a, .volTip ul li a:visited
+{
+	color:#ccc !important;
+	text-decoration:none !important;
+}
+.rank{
+    cursor: pointer;
+}
+

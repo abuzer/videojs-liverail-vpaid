@@ -1,0 +1,88 @@
+@import "new/rules";
+// GENERAL STYLES
+body {
+	margin:0;
+	padding:0;
+	font-family:"open sans", sans-serif;
+	font-size:12px;
+}
+
+
+// Main body container
+.container {
+	margin:10px;
+	@media (min-width:767px) {
+	width:960px; //960px default container width
+	margin:auto;
+	}
+}
+
+.content-wrapper {
+  min-height: 100%;
+  /* equal to footer height */
+  margin-bottom: -230px; 
+}
+.content-wrapper:after {
+  content: "";
+  display: block;
+  height: 230px //Must be the same as footer height
+}
+
+// Box Padding
+.box {padding:20px;}
+
+// Link styling and hover behavior
+a {
+	color:$red;
+	text-decoration:none;
+	&:hover{text-decoration:underline;}
+}
+
+li {list-style-image: url("new/right-bullet.png");line-height:1.5;}
+
+
+
+// alert
+.bs-docs-example .table, .bs-docs-example .progress, .bs-docs-example .well, .bs-docs-example .alert, .bs-docs-example .hero-unit, .bs-docs-example .pagination, .bs-docs-example .navbar, .bs-docs-example > .nav, .bs-docs-example blockquote {
+margin-bottom: 5px;
+}
+.alert-danger, .alert-error {
+color: #b94a48;
+background-color: #f2dede;
+border-color: #eed3d7;
+}
+.alert, .alert h4 {
+color: #c09853;
+}
+.alert {
+padding: 8px 35px 8px 14px;
+margin-bottom: 20px;
+text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+background-color: #fcf8e3;
+border: 1px solid #fbeed5;
+-webkit-border-radius: 4px;
+-moz-border-radius: 4px;
+border-radius: 4px;
+}
+
+// Arrow superpositioned on the left side of a box;
+.arrow {
+border-color: transparent transparent transparent transparent;
+top: 45%;
+left: -20px;
+}
+
+.arrow-border, .arrow {
+border-style: solid;
+border-width: 10px;
+height: 0;
+width: 0;
+position: absolute;
+}
+.arrow-border {
+border-color: transparent $border transparent transparent;
+top: 45%;
+left: -21px;
+}
+
+// GENERAL STYLES END

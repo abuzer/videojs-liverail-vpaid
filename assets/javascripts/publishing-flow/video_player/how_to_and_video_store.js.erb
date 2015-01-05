@@ -1,0 +1,1017 @@
+// Video Store
+var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+var isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
+var playstate = false;
+var uid = "";
+var first_name = "";
+var last_name = "";
+var email = "";
+var username = "";
+var LC_USER = "";
+var DEBUG = false;
+var comment_text = "";
+function perform_signup(success_callback) {
+    if(typeof(success_callback) == "undefined")
+        success_callback = "";
+
+  
+    FB.getLoginStatus(function (response) {
+        try {
+
+
+            if (response.status === 'connected') {
+                FB.api('/me', function (response) {
+                    uid = response.id;
+                    first_name = response.first_name;
+                    last_name = response.last_name;
+                    email = response.email;
+                    username = response.username;
+                });
+                var access_token = FB.getAuthResponse()['accessToken'];
+                setTimeout(function () {
+                    var data = 'fb_id=' + uid + '&user[first_name]=' + first_name + '&user[last_name]=' + last_name + '&user[email]=' + email + '&user[name]=' + username + '&accessToken=' + access_token;
+                    console.log(SERVER + '/' + REGISTER);
+                    DataCall(data, SERVER + '/' + REGISTER, "POST", false,
+                            function (data) {
+
+                                if (data.success == true) {
+
+                                    if (DEBUG)
+                                        console.log('login success');
+
+                                    LC_USER = data.data.user;
+                                    DEVICE_AUTH = data.data.user.device_auth_token;
+                                    if(success_callback.length > 0)
+                                        eval(success_callback);
+//                                    SuccessCallBack();
+                                } else
+                                    Error("Sign In", "Invalid information.");
+                            },
+                            function () {
+                                Error("Sign In", "An error occured.");
+                            }
+                    );
+
+                }, 3000);
+            }
+        }
+        catch (ex) {
+            console.log(ex.message);
+        }
+    });
+}
+
+function limitText(limitField, limitCount, limitNum) {
+    if ($('#' + limitField).val().length > limitNum) {
+        $('#' + limitField).val($('#' + limitField).val().substring(0, limitNum));
+    } else {
+        $('#' + limitCount).html(limitNum - $('#' + limitField).val().length + " characters.");
+    }
+}
+function AddComment(evt, video_id) {
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    comment_text = $('#comment_text' + video_id).val();
+    if ((charCode == 13 && comment_text != '' && (/\S/.test(comment_text)) )) {
+
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
+                post_comment(evt, video_id);
+            }
+            else if (response.status === 'not_authorized') {
+                FB.login(function (response) {
+                    if (response.authResponse) {
+                        console.log('Welcome!  Fetching your information.... ');
+                        FB.api('/me', function (response) {
+                            console.log('Good to see you, ' + response.name + '.');
+                            function_to_be_called = "post_comment("+evt+","+video_id+")";
+                            perform_signup(function_to_be_called);
+                            //post_comment(evt, video_id);
+
+                        });
+                    } else {
+                        console.log('User cancelled login or did not fully authorize.');
+                    }
+                });
+            }
+        });
+
+    }
+
+}
+
+function post_comment(evt, video_id) {
+
+    var posted_at = dateFormat(new Date(), "yyyy-mm-dd'T'HH:MM:ss");
+    var comment = {
+        user: {
+            first_name: first_name,
+            last_name: last_name,
+            uid: uid
+        },
+        id: "1",
+        comment: comment_text,
+        title: null,
+        created_at: posted_at
+    }
+
+    $('#comments' + video_id).prepend(CommentStructure(comment, false));
+    $('#comment_text' + video_id).val('');
+
+    DataCall("device=FBApp&comment[title]=" + comment.title + "&comment[comment]=" + comment.comment, SERVER_URL + '/' + VIDEOS + video_id + "/" + COMMENT, "POST", true,
+
+            function (data) {
+                var count = $('#comments-count' + video_id).html();
+                var newCount = (parseInt(count, 10)) + 1;
+                $('#comments-count' + video_id).html(newCount);
+                $('#comment_text' + video_id).val('');
+                $('#comment-error' + video_id).hide();
+                $('#comment-chars' + video_id).html('500 characters.');
+            },
+
+            function (data) {
+                $('#comment-error' + video_id).show();
+            });
+}
+
+function TimeStamp(old_datetime) {
+
+    try {
+
+        var stamp;
+
+        var month = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+
+        var dateTime = old_datetime.split("T");
+        var _date = dateTime[0];
+        var _time = dateTime[1].substr(0, dateTime[1].length - 1);
+
+        var date_s = _date.split("-");
+        var time_s = _time.split(":");
+
+        var valid_date = new Date();
+        valid_date.setYear(date_s[0]);
+        valid_date.setMonth(date_s[1] - 1);
+        valid_date.setDate(date_s[2]);
+        valid_date.setHours(time_s[0]);
+        valid_date.setMinutes(time_s[1]);
+        valid_date.setSeconds(time_s[2]);
+
+        var date = valid_date;
+
+        var offset = parseInt(date.getTimezoneOffset());
+        var sec_diff = (((new Date()).getTime() + (offset * 60 * 1000) - date.getTime()) / 1000);
+        var day_diff = Math.floor(sec_diff / 86400);
+
+        if (sec_diff < 600 && day_diff == 0)
+            stamp = "Just Now";
+        else if (sec_diff < 3600 && day_diff == 0)
+            stamp = Math.floor(sec_diff / 60) + " minutes ago";
+        else if (sec_diff < 7200 && day_diff == 0)
+            stamp = "1 hour ago";
+        else if (sec_diff < 86400 && day_diff == 0)
+            stamp = Math.floor(sec_diff / 3600) + " hours ago";
+        else if (day_diff == 1)
+            stamp = "Yesterday";
+        else if (day_diff < 7)
+            stamp = day_diff + " days ago";
+        else if (day_diff < 31) {
+            var weekCount = Math.ceil(day_diff / 7);
+            if (weekCount > 1)
+                stamp = weekCount + " weeks ago";
+            else
+                stamp = weekCount + " week ago";
+        }
+        else
+            stamp = month[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+
+        var data = {
+            user_stamp: stamp,
+            utc: valid_date,
+            stamp: dateFormat(valid_date, "dddd, dS mmmm yyyy, h:MM TT")
+        };
+
+        return data;
+
+    } catch (err) {
+        if (DEBUG)
+            console.log("Invalid DateTime Format. << DateTime");
+
+        return {
+            user_stamp: '',
+            utc: '',
+            stamp: ''
+        };
+
+    }
+}
+function CommentStructure(comment, posted) {
+
+    var comment_body = '';
+
+    var stamp = TimeStamp(comment.created_at);
+    var username = comment.user.first_name + ' ' + comment.user.last_name;
+
+    comment_body = comment_body + '<div class="user-row clearfix coment-panel">';
+    comment_body = comment_body + '<div class="user-img"><img width="50" alt="' + username + '" height="50" src="https://graph.facebook.com/' + comment.user.uid + '/picture"></div>';
+    comment_body = comment_body + '<div class="comment-listing">';
+    comment_body = comment_body + '<div class="comment-info clearfix">';
+    comment_body = comment_body + '<div class="user-title">' + username + '</div>';
+    if (posted == false)
+        comment_body = comment_body + '<div class="comment-time" title="' + stamp.stamp + '">Just Now</div>';
+    else
+        comment_body = comment_body + '<div class="comment-time" title="' + stamp.stamp + '">' + stamp.user_stamp + '</div>';
+    comment_body = comment_body + '</div>';
+    comment_body = comment_body + '<div class="comment-content">';
+    comment_body = comment_body + '<p>' + comment.comment + '</p>';
+    comment_body = comment_body + '</div></div></div>';
+
+    return comment_body;
+
+}
+
+function indexedLoadHTMLPlayer(poster, title, buy, index, fb_app_url, purchased) {
+    //alert(poster + ' ' + title + ' ' + buy + ' ' + index);
+    var isApple = (navigator.userAgent.indexOf('iPad') != -1 || navigator.userAgent.indexOf('iPhone') != -1);
+
+    //<span class="resize" id="fscreenCtrl" onclick="fscreen();"></span>
+    control_template_middle = '';
+
+    //var controlsTemplate = '<div class="play-bar-wrap"><div class="play-bar-wraper"><div %{scrubber}><div %{loaded}></div><div %{playhead}></div><div %{scrubberdrag}></div></div></div></div><div class="control-wraper clearfix"><ul class="play fl"><li><a href="#" onclick="return false;"><div %{play}></div><div %{pause}></div></a></li><li id="vBar' + index + '"><span class="ppmute" id="vmute' + index + '" onclick="vToggle(1, ' + index + ');"></span><span onclick="vToggle(2, ' + index + ');" style="display:none" id="vmax' + index + '" class="ppvmax"></span></li></ul><div class="left-section clearfix"><ul class="link icos fl">    </ul></div><div class="right-section clearfix"><ul class="link icos fl"><li><a href="#"></a></li><li><div %{timeleft} style="min-width:125px !important; width:125px !important;">%{hr_elp}:%{min_elp}:%{sec_elp} <span class="grey">/ %{hr_dur}:%{min_dur}:%{sec_dur}</span></div></li></ul><div class="player-logo"><a href="
+    var controlsTemplate = '<div class="play-bar-wrap"><div class="play-bar-wraper"><div %{scrubber}><div %{loaded}></div><div %{playhead}></div><div %{scrubberdrag}></div></div></div></div><div class="control-wraper clearfix"><ul class="play fl"><li><a href="#" onclick="return false;"><div %{play}></div><div %{pause}></div></a></li><li id="vBar' + index + '"><span class="ppmute" id="vmute' + index + '" onclick="vToggle(1, ' + index + ');"></span><span onclick="vToggle(2, ' + index + ');" style="display:none" id="vmax' + index + '" class="ppvmax"></span></li></ul><div class="left-section clearfix"><ul class="link icos fl">'
+    if (purchased == false) {
+        control_template_middle = '<li><span class="btnpreview" id="previewBtn' + index + '" onclick="btnPreview(' + index + ');">Preview</span></li><li><span class="btnabout" id="aboutBtn' + index + '" onclick="btnAbout(' + index + ');">About</span></li>';
+    }
+    control_template_postfix = '</ul></div><div class="right-section clearfix"><ul class="link icos fl"><li><a href="#"></a></li><li><div %{timeleft} style="min-width:125px !important; width:125px !important;">%{hr_elp}:%{min_elp}:%{sec_elp} <span class="grey">/ %{hr_dur}:%{min_dur}:%{sec_dur}</span></div></li></ul><div class="player-logo"><a href="<%= APP_CONFIG['APP_INFORMATION']['BASE_URI'] %>" title="LittleCast" target= "_blank"></a></div>';
+
+    controlsTemplate = controlsTemplate + control_template_middle + control_template_postfix;
+
+
+    if (buy == true)
+        if (purchased == false) {
+            controlsTemplate = controlsTemplate + '<div class="button" id="player-buy-button' + index + '"><a href="' + fb_app_url + '" target="_blank" onclick="return MakePayment();">Buy Now</a></div>';
+        }
+
+    controlsTemplate = controlsTemplate + '</div></div>';
+    var pl = '#vdo-player' + index;
+
+
+    projekktor(pl,
+            {
+                enableFullscreen: true,
+                enableKeyboard: true,
+                playerFlashMP4: "/assets/StrobeMediaPlayback.swf",
+                playerFlashMP3: "/assets/StrobeMediaPlayback.swf",
+                debug: false,
+                plugin_controlbar: {
+                    disableFade: true,
+                    showOnStart: true,
+                    showOnIdle: true,
+                    controlsTemplate: controlsTemplate
+                }
+            }
+    ).addListener('state', function (state) {
+                switch (state) {
+                    case 'AWAKENING':
+                    case 'PLAYING':
+                        if (previewed_call[index] == false) {
+                            var path = "/v2/videos/" + index + "/previewed.json?device=<%= Video::DEVICE[:FBTimeline] %>&uid=" + uid
+                            $.get(path);
+                            previewed_call[index] = true
+                        }
+                        $('#video-information-in' + index).hide('slow');
+                        $('#previewBtn' + index).hide();
+                        $('#aboutBtn' + index).hide();
+                        $('#vBar' + index).show();
+                        $('#hdsdswitch' + index).show();
+                        $('#fscreenCtrl' + index).show();
+                        $('#thumbContainer' + index).hide();
+
+                        break;
+                    case 'PAUSED':
+                        $('#previewBtn' + index).hide();
+                        $('#aboutBtn' + index).hide();
+                        $('#vBar' + index).show();
+                        $('#hdsdswitch' + index).show();
+                        $('#fscreenCtrl' + index).show();
+                        //$('#video-information-in'+index).show();
+                        //$("#about-video-in"+index).attr('style', "display:block");
+                        break;
+                    case 'STOPPED':
+                        $('#video-information-in' + index).show();
+                        //$("#about-video-in"+index).attr('style', "display:block");
+                        $('#previewBtn' + index).show();
+                        $('#aboutBtn' + index).show();
+                        $('#vBar' + index).hide();
+                        $('#hdsdswitch' + index).hide();
+                        $('#fscreenCtrl' + index).hide();
+                        if (!($('#thumbContainer' + index).is(":visible"))) {
+                            $('#thumbContainer' + index).show();
+                        }
+                        break;
+                    case 'COMPLETED':
+                        $('#video-information-in' + index).show();
+                        //$("#about-video-in"+index).attr('style', "display:block");
+                        $('#previewBtn' + index).show();
+                        $('#aboutBtn' + index).show();
+                        $('#vBar' + index).hide();
+                        $('#hdsdswitch' + index).hide();
+                        $('#fscreenCtrl' + index).hide();
+                        if (!($('#thumbContainer' + index).is(":visible"))) {
+                            $('#thumbContainer' + index).show();
+                        }
+                        break;
+                }
+
+            });
+
+    //$('#video-information-in'+index).click (function (){ projekktor(pl).setPlayPause(); });
+    if (isApple) {
+        //$('#html-player'+index).click(function(){projekktor(pl).setPlay();});
+    }
+    $('#previewBtn' + index).show();
+    $('#aboutBtn' + index).show();
+    $('#vBar' + index).hide();
+    $('#hdsdswitch' + index).hide();
+    $('#fscreenCtrl' + index).hide();
+
+}
+
+
+function addEventListeners(video_id) {
+    document.addEventListener("fullscreenchange", function () {
+        if ($('#fscreenCtrl' + video_id).hasClass('exresize')) {
+            if ($.browser.webkit) {
+                var disp_height = screen.height * 0.40;
+                $('#vdo-player' + video_id).attr('style', 'max-width: 100%; height: ' + disp_height + 'px;');
+            }
+            $('#fscreenCtrl' + video_id).removeClass('exresize');
+            $('#fscreenCtrl' + video_id).addClass('resize');
+        }
+        else {
+            $('#fscreenCtrl' + video_id).removeClass('resize');
+            $('#fscreenCtrl' + video_id).addClass('exresize');
+        }
+    }, false);
+
+    document.addEventListener("mozfullscreenchange", function () {
+        if ($('#fscreenCtrl' + video_id).hasClass('exresize')) {
+            $('#fscreenCtrl' + video_id).removeClass('exresize');
+            $('#fscreenCtrl' + video_id).addClass('resize');
+        }
+        else {
+            $('#fscreenCtrl' + video_id).removeClass('resize');
+            $('#fscreenCtrl' + video_id).addClass('exresize');
+        }
+    }, false);
+
+    document.addEventListener("webkitfullscreenchange", function () {
+
+        if ($('#fscreenCtrl' + video_id).hasClass('exresize')) {
+            if ($.browser.webkit) {
+                $('#vdo-player' + video_id).attr('style', 'max-width: 100%; height: 364px;');
+            }
+            $('#fscreenCtrl' + video_id).removeClass('exresize');
+            $('#fscreenCtrl' + video_id).addClass('resize');
+        }
+        else {
+            $('#fscreenCtrl' + video_id).removeClass('resize');
+            $('#fscreenCtrl' + video_id).addClass('exresize');
+        }
+    }, false);
+}
+function exitfs(video_id) {
+
+    if ($.browser.webkit) {
+        //var disp_height = screen.height * 0.40;
+        //$('#vdo-player').attr('style','max-width: 100%; height: '+disp_height+'px;');
+        $('#vdo-player' + video_id).attr('style', 'max-width: 100%; height: 364px;');
+        document.webkitCancelFullScreen();
+    }
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    }
+    else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    }
+    else if (document.webkitCancelFullScreen) {
+
+        document.webkitCancelFullScreen();
+    }
+    console.log("\nEXIT FS CALLED\n");
+
+}
+
+function fscreen(video_id) {
+    if ((window.fullScreen) || (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
+        exitfs();
+    }
+    else {
+
+
+        projekktor('#vdo-player' + video_id).setFullscreen(true);
+        if ($.browser.webkit) {
+            //goFullscreen('vdo-player_media');
+            var disp_height = screen.height;
+            console.log("DISP-HEIGHT:" + disp_height);
+            $('#video-player' + video_id).css('width', '100%');
+            $('#video-player' + video_id).css('height', '100%');
+            $('#vdo-player' + video_id).attr('style', 'max-width: 100%; height: ' + disp_height + 'px;');
+            goFullscreen('video-player' + video_id);
+        }
+        else {
+            goFullscreen('vdo-player' + video_id);
+        }
+    }
+
+}
+
+function goFullscreen(id) {
+    // Get the element that we want to take into fullscreen mode
+    var element = document.getElementById(id);
+    // These function will not exist in the browsers that don't support fullscreen mode yet,
+    // so we'll have to check to see if they're available before calling them.
+    if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+    }
+    else if (element.webkitRequestFullScreen) {
+        element.webkitRequestFullScreen();
+    }
+    else {
+        element.requestFullscreen();
+    }
+
+
+    // Hooray, now we're in fullscreen mode!
+}
+
+function vToggle(state, video_index) {
+    if (state == 1) {
+        $('#vmute' + video_index).hide();
+        $('#vmax' + video_index).show();
+    } else {
+        $('#vmute' + video_index).show();
+        $('#vmax' + video_index).hide();
+    }
+}
+
+
+function btnPreview(video_index) {
+    projekktor('#vdo-player' + video_index).setPlay();
+    $('#previewBtn' + video_index).hide();
+    $('#aboutBtn' + video_index).hide();
+    $('#video-information-in' + video_index).hide('slow');
+}
+function btnAbout(video_index) {
+    if ($("#about-video-in" + video_index).is(":visible")) {
+        $("#about-video-in" + video_index).attr('style', "display:none");
+    }
+    else {
+        $("#about-video-in" + video_index).attr('style', "display:block; padding: 10px 10px 0 10px;");
+    }
+}
+function LikeVideo(video_id) {
+    FB.getLoginStatus(function (response) {
+        if (response.status === 'connected') {
+            LikeVideo_post(video_id);
+        }
+        else if (response.status === 'not_authorized') {
+            FB.login(function (response) {
+                if (response.authResponse) {
+                    console.log('Welcome!  Fetching your information.... ');
+                    FB.api('/me', function (response) {
+                        console.log('Good to see you, ' + response.name + '.');
+                        function_to_be_called = "LikeVideo_post("+video_id+")";
+                        perform_signup(function_to_be_called);
+//                        perform_signup();
+//                        LikeVideo_post(video_id);
+                    });
+                } else {
+                    console.log('User cancelled login or did not fully authorize.');
+                }
+            });
+        }
+    });
+}
+
+function LikeVideo_post(video_id) {
+    var liked = "like";
+    var SERVICE;
+
+    var value = $("#video-like" + video_id).attr('class');
+    var oldValue = value;
+
+    if (value == "like") {
+        liked = "unlike";
+        SERVICE = SERVER_URL + VIDEOS + video_id + "/" + LIKE;
+    } else {
+        liked = "like";
+        SERVICE = SERVER_URL + VIDEOS + video_id + "/" + UNLIKE;
+    }
+
+    $("#video-like").attr('class', value);
+    DataCall("device=FBApp", SERVICE, "POST", true,
+
+            function (data) {
+                if (value == "unlike") {
+                    $("#video-like" + video_id).attr('class', 'like');
+                    //VideoLikes();
+                    $("#video-like" + video_id).html('Like ');
+                    var count = $('#likes-count' + video_id).html();
+                    var newCount = (parseInt(count, 10)) - 1;
+                    $('#likes-count' + video_id).html(newCount);
+                }
+                else {
+                    $("#video-like" + video_id).attr('class', 'unlike');
+                    //VideoLikes();
+                    $("#video-like" + video_id).html('Unlike ');
+                    var count = $('#likes-count' + video_id).html();
+                    var newCount = (parseInt(count, 10)) + 1;
+                    $('#likes-count' + video_id).html(newCount);
+                }
+            },
+
+            function (data) {
+                $("#video-like" + video_id).attr('class', oldValue);
+            });
+
+
+    return false;
+}
+// How To Video
+
+function indexedLoadHTMLPlayerHowTo(poster, title, buy, index, fb_app_url, how_to_video) {
+    //alert(poster + ' ' + title + ' ' + buy + ' ' + index);
+    var isApple = (navigator.userAgent.indexOf('iPad') != -1 || navigator.userAgent.indexOf('iPhone') != -1);
+
+    //<span class="resize" id="fscreenCtrl" onclick="fscreen();"></span>
+    controlsTemplate_end_block = '';
+    if (how_to_video == "facebook-root") {
+        controlsTemplate_end_block = '<a href="<%= APP_CONFIG['APP_INFORMATION']['BASE_URI'] %>" title="LittleCast" target= "_blank"></a>'
+    }
+    else {
+        controlsTemplate_end_block = '<a href="javascript:;" title="LittleCast" ></a>'
+    }
+
+    if (how_to_video == "web-root") {
+        var controlsTemplate = '<div class="play-bar-wrap"><div class="play-bar-wraper"><div %{scrubber}><div %{loaded}></div><div %{playhead}></div><div %{scrubberdrag}></div></div></div></div><div class="control-wraper clearfix"><ul class="play fl"><li><a href="#" onclick="return false;"><div %{play} onclick="playURLPlay(' + index + ');"></div><div %{pause}></div></a></li><li id="vBar' + index + '"><span class="ppmute" id="vmute" onclick="vTogglehowto(1);"></span><span onclick="vTogglehowto(2);" style="display:none" id="vmax" class="ppvmax"></span></li></ul><div class="left-section clearfix"><ul class="link icos fl"></ul></div><div class="right-section clearfix"><ul class="link icos fl"><li><a href="#"></a></li><li><div %{timeleft} style="min-width:125px !important; width:125px !important;">%{hr_elp}:%{min_elp}:%{sec_elp} <span class="grey">/ %{hr_dur}:%{min_dur}:%{sec_dur}</span></div></li id="fscreenCtrl" ><li><div %{fsexit}></div><div %{fsenter}></div></li></ul></span><div class="player-logo">';
+        controlsTemplate = controlsTemplate + controlsTemplate_end_block + '</div>';
+    }
+    else {
+        var controlsTemplate = '<div class="play-bar-wrap"><div class="play-bar-wraper"><div %{scrubber}><div %{loaded}></div><div %{playhead}></div><div %{scrubberdrag}></div></div></div></div><div class="control-wraper clearfix"><ul class="play fl"><li><a href="#" onclick="return false;"><div %{play} onclick="playURLPlay(' + index + ');"></div><div %{pause}></div></a></li><li id="vBar' + index + '"><span class="ppmute" id="vmute" onclick="vTogglehowto(1);"></span><span onclick="vTogglehowto(2);" style="display:none" id="vmax" class="ppvmax"></span></li></ul><div class="left-section clearfix"><ul class="link icos fl"></ul></div><div class="right-section clearfix"><ul class="link icos fl"><li><a href="#"></a></li><li><div %{timeleft} style="min-width:125px !important; width:125px !important;">%{hr_elp}:%{min_elp}:%{sec_elp} <span class="grey">/ %{hr_dur}:%{min_dur}:%{sec_dur}</span></div></li></ul><span class="resize" id="fscreenCtrl" onclick="fscreenhowto();"></span><div class="player-logo">';
+        controlsTemplate = controlsTemplate + controlsTemplate_end_block + '</div>';
+    }
+
+//        if (buy == true)
+//            controlsTemplate = controlsTemplate + '<div class="button" id="player-buy-button'+index+'"><a href="' + fb_app_url + '" target="_blank" onclick="return MakePayment();">Buy Now</a></div>';
+
+    controlsTemplate = controlsTemplate + '</div></div>';
+    var pl = '#vdo-player' + index;
+    if (how_to_video == "web-root") {
+        projekktor(pl,
+                {
+                    enableFullscreen: true,
+                    enableKeyboard: false,
+                    playerFlashMP4: "/assets/StrobeMediaPlayback.swf",
+                    playerFlashMP3: "/assets/StrobeMediaPlayback.swf",
+                    debug: false,
+
+                    iframe: true,
+                    videoScaling: "fill",
+                    imageScaling: "fill",
+
+                    plugin_controlbar: {
+                        disableFade: true,
+                        showOnStart: true,
+                        showOnIdle: true,
+                        controlsTemplate: controlsTemplate
+                    }
+                }
+        ).addListener('state', function (state) {
+                    switch (state) {
+                        //case 'AWAKENING':
+                        case 'PLAYING':
+                            if (previewed_call[index] == false) {
+                                var path = "/videos/" + index + "/previewed.json?device=<%= Video::DEVICE[:FBTimeline] %>"
+                                $.get(path);
+                                previewed_call[index] = true
+                            }
+                            $('#video-information-in'+index).hide('slow');
+                            $('#previewBtn').hide();
+
+                            $('#vBar').show();
+
+                            $('#fscreenCtrl').show();
+                            $('#thumbContainer' + index).hide();
+                            playstate = true
+
+                            break;
+                        case 'PAUSED':
+                            $('#previewBtn').hide();
+                            $('#vBar').show();
+                            $('#fscreenCtrl').show();
+                            //$('#video-information-in'+index).show();
+                            //$("#about-video-in"+index).attr('style', "display:block");
+                            break;
+                        case 'STOPPED':
+                            $('#video-information-in1').show();
+                            //$("#about-video-in"+index).attr('style', "display:block");
+                            $('#previewBtn').show();
+                            $('#vBar').hide();
+                            $('#fscreenCtrl').hide();
+                            playstate = false
+                            if (!($('#thumbContainer' + index).is(":visible"))) {
+                                $('#thumbContainer' + index).show();
+                            }
+                            //playURL();
+                            break;
+                        case 'COMPLETED':
+                             $('#video-information-in'+index).show();
+                            //$("#about-video-in"+index).attr('style', "display:block");
+                            $('#previewBtn').show();
+                            $('#vBar').hide();
+                            $('#fscreenCtrl').hide();
+                            playstate = false
+                            if (!($('#thumbContainer' + index).is(":visible"))) {
+                                $('#thumbContainer' + index).show();
+                            }
+                            playURL();
+                            break;
+                    }
+
+                });
+    }
+    else {
+        projekktor(pl,
+                {
+                    enableFullscreen: true,
+                    enableKeyboard: false,
+                    playerFlashMP4: "/assets/StrobeMediaPlayback.swf",
+                    playerFlashMP3: "/assets/StrobeMediaPlayback.swf",
+                    debug: false,
+                    plugin_controlbar: {
+                        disableFade: true,
+                        showOnStart: true,
+                        showOnIdle: true,
+                        controlsTemplate: controlsTemplate
+                    }
+                }
+        ).addListener('state', function (state) {
+                    switch (state) {
+                        //case 'AWAKENING':
+                        case 'PLAYING':
+                            //console.log('--------    PLAYING    -------');
+                            if (previewed_call[index] == false) {
+                                var path = "/videos/" + index + "/previewed.json?device=<%= Video::DEVICE[:FBTimeline] %>"
+                                $.get(path);
+                                previewed_call[index] = true
+                            }
+                            $('#video-information-in1').hide('slow');
+                            $('#previewBtn').hide();
+
+                            $('#vBar').show();
+
+                            $('#fscreenCtrl').show();
+                            $('#thumbContainer' + index).hide();
+                            playstate = true
+
+                            break;
+                        case 'PAUSED':
+                            $('#previewBtn').hide();
+                            $('#vBar').show();
+                            $('#fscreenCtrl').show();
+                            //$('#video-information-in'+index).show();
+                            //$("#about-video-in"+index).attr('style', "display:block");
+                            break;
+                        case 'STOPPED':
+                            $('#video-information-in1').show();
+                            //$("#about-video-in"+index).attr('style', "display:block");
+                            $('#previewBtn').show();
+                            $('#vBar').hide();
+                            $('#fscreenCtrl').hide();
+                            playstate = false
+                            if (!($('#thumbContainer' + index).is(":visible"))) {
+                                $('#thumbContainer' + index).show();
+                            }
+                            //playURL();
+                            break;
+                        case 'COMPLETED':
+                            $('#video-information-in'+index).show();
+                            //$("#about-video-in"+index).attr('style', "display:block");
+                            //$('#previewBtn').show();
+                            $('#vBar').hide();
+                            $('#fscreenCtrl').hide();
+                            playstate = false
+                            if (!($('#thumbContainer' + index).is(":visible"))) {
+                                $('#thumbContainer' + index).show();
+                            }
+                            playURL(index);
+                            break;
+                    }
+
+                });
+    }
+    $('#previewBtn').show();
+    $('#vBar').hide();
+    $('#fscreenCtrl').hide();
+}
+
+function addEventListenersHowTo() {
+
+    document.addEventListener("fullscreenchange", function () {
+
+        if ($('#fscreenCtrl').hasClass('exresize')) {
+
+            $('#fscrTip').html('View Full Screen');
+            $('#fscreenCtrl').removeClass('exresize');
+            $('#fscreenCtrl').addClass('resize');
+        } else {
+
+            $('#fscrTip').html('Exit Full Screen');
+            $('#fscreenCtrl').removeClass('resize');
+            $('#fscreenCtrl').addClass('exresize');
+        }
+    }, false);
+
+    document.addEventListener("mozfullscreenchange", function () {
+        if ($('#fscreenCtrl').hasClass('exresize')) {
+            $('#fscrTip').html('View Full Screen');
+            $('#fscreenCtrl').removeClass('exresize');
+            $('#fscreenCtrl').addClass('resize');
+        } else {
+            $('#fscrTip').html('Exit Full Screen');
+            $('#fscreenCtrl').removeClass('resize');
+            $('#fscreenCtrl').addClass('exresize');
+        }
+    }, false);
+    //HERE IE
+    document.addEventListener("msfullscreenchange", function () {
+        if (DEBUG)
+            console.log("IE FULL SCREEN");
+
+        if ($('#fscreenCtrl').hasClass('exresize')) {
+            $('#fscrTip').html('View Full Screen');
+            $('#fscreenCtrl').removeClass('exresize');
+            $('#fscreenCtrl').addClass('resize');
+        } else {
+            $('#fscrTip').html('Exit Full Screen');
+            $('#fscreenCtrl').removeClass('resize');
+            $('#fscreenCtrl').addClass('exresize');
+        }
+    }, false);
+
+    document.addEventListener("webkitfullscreenchange", function () {
+        if (navigator.appVersion.indexOf("Mac") != -1 && navigator.userAgent.toLowerCase().indexOf("safari") != -1) {
+            if (mac_safari_count > 2) {
+                if ((window.fullScreen) || (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
+                    console.log("1a");
+                    var w = screen.width;
+                    var h = screen.height;
+                    var r = gcd(w, h);
+                    var aspectRatio = ((w / r) / (h / r));
+                    var disp_height = 0;
+                    if (aspectRatio <= 1.33)
+                        disp_height = screen.height * 0.40;
+                    else
+                        disp_height = screen.height * 0.50;
+
+                    $('#vdo-player_media').attr('style', 'overflow: hidden; height:' + disp_height + 'px; width: 100%; top: 0px; left: 0px; padding: 0px; margin: 0px; display: block;');
+                    $('#video-player').attr('height', disp_height + 'px;');
+                    $('#vdo-player').attr('style', 'max-width: 100%; height: ' + disp_height + 'px;');
+                    $('#fscrTip').html('View Full Screen');
+                    $('#fscreenCtrl').removeClass('exresize');
+                    $('#fscreenCtrl').addClass('resize');
+                    mac_safari_count = 0;
+                    //NEW CHANGE
+                    document.webkitExitFullscreen();
+                }
+                else {
+                    mac_safari_count = mac_safari_count + 1;
+                    $('#fscrTip').html('Exit Full Screen');
+                    $('#fscreenCtrl').removeClass('resize');
+                    $('#fscreenCtrl').addClass('exresize');
+                }
+                return;
+            }
+            return;
+        }
+        else {
+            if ($('#fscreenCtrl').hasClass('exresize')) {
+                var w = screen.width;
+                var h = screen.height;
+                var r = gcd(w, h);
+                var aspectRatio = ((w / r) / (h / r));
+                var disp_height = 0;
+                if (aspectRatio <= 1.33)
+                    disp_height = screen.height * 0.40;
+                else
+                    disp_height = screen.height * 0.50;
+
+                $('#vdo-player').attr('style', 'max-width: 100%; height: ' + disp_height + 'px !important;');
+                $('#fscrTip').html('View Full Screen');
+                $('#fscreenCtrl').removeClass('exresize');
+                $('#fscreenCtrl').addClass('resize');
+                return;
+            }
+
+            var cr_height = screen.height;
+            $('#vdo-player').attr('style', 'max-width: 100%; height:' + cr_height + 'px !important;');
+            $('#fscrTip').html('Exit Full Screen');
+            $('#fscreenCtrl').removeClass('resize');
+            $('#fscreenCtrl').addClass('exresize');
+        }
+    }, false);
+}
+
+function exitfshowto() {
+
+    if (isChrome || isSafari) {
+
+        var w = screen.width;
+        var h = screen.height;
+        var r = gcd(w, h);
+        var aspectRatio = ((w / r) / (h / r));
+        var disp_height = 0;
+        if (aspectRatio <= 1.33)
+            disp_height = screen.height * 0.40;
+        else
+            disp_height = screen.height * 0.50;
+        $('#vdo-player').attr('style', 'max-width: 100%; height: ' + disp_height + 'px;');
+        if (navigator.appVersion.indexOf("Mac") != -1 && navigator.userAgent.toLowerCase().indexOf("safari") != -1) {
+            $('#fscrTip').html('View Full Screen');
+            $('#fscreenCtrl').removeClass('exresize');
+            $('#fscreenCtrl').addClass('resize');
+            mac_safari_count = 0;
+        }
+
+        document.webkitCancelFullScreen();
+    }
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    } else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
+    }
+    if (DEBUG)
+        console.log("\nEXIT FS CALLED\n");
+
+}
+
+function fscreenhowto() {
+
+    if ((window.fullScreen) || (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
+        exitfshowto();
+    } else {
+
+        projekktor('#vdo-player').setFullscreen(true);
+        $('#fscrTip').html('Exit Full Screen');
+
+        if (isChrome || isSafari) {
+            var disp_height = screen.height;
+
+            if (navigator.appVersion.indexOf("Mac") != -1 && navigator.userAgent.toLowerCase().indexOf("safari") != -1) {
+                goFullscreenhowto('vdo-player_media');
+                $('#fscrTip').html('View Full Screen');
+                $('#fscreenCtrl').removeClass('exresize');
+                $('#fscreenCtrl').addClass('resize');
+                return;
+            }
+
+            /*$('#video-player').css('width', '100%');
+             $('#video-player').css('height', screen.height + 'px;');
+             $('#video-player').attr('height', screen.height + 'px;');
+             $('#vdo-player_media').attr('style', 'max-width: 100%; height:' + screen.height + 'px;');*/
+            //goFullscreenhowto('video-player');
+            //WORKING WITHOUT CONTROL BAR
+            $('#vdo-player').attr('style', 'max-width: 100%; height:' + screen.height + 'px;');
+            goFullscreenhowto('vdo-player_media');
+        } else {
+            goFullscreenhowto('vdo-player');
+        }
+    }
+
+}
+
+function goFullscreenhowto(id) {
+    //alert("ELEMENT: "+id);
+    // Get the element that we want to take into fullscreen mode
+    var element = document.getElementById(id);
+    //alert("ELEMENT FOUND: "+element);
+    // These function will not exist in the browsers that don't support fullscreen mode yet,
+    // so we'll have to check to see if they're available before calling them.
+    if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+    }
+    else if (element.webkitRequestFullScreen) {
+        element.webkitRequestFullScreen();
+    }
+    else {
+        element.requestFullscreen();
+    }
+    // Hooray, now we're in fullscreen mode!
+}
+
+function vTogglehowto(state) {
+    if (state == 1) {
+        $('#vmute').hide();
+        $('#vmax').show();
+    } else {
+        $('#vmute').show();
+        $('#vmax').hide();
+    }
+}
+
+
+function btnPreviewhowto() {
+
+    var videoToPlay = {
+        0: {
+            src: 'https://d2zxgjueudeki7.cloudfront.net/how_to_videos/LC001_Preview_05_640x360-H264.mp4',
+            type: 'video/mp4'
+        }
+    };
+    projekktor('#vdo-player').setItem(videoToPlay, 0, true);
+    projekktor('#vdo-player').setPlay();
+    $('#previewBtn').hide();
+    $('#aboutBtn').hide();
+    $('#video-information-in1').hide('slow');
+}
+
+
+function gcd(a, b) {
+    return (b == 0) ? a : gcd(b, a % b);
+}
+
+
+
+function playURL(index) {
+    if(typeof(index) == 'undefined')
+      index = 1;
+    var videoToPlay = {
+        0: {
+            src: 'https://d2zxgjueudeki7.cloudfront.net/how_to_videos/LC001_Preview_05_640x360-H264.mp4',
+            type: 'video/mp4'
+        }
+    };
+    projekktor('#vdo-player'+index).setItem(videoToPlay, 0, true);
+    projekktor('#vdo-player'+index).setStop();
+    $('#previewBtn').show();
+    $('#aboutBtn').show();
+    $('#video-information-in'+index).show();
+    $('#vBar'+index).hide();
+    $('#fscreenCtrl'+index).hide();
+//  $('#vdo-player_media').css("cursor", "pointer" );
+}
+function playURLPlay(index) {
+    try
+    {
+      if (playstate == true) {
+      }
+      else {
+          var videoToPlay = {
+              0: {
+                  src: 'https://d2zxgjueudeki7.cloudfront.net/how_to_videos/LC001_Preview_05_640x360-H264.mp4',
+                  type: 'video/mp4'
+              }
+          };
+          //projekktor('#vdo-player1').setItem(videoToPlay, 0, true);
+          projekktor('#vdo-player'+index).setPlay();
+          $('#video-information-in'+index).hide();
+      }
+    }
+    catch(ex)
+    {
+     alert(ex.to_s);
+    }
+}
+
+function setHeight() {
+    var w = screen.width;
+    var h = screen.height;
+    var r = gcd(w, h);
+    var aspectRatio = ((w / r) / (h / r));
+    var disp_height = 0;
+    if (aspectRatio <= 1.33)
+        disp_height = screen.height * 0.40;
+    else
+        disp_height = screen.height * 0.50;
+    $('.projekktor').height(disp_height);
+}
+function playFromThumb(index) {
+    if ($('#thumbContainer' + index).is(":visible")) {
+        $('#thumbContainer' + index).hide();
+        projekktor('#vdo-player' + index).setPlay();
+    }
+}
+
+function loadThumb(index, src) {
+  if(typeof(show_play_button) != 'undefined')
+  {
+    $('#thumbContainer' + index).html('<center style="height: 100%; overflow: hidden;"><img height="100%" alt="" src="' + src + '"></center><button id="thumbCtrPlay" class="play-button" style=""></button>');
+  }
+  else
+  {
+    $('#thumbContainer' + index).html('<center style="height: 100%; overflow: hidden;"><img height="100%" alt="" src="' + src + '"></center>');
+  }
+
+}

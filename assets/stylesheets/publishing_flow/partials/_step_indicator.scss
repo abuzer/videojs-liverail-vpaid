@@ -1,0 +1,213 @@
+@import "../variables";
+
+#publish-steps{
+	.arrow_box {
+		position: relative;
+		background: #f8f8f8;
+		border: 1px solid #a0a0a0;
+	}
+	.arrow_box:after, .arrow_box:before {
+		left: 100%;
+		border: solid transparent;
+		content: " ";
+		height: 0;
+		width: 0;
+		position: absolute;
+		pointer-events: none;
+	}
+
+	.arrow_box:after {
+		border-color: rgba(248, 248, 248, 0);
+		border-left-color: #f8f8f8;
+		border-width: 20px;
+		top: 50%;
+		margin-top: -20px;
+	}
+	.arrow_box:before {
+		border-color: rgba(160, 160, 160, 0);
+		border-left-color: #a0a0a0;
+		border-width: 22px;
+		top: 50%;
+		margin-top: -22px;
+	}
+
+	.arrow_box:last-child {
+			border-radius: 0 4px 4px 0;
+			&:after, &:before {
+				border-width: 0;
+			}
+		}
+
+	li.current {
+		color: #fff;
+		background: $red;
+		font-weight:bold;
+
+		// Appended arrow.
+		&:after {
+		  border-left-color: $red;
+		}
+				
+		span {
+			// Prepended arrow.
+			&:after {
+				border-color: $red;
+				border-left-color: transparent;
+			}
+		}
+
+		&:before {
+			position: absolute;
+			top: 50%;
+			border-width: 19px;
+			margin-top: -19px;
+			border-color: rgba(194, 225, 245, 0);
+			border-left-color: #c2e1f5;
+		}
+	}
+	.numbers {
+		border-radius: 50%;
+		height: 20px;
+		width: 20px;
+		margin-right: 5px;
+		background: white;
+		border:$grayborder 1px solid;
+		color: #666;
+		font-size: 1em;
+		display: inline-block;
+		text-align:center;
+		margin-left:-9px;
+		&:first-child {
+			 margin-left:0;
+		}
+	}
+	.current .numbers {
+		color: $red;
+		border:$grayborder 1px solid;
+	}
+}
+
+ol.steps {
+	$line_height: 20px;
+	$padding: 10px;
+	$arrow_size: ($line_height + 2 * $padding)/2;
+	$max_li: 10;
+	
+	// Color
+	$red: #c40707;
+	$gray: #c7c7c7;
+	$white:#fefefe;
+	$border: rgba(7,7,7,.25);
+	
+	$graybackground: #e5e5e5;
+	$grayborder: #a0a0a0;
+	$grayinput: #f8f8f8;
+	$grayinputborder:#c1c1c1;
+	$grayside: #f4f4f4;
+	$graysteptext:#666666;
+	$labelcolor:#444444;
+
+
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	font-size: 13px;
+	line-height: $line_height;
+	counter-reset: li;
+	
+
+	li {
+		list-style-image: none;
+		list-style-type: none;
+		color: $graysteptext;
+		// background: $grayinput;
+		position: relative;
+		margin-left: 5px + 2 * $arrow_size;
+		margin-left: 50px;
+		width:200px;
+		margin-bottom:15px;
+		font-weight:normal;
+		font-size:1em;
+		// border: solid $grayinputborder 1px;
+		text-transform:uppercase;
+		height:40px;
+		letter-spacing:1px;
+	
+		// No prepended arrow on first item.
+		&:first-child {
+			margin-left: 0;
+			border-radius: 4px 0 0 4px;
+			span {
+				padding: $padding;
+				&:after {
+					border: none;
+				}
+			}
+		}
+
+		// No appended arrow on last item.
+		&:last-child {
+			border-radius: 0 4px 4px 0;
+			&:after {
+				border-width: 0;
+			}
+		}
+
+		span {
+			display: block;
+			padding: $padding ($padding + $arrow_size) $padding $padding;
+
+			// Prepended arrow inset.
+			&:after, &:before {
+				position: absolute;
+				top: 50%;
+				right: 100%;
+				content: " ";
+				height: 0;
+				width: 0;
+				pointer-events: none;
+				border: solid $grayinput 1px;
+				border-left-color: transparent;
+				border-width: $arrow_size;
+				margin-top: -$arrow_size;
+			}
+			// Prepend arrow border
+			&::before {
+				border-color: #a0a0a0;
+				border-left-color: rgba(160, 160, 160, 0);
+				border-width: 21px;
+				top: 50%;
+				margin-top: -21px;
+			}
+
+			&:after {
+				border-color: #f8f8f8;
+				border-left-color: rgba(248, 248, 248, 0);
+				border-width: 20px;
+				top: 50%;
+				margin-top: -20px;
+			}
+				
+			// "X)" numbering
+			&:before {
+				content: counter(li) ") ";
+				counter-increment: li;
+			}
+		}
+	}
+
+	& > li {
+		float: left;
+	}
+
+
+	// For the overlapping to work, later LIs must have a lower z-index.
+	@for $i from 1 through $max_li {
+		li.step#{$i} {
+			z-index: $max_li - $i;
+		}
+	}
+
+
+}

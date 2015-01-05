@@ -1,0 +1,647 @@
+/*// Place all the styles related to the Profile controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+*/
+#vdo-player_media_image {
+left: 0 !important;
+}
+.videoWrapper #vdo-player img {
+    width: 100% !important;
+}
+.video_detail_page_pp{
+  width:51px;
+  height:51px;
+}
+a:hover{
+    text-decoration: none;
+}
+#profile_name_status{
+    float: left;
+margin-left: 10px;
+margin-top: 5px;
+}
+#user_profile_name{float:left;}
+.del-btn{margin-top: 10px;
+margin-left: 10px;
+position:absolute;}
+
+.projekktor{
+    width:100%;
+}
+#pic_upload_form{
+  position: absolute;
+  top: 150px;
+  display: none;
+}
+
+#background_pic_upload_form{
+  position: absolute;
+  top: 10px;
+  display: none;
+  right:5px;
+}
+header #account-menu{
+    top: 0px;
+    z-index: 999999;
+}
+body {
+    overflow: hidden;
+    overflow: visible\9;
+    *overflow: visible;;
+    _overflow: visible;;
+    background: none;
+    background-color: #e5e5e5;
+}
+@font-face {
+    font-family: 'helvetica_neueregular';
+    src: url('../../fonts/helveticaneue-webfont.eot');
+    src: url('../../fonts/helveticaneue-webfont.eot?#iefix') format('embedded-opentype'), url('../../fonts/helveticaneue-webfont.woff') format('woff'), url('../../fonts/helveticaneue-webfont.ttf') format('truetype'), url('../../fonts/helveticaneue-webfont.svg#helvetica_neueregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'helvetica_neue-medium';
+    src: url('../../fonts/helveticaneue-medium-webfont.eot');
+    src: url('../../fonts/helveticaneue-medium-webfont.eot?#iefix') format('embedded-opentype'), url('../../fonts/helveticaneue-medium-webfont.woff') format('woff'), url('../../fonts/helveticaneue-medium-webfont.ttf') format('truetype'), url('../../fonts/helveticaneue-medium-webfont.svg#helvetica_neueregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'helvetica_neue-bold';
+    src: url('../../fonts/helveticaneue-bold-webfont.eot');
+    src: url('../../fonts/helveticaneue-bold-webfont.eot?#iefix') format('embedded-opentype'), url('../../fonts/helveticaneue-bold-webfont.woff') format('woff'), url('../../fonts/helveticaneue-bold-webfont.ttf') format('truetype'), url('../../fonts/helveticaneue-bold-webfont.svg#helvetica_neueregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+.container { width: 91%; }
+
+#player-buy-button a, #player-buy-button a:hover{ color:#fff;}
+
+ul, ol { list-style-type:none; margin:0; padding:0;}
+.extra { margin:0; padding:0;}
+
+
+.extra { margin:0; padding:0;}
+.fltL { float:left !important;}
+.fltR { float:right !important;}
+.mt20 { margin-top:20px;}
+.pb90 { padding-bottom:90px;}
+.preview-header-text{
+    line-height: 30px;
+    font-size: 88%;
+    padding-right: 8px;
+}
+#iAgree{
+    margin-top: -1px;
+}
+label {
+    margin-bottom: 0px;
+}
+#video-player label {
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+input[type="radio"], input[type="checkbox"] {
+    margin: 0px;
+}
+
+.textarea-info{
+    width: 100%;
+}
+.right-col {background: #fff; border:solid 1px #bababa; border-radius: 5px; margin-top:22px;}
+
+.title-video{ display:block; padding:0 20px 20px 20px; }
+.title-video h1{ display:block; padding:0; font-size:21px; font-weight:bold; color:#000000; line-height:30px; margin:0;}
+/*.title-video h2{ display:block; padding:0; font-size:17px; font-weight:normal; color:#000000; line-height:0px; margin-bottom:17px;}*/
+.user-strip-pad{padding-bottom: 37px;}
+.user-strip h4{ display:block; font-size:21px; color:#000000; font-weight:normal; margin:5px 0;}
+.user-strip h5{ display:block; font-size:14px; color:#993333; font-weight:bold; margin:0px;}
+.user-strip h5 span{ color:#999999;}
+.pop-full a, .user-strip h5 a{ color:#a60404;}
+.user-strip h5 a:hover{ color:#a60404;}
+.user-strip p{ display:block; font-weight:bold; font-size:14px;}
+.user-strip .stand-up{ display:block; background:url(../../img/ico-features.png) left 3px no-repeat; color:#999999; font-weight:bold; padding-left:23px; margin-top:15px; font-size:14px;}
+
+.hold-pic{ display: block; background-size: cover; background-repeat: no-repeat; background-position: center center; -webkit-border-radius: 25px; -moz-border-radius: 25px; border-radius: 5px; border: 1px solid #b6b6b6; margin:0 auto;
+}
+
+.CategoryVideo { display: block; clear:both; margin:33px 0 !important;}
+.CategoryVideo .media-heading{ display: block; font-size: 19px; color:#000; font-weight: bold;}
+.CategoryVideo p{ display: block; font-size: 15px; color:#000; font-weight: normal; margin:0; padding:0; line-height: 25px;}
+.CategoryVideo .media-body{ float:left;}
+.CategoryVideo label { font-size:15px; color:#c60000; float:right;}
+
+
+.like-video { display:block; margin:0 10px; padding-top:10px; overflow:hidden; width: 100%}
+.like-video h2{ float:left; font-weight:bold; font-size:19px; float:left; line-height:20px; color:black; margin:0px;}
+.like-video .liking{ float:left; background:url(../../img/ico-like.png) no-repeat; text-decoration:none; color:#c10707; font-size:15px; margin-left:26px; padding-left:20px; cursor: pointer;}
+.like-video .liking:hover{ color:#cd3838;}
+.like-video .un-liking{ float:left; background:url(../../img/ico-unlike.png) no-repeat; text-decoration:none; color:#c10707; font-size:15px; margin-left:27px; padding-left:20px;}
+.like-video .un-liking:hover{ text-decoration:underline; color:#cd3838;}
+
+.like-video .liking-btn{ float:left; border-radius:4px; font-size:14px; color:#fff; padding:4px 15px; margin-left:8px; text-decoration:none; margin-top:-3px; background:#a80b0b;}
+.like-video .liking-btn:hover{ background:#c10707;}
+
+#video-like{float:left; border-radius:4px; font-size:14px; color:#fff; padding:4px; margin-left:8px; text-decoration:none; margin-top:-3px; background:#a80b0b; width: 95px;text-align: center; background:#c10707;cursor: pointer;}
+
+.leave-comments { display:block; margin:0 10px; padding:19px 0 0 0;}
+.leave-comments input{ display:block; min-height:41px; margin-top:5px; color:#696969; background:#fbfbfb; border: 1px solid #D0D2D3 !important; width:100%;}
+.leave-comments textarea{ display:block; min-height:50px;max-height:50px; color:#696969; background:#fbfbfb;width:100%;resize: none;}
+
+
+.share-video { float:left; margin-left:10px; width: 300px; height: 25px;}
+.share-video ul{ display:block; overflow:hidden;}
+.share-video ul li{ display:inline; margin-left: 5px; float:left;}
+
+.view-comments { display:block; margin:0 10px; padding-top:18px;}
+.view-comments h4{ display:block; font-size:15px; color:#cc3333; font-weight:bold; line-height:20px; margin:0; padding:0;}
+.view-comments h4 span{ color:#999999; font-weight:normal; font-size:14px; margin:0 17px 0 0;}
+.view-comments p{ display:block; margin:0;}
+
+.Add-btn{ float:left; border-radius:3px; background:#a80b0b; font-size:13px; color:#fff; padding:9px 2px; text-decoration:none; text-align:center; width:125px; margin-right:11px; margin-top:6px;}
+.Add-btn:hover{ background:#c10707; color:#fff !important; text-decoration:none !important;}
+
+span.btnpreview, span.btnabout { margin-top: 6px !important;}
+
+.pure-u-1-5 {
+    width: 20%;
+}
+.nav>li>a:hover {
+  background: rgba(255, 255, 255, 0.11);
+}
+.comment-area textarea {
+    width: 100%;
+}
+
+#paymentScreen a {
+    margin-top: 24%;
+}
+.title-video {
+    min-height: 439px;
+}
+.purchase .watchOn{
+    width: 40%;
+}
+.purchase h6 {
+    width: 25%;
+}
+#comment-error{
+    width: 100%;
+    text-align: left;
+    float: right;
+    font-size: 13px;
+}
+.app-screen-btn{
+    background: none repeat scroll 0 0 #c40707;
+    border: medium none;
+    color: #FFFFFF;
+    float: left;
+    font-weight: bold;
+    margin: 5px 0;
+    padding: 6px 15px;
+    text-shadow: none;
+}
+.btn:hover {
+background: #970303;
+color: #FFF;
+text-shadow: none;
+}
+
+p.butonP a {
+    line-height: 44px;
+    margin-right: 10px;
+}
+/*.ppplayhead{
+    background-image: url('/fb_app/images/knob.png');
+    background-position: 100% center;
+    background-repeat: no-repeat;
+}
+*/
+#toggle-share{
+    float: left;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #666666;
+    padding: 4px;
+    margin-left: 8px;
+    text-decoration: none;
+    margin-top: -3px;
+    background: #e5e5e5;
+    width: 50px;
+    text-align: center;
+    cursor: pointer;
+}
+#toggle-desc{
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: block;
+    float: right;
+    margin-right: 4px;
+    background: url('/assets/fb_app/arrow-sprite.png');
+    background-repeat: no-repeat;
+}
+/*.desc-show{
+    background-position: 0px 0px !important;
+}
+.desc-hide{
+    background-position: 0px -20px !important;
+}*/
+header{
+    background: transparent;
+    min-height: 35px;
+}
+.nav-left{
+    float: left;
+}
+.nav-left #account-menu ul{
+    position: absolute;
+    background: #C40707;
+    width: 140px;
+}
+.nav-left .arrow{
+    cursor: pointer;
+    padding-left: 2px;
+    padding-top: 3px;
+}
+.nav-left #logo{
+    cursor: pointer;
+    padding:  6px 6px 6px 10px;
+}
+.nav-right{
+    float: right;
+}
+.nav-right{
+    padding: 10px;
+}
+.nav-right a{
+    color: #666666;
+}
+header #account-menu {
+    margin: 0 10px;
+}
+
+.load-likes{
+    width: 100%;
+}
+.social-likes .social-likes__button_facebook{
+    font-size: 12px;
+}
+#vdo-player_media_image{
+    height: 100%;
+    width: 100%;
+}
+.social-likes{
+        /*width: 300px;*/
+}
+.vdo-title-purchased, .vdo-desc-purchased{
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 15px;
+}
+.eye-sold-container{
+        float:left; padding-right:10px;
+}
+#creation-date #video-stamp-in{
+        float:right;line-height: 24px;
+}
+.right-col  #player-loading{
+        height: 40px;
+        width: 90%;  font-size: 15px;font-weight: bold; text-align: center; z-index: 999; overflow: auto; margin:0 auto; position: absolute; top: 0px; left: 0px; bottom: 0px; right: 0px;
+}
+.right-col  #player-loading span{
+        line-height: 32px;
+}
+#video-caption-in{
+        margin-top: 14px;
+}
+@media only screen and (max-width: 480px){
+        #video-player{
+                position: relative;
+        }
+        h2,h3 {
+                font-size: 14px;
+        }
+        h1, h2, h3{
+                line-height: normal;
+        }
+        #video-caption-in{
+                font-size: 10px;
+                line-height: 14px;
+                overflow: hidden;
+        }
+        .right-col #player-loading{
+                font-size: 12px;
+        }
+        #video-like {
+                clear: both;
+                margin-left: 0px;
+                margin-top: 5px;
+        }
+        #toggle-share{
+                margin-top: 5px;
+        }
+        .about-header{
+                padding-bottom: 0;
+                height: 20px;
+        }
+        #about-video-in{
+                margin-top: -10px;
+                padding-top: 0 !important;
+        }
+        .btnabout{
+                display: none;
+        }
+        .pptestcard p{
+                font-size: 12px;
+
+        }
+}
+@media only screen and (max-width: 768px){
+        #video-caption-in{
+                font-size: 12px !important;
+                line-height: 14px;
+                overflow: hidden;
+        }
+        .video-player{
+                background: transparent;
+        }
+        .share-video{
+                margin-left: 0;
+                margin-top: 5px;
+        }
+}
+
+.eye, .solds{
+        width: auto;
+}
+
+
+#containingBlock {
+  width:100%;
+}
+.videoWrapper {
+  position: relative;
+  padding-bottom:56.2%;
+  /*padding-top:25px;*/
+  height:0;
+}
+.videoWrapper {
+  /*margin-bottom: 45px;*/
+  margin-bottom: 0;
+}
+.videoWrapper div,
+.videoWrapper object {
+  /*position:absolute;
+  top:0;
+  left:0;
+  width: 100%;
+  height:100%;
+*/}
+.videoWrapper #vdo-player,
+{
+  position:absolute;
+  top:0;
+  left:0;
+  width: 100%;
+  height:100%;
+}
+.videoWrapper #vdo-player img{
+        width: 100%;
+        height: 100%;
+}
+
+.videoWrapper #vdo-player {
+        width: 100% !important;
+        height: 100%;
+        position: absolute
+}
+.video-player{
+        background-color: #fff;
+}
+#thumbContainer{
+        background-color: transparent;
+        background: transparent;
+}
+.projekktor{
+        background: #131313;
+}
+#paymentDiv{
+        background: transparent;
+}
+
+.buy-now-container{
+        position: absolute;
+        left: 0px !important;
+        top: 0;
+        height: 100% !important;
+        z-index: 888;
+        width: 100%;
+        color: #fff;
+        background: url(/fb_app/images/bg-overlay.png) repeat scroll 0 0 transparent;
+}
+.buy-now-container ul {
+        line-height: 18px;
+        padding-left: 5px;
+        padding-right: 25px;
+        margin-bottom: 0px;
+}
+.buy-now-container a{
+color: #a60404;
+}
+.buy-now-container h4 {
+        margin: 0px 0 10px 15px !important;
+        padding: 5px 0 0px 0;
+        padding-top: 62px;
+        font-size: 16px;
+        line-height: 20px;
+        font-family: Helvetica, Arial, sans-serif;
+        color: #fff;
+}
+.buy-now-container p {
+        margin: 0 auto;
+        width: 100%;
+        padding: 5px 0 5px 15px;
+        font-size: 14px;
+        line-height: 24px;
+        font-family: Helvetica, Arial, sans-serif;
+        color: #cccccc;
+}
+.buy-now-container ul li {
+        padding-left: 10px;
+        color: #cccccc;
+        padding-left: 10px;
+        color: #cccccc;
+        font-size: 14px;
+        margin-bottom: 10px;
+}
+.buy-now-container ul li {
+        font-size: 12px !important;
+}
+.buy-now-container ul li:last-child {
+        margin-bottom: 0;
+}
+@media only screen and (max-width: 768px){
+        .buy-now-container ul li, .buy-now-container p, .buy-now-container label{
+                font-size: 12px !important;
+        }
+}
+
+
+.custom-banner-img{
+    width: 725px !important;
+    height: 90px !important;
+}
+.fan-connect-footer{
+    color: #666666;
+    margin-top: 30px;
+    width: 160px;
+    text-align: center;
+    margin: 0 auto;
+}
+.fan-connect-footer span{
+
+}
+.page-banner{
+    height: 315px;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    margin-bottom: 10px;
+    margin-top: 28px;
+    background-size: 851px;
+}
+.pl5{
+    padding-left: 10px;
+}
+.no-margin{
+    margin-top: 0px;
+}
+.custom-banner{
+    position: relative; width: 100%; max-height:120px
+}
+.preview-header-text{
+    padding-right: 0px;
+}
+.container{
+    width: 85%;
+}
+.mt15{
+    margin-top: 15px;
+}
+.mt10{
+    margin-top: 10px;
+}
+.like-video, .leave-comments{
+    margin-left: 0px;
+}
+.powered-by{
+    line-height: 18px;
+    padding-right: 3px;
+    float: left;
+}
+.fc-activity-text {
+    padding-left: 3px;
+    float:left;
+    line-height: 23px;
+    width: auto !important;
+}
+.fc-activity-text span{
+    padding-left: 5px;
+}
+
+.fc-activity-text a {
+    color: #a1a1a1 !important;
+}
+.view-comments{
+    margin-left: 0px;
+}
+#PPDGFrame .mask{
+    height: 100% !important;
+}
+#PPDGFrame{
+    height: 100%;
+}
+
+
+@media (max-width:641px) {
+    .title-video {
+        display: block;
+        padding: 0 10px 10px 10px;
+    }
+    .ppstart, .ppstart:hover {
+        background-size: 42px;
+    }
+    .user-strip-pad{
+        padding-bottom: 0px;
+    }
+    .watch-full-video-button {
+        font-size: 12px;
+        padding: 5px 10px;
+        font-weight: normal;
+    }
+    .video-detail-area{
+        width: 80%;
+        margin: 0 auto;
+    }
+}
+@media (max-width:641px) and (min-width:481px) {
+    .container {
+        width: 92%;
+    }
+
+
+}
+@media (max-width:480px) {
+    .container {
+        width: 100%;
+    }
+    .btnpreview, .btnabout{ display: none !important;}
+    .player-logo,.pptimeleft, .icos li{
+        display: none;
+    }
+
+}
+.full-scrn{
+
+    color:#999999;
+    font-weight:bold;
+    padding-left:3px;
+    margin-top:8px !important;
+    font-size:24px;
+    cursor: pointer;
+    background:url(/assets/fb_app/images/player/ico-full-screen.png) no-repeat;
+    float: right !important;
+    width: 30px !important;
+}
+.del-video-error{
+    margin: 0;
+    padding: 0px 0 0px 0;
+    width: 100% !important;
+    overflow: hidden;
+    font-size: 18px;
+    line-height: 16px;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #ffffff;
+    opacity: 1;
+    font-weight: normal;
+    float: left;
+    text-shadow: 1px 1px 1px #333;
+}
+.ppfsenter, .ppfsexit {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    border-left: 1px solid #413e3e;
+}
+.ppstart{
+    z-index: 11;
+}
+.ppbuffering{
+    z-index: 10;
+}
+.video-store-listing .vdo-str-category-detail{
+    width: 70%;
+}

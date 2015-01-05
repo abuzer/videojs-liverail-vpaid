@@ -1,0 +1,54 @@
+
+.email-premission-container h2{
+	margin: 0 auto;
+	float: none;
+	line-height: 26px;
+	text-shadow: none;
+	width: auto;
+	font-weight: bold;
+	max-width: 100%;
+	text-align: center;
+
+}
+.email-premission-container .share-email-with{
+	color: #999 !important;
+	font-size: 13px;
+	margin-bottom: 10px;
+}
+.email-premission-container .want-to-connet{
+	margin-top: 23%;
+	font-size: 16px;
+	font-weight: bold;
+}
+.paymentDiv{
+	height: 100%; /* fallback if needed */
+  	height: calc(100% - 36px);	
+}
+.watch-full-video-button:hover{
+	text-decoration: none;
+}
+.watch-full-video-button{
+	background: #a60404;
+	color: #fff !important;
+	padding: 8px 10px;
+	border-radius: 5px;
+	display: table;
+	margin: auto;
+	font-size: 12px;
+}
+.no-email-premission{
+	padding-top: 25% ;
+	margin: auto;
+}
+
+@media only screen and (max-width: 430px) {
+	.email-premission-container .want-to-connet{
+		margin-top: 16%;
+	}
+}
+.ppfsenter, .ppfsexit {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    border-left: 1px solid #413e3e;
+}

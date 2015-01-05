@@ -1,0 +1,363 @@
+@import "new/rules";
+
+
+/* Pop-Over */
+
+/*
+#popupClose - this is referring to the anchor tag inside the popup conatainer.
+We'll absolute position and style it here
+*/
+
+#popupClose {
+font-size:12px;
+  line-height:20px;
+  position:absolute;
+  top:4px;
+  display:block;
+  color: #FFF;
+  margin-left: 407px;
+  margin-top: -48px;
+  text-decoration: none;
+  width: 73px;}
+
+/*
+#bgPopup - this is referring to the element that will cover the whole page
+behind the popup and above the rest of the page.
+NOTE: if you are using z-index on the same level in the DOM -
+    #bgPopup z-index needs to have the second highest value (behind #Popup)
+*/
+#bgPopup{
+  display:none;
+  position:fixed;
+  _position:absolute; /* hack for internet explorer 6*/
+  height:100%;
+  width:100%;
+  top:0;
+  left:0;
+  background:#000000;
+  z-index:1;
+
+}
+
+/*
+#Popup - The popup container
+NOTE: if you are using z-index on the same level in the DOM -
+    #Popup z-index needs to have the highest value.
+*/
+#Popup{
+  display:none;
+  position:fixed;
+  _position:absolute; /* hack for internet explorer 6 */
+  background: none;
+  z-index:2;
+  padding:12px;
+  font-size:13px;
+  height: inherit;
+  width: inherit;
+}
+
+/*
+#myButton - The Button....  make it have Button-like properties
+*/
+#myButton{
+  display:block;
+  position:relative;
+  width:400px;
+  height:222px;
+  line-height:50px;
+  font-family:"Open Sans";
+  font-size:14px;
+  text-align:center;
+}
+
+#preview-tooltip {
+  margin-left: -140px;
+  padding-right: 25px;
+  margin-bottom: 90px;
+}
+
+#watchfull-tooltip {
+  display: block;
+}
+
+#home {
+	padding-bottom:100px;
+
+	.container{
+		width:961px;
+	}
+
+	#home-splash {
+		background: url('new/landing-bg.jpg') no-repeat center;
+		background-color: rgb(0,0,0);
+		min-height:1px;
+		width:100%;
+		@media (min-width:768px) {height:510px;margin-top:-1px}
+		@media (max-width:767px) {text-align:center;}
+		.black-underlay {
+			min-height:310px;
+		}
+
+		input.btn-fb-login {
+		    background: url("/assets/sprite.png") 0 -188px no-repeat;
+		    width: 198px;
+		    height: 41px;
+		    border: medium none;
+		    clear: both;
+		    float: left;
+		    text-indent: -999px;
+		    margin-right:10px;
+		    margin-top:-2px;
+		    @media (max-width:767px) {float:none;margin-bottom:30px;}
+		}
+
+		input.btn-fb-login:hover {
+		    background-position: 0 -232px;
+		}
+
+		h1 {
+			font-size:55px;
+			font-weight:bold;
+			color: $white;
+			line-height: 1.1;
+			margin-top:35px;
+		}
+
+		.splash-content {
+			padding-top:75px;
+			@media (min-width:768px){padding-left:30px;}
+			@media (max-width:480px) {img {padding-bottom:10px}}
+			.video-image {
+				padding:5px 5px 5px 0;
+				@media (min-width:768px){
+					float:right;
+				}
+				@media (max-width:480px) {padding-top:20px;padding-bottom:10px;}
+			}
+
+			.ppstart {
+				background: url('new/preview-play-btn.jpg');
+			}
+
+			.video-pos {
+				margin-top:20px;
+			}
+
+			.video-responsive {
+				@media (max-width:767px) {width:320px;height:180px}
+			}
+		}
+		.social img { margin-right:3px;display:inline-block;}
+		.social {padding-top:10px;}
+		.signup {
+			@media (min-width:768px) {width:195px;font-size:1.1em;}
+			@media (max-width:767px) {margin-top:25px;font-size:1.4em;}
+			text-align:center;
+			p {
+				font-weight:300;
+				letter-spacing:1;
+				margin-top:2px;
+				color:$gray;
+				
+			}
+		}
+	}
+
+	#home-body {
+		.iphone-head, .distribution-head, .timeline-head {
+			padding-top:20px;
+			h2 {
+				font-size:2.5em;
+				text-align:center;
+				margin-bottom:0;
+			}
+			h3 {
+				font-size:1.75em;
+				text-align:center;
+				font-weight:500;
+				margin-top:0.5em;
+			}
+		}
+		.iphone-body {
+			padding-top:40px;
+			h3 {
+				font-size:1.7em;
+				font-weight:700;
+				margin-top:2em;
+				display:inline-block;
+				padding-left:10px;
+				line-height: 1;
+			}
+			p {font-size:1.1em;}
+			.reason-right, .reason-left {padding:0 20px 10px 20px;text-align:center;}
+			@media (min-width:768px) {
+				.reason-right {
+					padding:20px 10px 110px 50px;
+				}
+			}
+			@media (min-width:768px) {
+				.reason-left {
+					padding:20px 50px 110px 10px;
+				}
+			}
+
+			#stacked-iphone {
+				width:240px;
+				margin-left:auto;
+				margin-right:auto;
+				height:490px;
+				margin-top:20px;
+			}
+
+			@media (max-width:767px) {.iphone-image {text-align:center;}}
+
+			.icon-circle {
+				display: inline-block;
+		    width: 50px;
+		    height: 50px;
+		    background: $red;
+		    border-radius:25px;
+		    -moz-border-radius: 25px;
+		    -webkit-border-radius: 25px;
+		    text-align:center;
+		    img {margin-top:13px;}
+			}
+		}
+
+		#background-iphone {
+			position:absolute;
+			z-index:0;
+			@media (max-width: 767px) {
+				margin-left:-111px;
+			}
+		}
+		#iphone-slideshow {
+			width:194px;
+			height:346px;
+			padding-top: 73px;
+			padding-left: 20px;
+			@media (max-width: 767px) {
+				padding-top: 72px;
+				padding-left: 29px;
+			}
+			ul {
+				padding-left:0;
+			}
+		}
+
+		.iphone-foot {
+			text-align:center;
+			@media (min-width: 768px) {.appstore-big{margin-right:3em;}}
+		}
+
+		.timeline-head {
+			margin-top:60px;
+			text-align:center;
+			img {margin-top:40px;}
+		}
+
+		.distribution-head {
+			margin-top:60px;
+		}
+
+		.distribution-body {
+			padding-top:10px;
+			img {margin-top:20px;}
+			h4 {
+				font-size:1.6em;
+				margin-top:20px;
+				margin-bottom:10px;
+				@media (max-width: 767px) {text-align:center;}
+			}
+			ul {padding-left:18px;margin-top:0;}
+			li {padding-top:5px;}
+
+			.list{
+				display:inline-block;
+				margin:-1px;
+			}
+		}
+
+	}
+
+	.minutes-watched {
+		text-align:left;
+		color:$darkgray;
+		margin-top:3em;
+	}
+
+
+}
+
+#media-home {
+	img {
+		text-align:center;
+		margin-bottom:40px;
+	}	
+	h3 {
+		margin-top:30px;
+		text-transform:uppercase;
+		margin-bottom:5px;
+	}
+}
+
+
+.product-steps {
+  width: 300px;
+  display: block;
+  margin-top: 20px;
+  padding-bottom: 100px;
+  float: left;
+}
+
+.product-steps img {
+  display:block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.product-steps h2 {
+  text-align: center;
+  font-size: 18px;
+  display:block;
+  margin-top: 20px;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+#underarrow {
+  margin-top: -190px;
+  margin-left: 265px;
+}
+
+#upperarrow {
+  margin-top: -190px;
+  margin-left: 265px;
+}
+
+.pure-u-1 h2 {
+  margin-top: 30px;
+  font-weight: 300;
+  color: #444444;
+  text-rendering: optimizeLegibility;
+}
+
+#media-home h1 {
+  margin-top: 45px;
+}
+
+.see-demo {
+  display: block;
+  width: 300px;
+  text-align: center;
+  padding: 5px 20px;
+  font-size: 19px;
+  font-weight: 600;
+  color: #FFF;
+  border: 3px solid #06AF2D;
+  background-color: #06AF2D;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: -80px;
+  margin-bottom: 20px;
+}

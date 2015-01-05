@@ -1,0 +1,10 @@
+/*
+ *= require_self
+ *= require  fb_app/reset
+ *= require fb_app/little_cast_app
+ *= require fb_app/player/player_default_theme
+ *= require fb_app/style
+ *= require owl-carousel/owl.carousel.css
+ *= require owl-carousel/owl.theme.css
+ *= require ../vjs_theme/lc_theme
+*/

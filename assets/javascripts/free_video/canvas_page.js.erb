@@ -1,0 +1,28 @@
+$(function(){
+
+
+  //Function Deffinitions
+
+  init_payment_before_send = function(){
+  }
+
+  init_payment_success = function(evt, data, status, xhr){
+    $('#paypal_form #paykey').val(JSON.parse(xhr.responseText).data.pay_key);
+    $('#submitBtn').click();
+  }
+
+  init_payment_error = function(){
+
+  }
+
+  init_payment_complete = function(){
+  }
+
+
+  $('#init_paypal_link').bind("ajax:beforeSend", init_payment_before_send).
+    bind("ajax:success",       init_payment_success).
+    bind("ajax:error",           init_payment_error).
+    bind("ajax:complete",     init_payment_complete)
+
+
+})

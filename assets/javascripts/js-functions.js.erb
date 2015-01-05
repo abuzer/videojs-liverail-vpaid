@@ -1,0 +1,11 @@
+// file to place the very common functions here
+
+function track_video_click(video_id, device){
+    DataCall("device=" + device + "&uid=" + LC_USER.uid + "&id=" + video_id, '/freevideo-upload/track_related_video_click' , 'GET', false,
+        function () {
+            console.log("success");
+        },
+        function () {
+            console.log("failed");
+        });
+}

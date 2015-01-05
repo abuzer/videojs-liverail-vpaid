@@ -1,0 +1,136 @@
+.watch-full-video-button {
+    background: #a60404;
+    color: #fff !important;
+    padding: 10px 25px;
+    border-radius: 5px;
+    display: table;
+    margin: auto;
+    font-size: 14px;
+    font-weight: bold;
+}
+#watch-full-overlay {
+    text-align: center;
+}
+.no-email-premission {
+    padding-top: 25%;
+    margin: auto;
+}
+.video-player {
+    background: transparent;
+}
+.videoWrapper #vdo-player img {
+    width: 100% !important;
+}
+.email-premission-container h2 {
+    float: none;
+    line-height: 30px;
+    text-shadow: none;
+    width: auto;
+}
+.email-premission-container .share-email-with {
+    color: #999 !important;
+    font-size: 16px;
+    margin-bottom: 10px;
+    font-weight: normal;
+}
+.email-premission-container .want-to-connet {
+    margin-top: 23%;
+    font-size: 20px;
+    font-weight: bold;
+}
+#paymentDiv {
+    height: 100%;
+    /* fallback if needed */
+    height: calc(100% - 35px);
+    background: url(/fb_app/images/bg-overlay.png) repeat scroll 0 0 transparent;
+}
+@media (max-width:800px) and (min-width:481px) {
+    .container {
+        width: 92%;
+    }
+    #video-like{
+        display: block;
+        clear: both; 
+        margin-left: 0;
+        margin-top:5px;
+    }
+    #toggle-share{
+        margin-top: 5px;
+    }
+
+}
+
+@media (max-width:720px) {
+    .title-video {
+        display: block;
+        padding: 0 10px 10px 10px;
+    }
+    #video-owner-info {
+        display: none;
+    }
+    .ppstart, .ppstart:hover {
+        background-size: 42px;
+    }
+    .email-premission-container .want-to-connet {
+        font-size: 14px;
+    }
+    .email-premission-container .share-email-with {
+        font-size: 12px;
+    }
+    .watch-full-video-button {
+        font-size: 12px;
+        padding: 5px 10px;
+        font-weight: normal;
+    }
+    .email-premission-container .want-to-connet {
+        margin-top: 15%;
+    }
+    .right-section .player-logo,  #previewBtn, .fscrWrapper {
+        display: none !important;
+    }
+    .video-detail-area{
+        width: 80%;
+        margin: 0 auto;
+        padding-top: 5px;
+    }
+    .itunes-container{
+        padding-top: 10px;
+    }
+    #prev-text-for-user{
+        text-align: left;
+        font-size: 10px;
+    }
+}
+@media (max-width:641px) {
+    .right-section .player-logo, .right-section .icos, #previewBtn {
+        display: none !important;
+    }
+}
+@media (max-width:480px) {
+    .ppbuffering{ display: none !important; }
+    .container {
+        width: 100%;
+    }
+
+}
+@media (max-width:380px ) { 
+
+    .email-premission-container .want-to-connet { margin-top: 7%;line-height: 17px; }
+    .email-premission-container .share-email-with {
+        margin-bottom: 4px;
+        font-size: 11px;
+    }
+    .email-premission-container a img{
+        width: 100px;
+    }
+
+    .btnabout{ display: none !important;}
+}
+@media (max-width:799px) {
+ /*   body{
+        background-size: 100% 250px !important;
+    }
+    .gradient-container{
+        top: 100px
+    }*/
+}

@@ -1,0 +1,159 @@
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html, body, td, div, a, p, ul, li, input, textarea, .myform {
+  font-family: 'Helvetica', Arial, Sans-Serif;
+  color: #333333;
+}
+
+img {
+  border: 0px;
+}
+
+.main-contents {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 1;
+  position: fixed;
+  top: 0px;
+  z-index: 9999;
+}
+
+.wraper {
+  display: block;
+  margin-top: 30%;
+}
+
+@media (min-width: 767px) {
+  .container, .navbar .container, .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container {
+    width: 700px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .spacing {
+    padding-top: 10px;
+  }
+}
+
+@media (max-width: 767px) {
+  .container, .navbar .container, .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container {
+    position: relative;
+  }
+  .fright {
+    width: 200px;
+    height: 420px;
+    margin: 0 auto;
+  }
+  .wraper {
+    display: block;
+    margin-top: 10%;
+  }
+}
+
+.fright {
+  width: 200px;
+  height: 420px;
+  background: url("../msv/slider/iphone-5s.png") no-repeat;
+  img {
+    width: 172px !important;
+    height: 300px !important;
+    margin-top: 59px;
+  }
+}
+
+.spacing {
+  padding-top: 70px;
+}
+
+.littlecast-logo {
+  display: block;
+  background: url('../msv/littlecast-logo.png') no-repeat;
+  width: 277px;
+  height: 59px;
+}
+
+.heading {
+  display: block;
+  color: #fff;
+  font-style: italic;
+  font-weight: normal;
+  margin: 20px 0;
+}
+
+.play-store {
+  background: url('../msv/play-store.png');
+}
+
+.app-store {
+  background: url('../msv/app-store.png');
+}
+
+.play-store, .app-store {
+  float: left;
+  width: 153px;
+  height: 52px;
+  margin: 5px 7px;
+}
+
+.bottom-row {
+  display: block;
+  position: fixed;
+  background: #000000;
+  bottom: 0;
+  min-height: 60px;
+  opacity: 0.8;
+  padding: 15px 10px;
+  span {
+    font-size: 14px;
+    color: #aaa;
+    text-decoration: none;
+  }
+  a {
+    font-size: 14px;
+    color: #aaa;
+    text-decoration: none;
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+.txt-align {
+  text-align: right;
+}
+
+@media (max-width: 767px) {
+  #big-video-wrap {
+    display: none;
+  }
+  .main-contents {
+    background-image: url("../msv/bg-body.png");
+  }
+}
+
+@media (min-width: 768px) {
+  #big-video-wrap {
+    display: block;
+  }
+}
+
+#big-video-wrap:before {
+  background: #000;
+  content: " ";
+  height: 100%;
+  top: 0;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  opacity: 0.4;
+  z-index: 999;
+}

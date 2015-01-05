@@ -1,0 +1,234 @@
+@import "../variables";
+
+// Hack to make upload input under button to be bigger than button
+// The excess is cleared by the overflow:hidden in #video-upload-btn
+@mixin hideFileInput() {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    opacity: 0.0;
+    filter: alpha(opacity=0); 
+    font-size: 300px; 
+    height: 200px;
+}
+
+
+@mixin uploadBtn() {
+	margin: auto;
+  position: absolute;
+  z-index:1111;
+  top:0; left: 0; bottom: 0; right: 0;
+  overflow: hidden;
+	width:300px;
+	height:40px;
+	background-color:$red;
+	color:white;
+	text-align:center;
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: 1px;
+	padding: 11px 4px;
+	line-height: 2.7;
+	cursor:pointer;
+	border-radius: 2px;
+	border: 1px solid rgba(0, 0, 0, 0);
+	-webkit-appearance: none;
+	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	&:hover {
+		background-color: darken($red, 2%);
+	}
+}
+
+@mixin thumbnail-preview-btn(){
+	width:140px;
+ 	height:5px;
+ 	font-size:.9em;
+ 	bottom:inherit;
+ 	letter-spacing:0;
+ 	line-height:.5;
+ 	background:transparent;
+	border: rgba(7, 7, 7, 0.25) solid 1px;
+	font-weight:500;
+	color:black;
+	&:hover {background: rgba(7, 7, 7, 0.15);}
+	
+}
+
+.upload-box {
+	border: 1px solid $border;
+	border-radius:5px;
+	height:426px;
+	width: (960px * 0.666);
+	margin: 0 auto;
+	background-color:rgb(253, 253, 253);
+}
+
+
+#tos {
+	position:absolute;
+	top:20px;
+	display:none;
+	width:300px;
+	margin:150px;
+	padding-left:10px;
+	text-align: center;
+	font-size:12px;
+
+	label {
+		display:inline-block;
+		font-size:1em;
+		margin-bottom:0;
+		float:left;
+		text-align:left;
+		line-height:1.4;
+	}
+
+	.label-text {
+		margin-left: 6px;
+		span{
+			a:hover{
+				color: #a60404;
+				text-decoration:none;
+			}
+		}
+	}
+
+	#owner-label {
+		margin-top:8px;
+	}
+
+	#terms-label {
+		margin-top:28px;
+	}
+
+	#terms-link {
+		margin-top:12px;
+	}
+
+}
+
+#video-upload-btn {
+	@include uploadBtn();
+	right:307px;
+	top: 175px;
+	left: 0;
+	bottom:inherit;
+	display:none;
+}
+
+ #thumbnail-upload-btn, #preview-upload-btn {
+ 	@include uploadBtn();
+ 	@include thumbnail-preview-btn();
+ 	margin-left:200px;
+ 	top:419px;
+ 	display:none;
+ }
+
+ #thumbnail-generate-btn, #preview-generate-btn {
+ 	@include uploadBtn();
+ 	@include thumbnail-preview-btn();
+	background:transparent;
+	color:white;
+	background:$blue;
+	position:relative;
+	margin:14px 0;
+	display:inline-block;
+	float:left;
+	font-weight:bold;
+	display:none;
+
+	&:hover {
+		background-color: darken($blue, 2%);
+	}
+ }
+
+ #preview-upload-btn {
+	top:419px + 55px;
+ } 	
+
+ #csv-upload-btn {
+	@include uploadBtn();
+ 	position:relative;
+ 	width:140px;
+ 	height:14px;
+ 	font-size:1em;
+	letter-spacing:0;
+	line-height: 1;
+	top:16px;
+	margin-left:0;
+	margin-top:7px;
+	display:inline-block;
+	background:transparent;
+	color:black;
+	border: rgba(7, 7, 7, 0.25) solid 1px;
+	font-weight:500;
+	&:hover {background: rgba(7, 7, 7, 0.15);}
+ }
+ #csv-upload-paid {
+	position:relative;
+ 	width:140px;
+ 	height:14px;
+ 	font-size:1em;
+	letter-spacing:0;
+	line-height: 1;
+	margin-left:0;
+	margin-top:7px;
+	display:inline-block;
+	background:transparent;
+	color:black;
+	font-weight:500;
+ }
+
+#free_video_file, #video_uploader_web_video, #video_thumbnail_uploader_image, #preview_uploader_web_video{
+	@include hideFileInput();
+}
+
+
+#infobox {
+	padding:20px;
+	margin-left: 40px;
+	border: 1px solid $border;
+	border-radius:5px;
+	height:385px;
+	background-color:white;
+	.red {color:$red;}
+
+	h4{margin:0;font-size:14px;font-weight:bold;}
+	ul, li, p {
+		margin: 0.4em 0;
+		font-size: .9em;
+	}
+	
+	li {
+		list-style-image: url("../new/right-bullet.png");
+		line-height:1.5;
+		margin-left: 30px;
+	}
+	h5 {
+        margin:.5em 0;
+        font-size:1em;
+    }
+}
+
+#terms{
+	margin-top:55px;
+}
+
+
+
+.disabled-input {
+	cursor:not-allowed !important;
+}
+
+.disabled {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	cursor:not-allowed !important;
+	opacity:.4;
+}

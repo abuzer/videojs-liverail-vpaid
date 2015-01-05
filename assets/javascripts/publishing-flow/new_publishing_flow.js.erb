@@ -1,0 +1,2925 @@
+FreeVideosController = Paloma.controller('PublishVideo');
+
+FreeVideosController.prototype.new= function(){
+  var user_agent = navigator.userAgent.toLowerCase();
+  if(user_agent.indexOf("firefox") > -1 && user_agent.indexOf("windows") > -1){
+    $("#preview_to_s3_form  span.helping_text").css("margin-right", "4px");
+  }
+
+  action_button = 'Publish';
+  $("#session_refresh").fancybox({
+    'width': '75%',
+    'height': '75%',
+    'autoScale': false,
+    'transitionIn': 'none',
+    'transitionOut': 'none',
+    'type': 'iframe',
+    afterLoad: function() {
+      $("meta[name='csrf-token']").prop("content", JSON.parse($(".fancybox-iframe").contents().find("body").find("pre").html()).csrfToken);
+      $('[name=authenticity_token]').prop("value", JSON.parse($(".fancybox-iframe").contents().find("body").find("pre").html()).csrfToken);
+      $("#publishing_form").submit();
+    },
+    beforeShow: function() {
+      return $('.fancybox-wrap').hide();
+    }
+  });
+
+  $("#singleFieldTags").tagHandler({
+      maxTags: 10,
+      delimiter: ',', afterDelete: function(tag) {set_position_of_thumb_and_video();}
+  });
+
+  paid_video_bind_key_up_and_down_events();
+  setup_banner_image_upload();
+  //custum_styling();
+  bind_single_field_tag();
+  bind_schedule_post_checkbox();
+
+  $("#video_title").on("keyup change", function(){
+    $("#video_title_h1").text($(this).val());
+  })
+  $("#main_forms_holder").tooltip();
+  $('#publishing_container select').not("#video_video_identifier_id, #theater_collection, #free_video_video_identifier_id ").selectBox('settings', {hideOnWindowScroll: false});
+
+    $("#owner_video_permission").change(function(){
+      if($("#owner_video_permission").prop("checked") && $("#terms").prop("checked")){
+          $("#tos").hide();
+          $('#video-upload-btn').fadeIn();
+        }
+    });
+
+  $("#terms").change(function(){
+      if($("#owner_video_permission").prop("checked") && $("#terms").prop("checked")){
+        $("#tos").hide();
+        $('#video-upload-btn').fadeIn();
+      }
+    });
+
+    $('.back-button').click(function(element){
+      $('.error-dv').hide();
+      if($(element.target).data().tab_name == "pricing_tab"){
+        $('html, body').animate({scrollTop:0}, 'slow');
+        $('#pricing_tab').hide();
+
+        $('#new_video_thumbnail_uploader, #preview_to_s3_form, #video_details').show();
+        set_position_of_thumb_and_video();
+
+        $('.step2').addClass('current');
+        $('.step3').removeClass('current');
+      }
+
+      if($(element.target).data().tab_name == "publish_tab"){
+        $('html, body').animate({scrollTop:0}, 'slow');
+
+        $('#pricing_tab').show();
+        hide_publish_tab();
+
+        $('.step3').addClass('current');
+        $('.step4').removeClass('current');
+      }
+    })
+
+    $('.next-button').click(function(element){
+
+      error_counter = 0;
+      custom_error_message = "";
+
+      if($(element.target).data().tab_name == "video_details"){
+        if($('#video_title').val().trim() == ""){
+          $('#video_title').addClass('error-field')
+          error_counter += 1;}
+        else
+          $('#video_title').removeClass('error-field')
+
+        if($('#video_title').val().trim().length  > 50){
+          $('#video_title').addClass('error-field')
+          error_counter += 1;
+          $("#video_title_error").html("Title length should not exceed 50 characters");}
+
+        if(validateCustomDuration() == false)
+         error_counter += 1;
+
+        if($('#video_category_name').val().trim() == "Select Category"){
+          $('#video_category_name').addClass('error-field')
+          error_counter += 1;
+        }
+        else
+          $('#video_category_name').removeClass('error-field')
+
+        if($('#video_rating').val().trim() == "Select Rating"){
+          $('#video_rating').addClass('error-field')
+          error_counter += 1;
+        }
+        else
+          $('#video_rating').removeClass('error-field')
+
+        if($('#video_description').val().trim() == ""){
+          $('#video_description').addClass('error-field')
+          error_counter += 1;}
+        else
+          $('#video_description').removeClass('error-field')
+
+        if($('#video_description').val().trim().length  > 1500){
+          $('#video_description').addClass('error-field')
+          error_counter += 1;
+          $("#video_description_error").html("Description of video should not exceed 1500 characters");}
+
+        if($('#singleFieldTags').children().size() < 4  ){
+          $('#singleFieldTags').addClass('error-field');
+          if (error_counter == 0)
+            custom_error_message = "Please enter minimum 3 tags.";
+          error_counter += 1}
+        else
+          $('#singleFieldTags').removeClass('error-field')
+
+        if($('#video_category_name').val().trim() == ""){
+          $('#tab_5 .selectBox-dropdown:eq(0)').addClass('error-field')
+          error_counter += 1;}
+        else
+          $('#tab_5 .selectBox-dropdown:eq(0)').removeClass('error-field')
+
+        $('html, body').animate({scrollTop:0}, 'slow');
+
+        if (error_counter == 0){
+          $('#video_details, #new_video_thumbnail_uploader, #preview_to_s3_form').hide();
+          $('#pricing_tab').show();
+
+          $('.step2').removeClass('current');
+          $('.step3').addClass('current');
+          $('.error-dv').hide();
+        }else{
+          if(custom_error_message == "")
+            $('.error-dv').html("Please enter the correct values in highlighted fields ");
+          else
+            $('.error-dv').html(custom_error_message);
+          $('.error-dv').show();
+        }
+      }
+
+      if($(element.target).data().tab_name == "pricing_tab"){
+
+        if ($('#video_video_identifier_id').val().trim() === "Select Price" || $("#price_loading_image").is(":visible") && is_new_video) {
+          $('#video_video_identifier_id').addClass('error-field');
+          error_counter += 1;
+        } else {
+          $('#video_video_identifier_id').removeClass('error-field');
+        }
+
+        $('html, body').animate({scrollTop:0}, 'slow');
+
+        if( error_counter == 0)
+        {
+          $('#pricing_tab').hide();
+
+          show_publish_tab();
+
+          $('.step4').addClass('current');
+          $('.step3').removeClass('current');
+
+          $('.error-dv').hide();
+        }
+        else
+        {
+          $('.error-dv').html("Please enter the correct values in highlighted fields ")
+          $('.error-dv').show();
+        }
+
+      }
+    })
+
+    function show_publish_tab()
+    {
+        $('#publish_tab').show();
+
+        $('#banner_image_form_holder').css({"top" : $("#banner-button-holder").position().top +25 + "px"});
+
+        $('#paid_video_banner_image_to_s3_form, #banner_image_status_message, #banner_image_form_holder').show();
+
+        if($("#banner_image_status_message").html().length > 0 || $("#banner_img").is(":visible") == true)
+        {
+          $(".delete-banner-img").show();
+        }
+    }
+
+    function hide_publish_tab()
+    {
+        $('#publish_tab').hide();
+        $('#paid_video_banner_image_to_s3_form, #banner_image_status_message, #banner_image_form_holder .delete-banner-img').hide();
+    }
+    var IsEmail, check_all_check_boxes, check_and_finish_publishing, collect_selected_friends, extract_video_runtime, getPriceRange, ie, manageImportedContacts, previewUploadStarted, preview_being_uploaded, preview_upload_completed, resetPriceSelection, reset_preview_upload, reset_video_upload, setPricingInfo, updatePriceSelection, updatePricing, uploadStarted, valid_video_file_extensions, validateCustomDuration, video_being_uploaded, video_preview_upload_failed, video_upload_completed, video_upload_failed, wizard_completed;
+
+    window.tab_position = 0;
+
+    window.default_contact_importers = ["gmail", "yahoo", "windowslive", "aol", "plaxo", "addressbook", "file"];
+
+    valid_video_file_extensions = ["3gp", "mp4", "avi", "flv", "mov", "wmv", "m4v", "mkv"];
+
+    ie = navigator.userAgent.indexOf("MSIE") > 0;
+
+    wizard_completed = false;
+
+    video_upload_completed = false;
+
+    preview_upload_completed = true;
+
+    video_being_uploaded = false;
+
+    preview_being_uploaded = false;
+
+    video_upload_failed = false;
+
+    video_preview_upload_failed = false;
+
+    new_theater_space = false;
+
+    window.validates_video_type = function(video_file_attribute) {
+        var file_extension, message;
+        file_extension = $("#" + video_file_attribute).val().toLowerCase().split(".").pop();
+        if (valid_video_file_extensions.indexOf(file_extension) === -1 || file_extension.length === 0) {
+            message = "You have chosen an unsupported file format. Please upload a file with one of the following extensions: 3gp, mp4, avi, flv, mov, wmv, m4v, and mkv";
+            $("#custom-error").html(message);
+            $("#custom-error").show();
+            return false;
+        } else {
+            return true;
+        }
+        return end;
+    };
+
+    jQuery(function() {
+        var bar, csPageOptions, getUserFBPages, isFBPermissionsGrantedForPublishVideo, p_bar, p_percent, p_status, percent, set_default_permission, set_permission, status;
+
+        isFBPermissionsGrantedForPublishVideo = function(callback) {
+                return FB.getLoginStatus(function(response) {
+                if (response.status === "connected") {
+                    return FB.api("/me/permissions", function(response) {
+                        var permissions;
+                        if (response && response.data && response.data.length) {
+                            permissions = response.data.shift();
+                            if (permissions.manage_pages) {
+                                getUserFBPages();
+                            }
+                            if (permissions.publish_stream) {
+                                $('#post_wall_fb_div').show();
+                            }
+                            return callback(permissions.publish_stream && permissions.manage_pages);
+                        }
+                    });
+                } else {
+                    return callback(false);
+                }
+            });
+        };
+        isFBPermissionsGrantedForPublishVideo(function(fb_permission_response) {
+            if (fb_permission_response) {
+                $(".waiting_state_div").hide();
+                $(".permission_buttons_div").hide();
+                $("#new_video_uploader").show();
+                $("#tos").show();
+                return $("#tab_1 .q-answer").hide();
+            } else {
+                $(".waiting_state_div").hide();
+                return $(".permission_buttons_div").show();
+            }
+        });
+        $('#fb_get_permissions_button').click(function() {
+            return FB.login(function(response) {
+                return isFBPermissionsGrantedForPublishVideo(function(fb_permission_response) {
+                    if (fb_permission_response) {
+                        $(".waiting_state_div").hide();
+                        $(".permission_buttons_div").hide();
+                        $("#new_video_uploader").show();
+                        $("#tab_1 .q-answer").hide();
+                        return $("#tos").fadeIn();
+                    } else {
+                        $(".waiting_state_div").hide();
+                        return $(".permission_buttons_div").show();
+                    }
+                });
+            }, {
+                scope: "publish_stream,manage_pages"
+            });
+        });
+        getUserFBPages = function() {
+            var fb_pages_query;
+            if ($('#video_new_record').prop("value") === "true") {
+                fb_pages_query = 'select page_id, pic, pic_small, name, page_url from page where page_id in (select page_id from page_admin where uid = ' + $('#users_fb_id').prop("value") + ')  order by name';
+            } else {
+                fb_pages_query = 'select page_id, pic, pic_small, name, page_url from page where page_id in  (' + $('#video_fan_pages').prop("value") + ')  order by name';
+            }
+            return FB.api({
+                method: 'fql.query',
+                query: fb_pages_query
+            }, function(data) {
+                var fb_pages_li_data;
+                fb_pages_li_data = "";
+                $(data).each(function(index) {
+                    console.log("page_id : " + this.page_id + "- this.pic :: " + this.pic + "- this.pic_small : " +  this.pic_small + "- this.name : " + this.name + "- this.page_url : " + this.page_url);
+                    if ($('#video_new_record').prop("value") === "true") {
+                        return fb_pages_li_data += "<li id='" + this.name + " '><input name='facebook_pages[" + this.page_id + "]' type='hidden' value='0'><input type='checkbox' class='facebook_page_ckb' id='facebook_pages_" + this.page_id + "' name='facebook_pages[" + this.page_id + "]' value='1' />                                   <label class='label-a' for='1'></label>        <img src='" + this["pic"] + "' width='32px' heigh='32px'/> " + this.name + "</li>";
+                    } else {
+                        return fb_pages_li_data += "<li><img src='" + this["pic"] + "' width='32px' heigh='32px'/> " + this.name + " </li>";
+                    }
+                });
+                no_of_facebook_page = data.length;
+                if(no_of_facebook_page > 10)
+                $('#fb_page_ul_div').css("overflow-y", "scroll");
+                new_height = (Math.ceil(no_of_facebook_page/2)  > 5 ? 5 : Math.ceil(no_of_facebook_page/2) )* 35;
+                additional_height = new_height + 22;
+                $('#fb_page_ul_div').css("height", 15 + new_height + "px");
+                label_margin_top = parseInt($('.banner-img').css("margin-top").split("px")[0]);
+                //$('.banner-img').css("margin-top",  label_margin_top + additional_height - 8);
+                //$('#banner_image_form_holder').css("top", 193 + additional_height);
+                // adding additional div for all elements below fb pages, to set their dynamic height
+                /*height = additional_height/9;
+                if (height < 25)
+                  height = 25;
+                $('.fb-bottom').css("margin-top", height );
+*/
+                // commenting to change its position
+                if (no_of_facebook_page < 1){
+                  $('#label_banner_image').css("margin-top", 0);
+                  $('#label_fb_publish').css("margin-top", 30);
+                }else
+                  $('#label_banner_image').css("margin-top", additional_height-45);
+                existing_tab_height = $('#publish_tab').find(".f-box").css("height").split("px")[0];
+                $('#publish_tab').find(".f-box").css("height", 670 + additional_height);
+                existing_height = $('#publish_tab').find(".f-box").css("height").split("px")[0];
+                $('#publish_tab').find(".r-big-box-publish").css("height", existing_height);
+                $('#publish_tab').find(".r-box").css("height", existing_height-30);
+
+                if (navigator.userAgent.indexOf("Firefox")!=-1) // adding this for Firefox browser
+                {
+                  $('.botoom-btn').css("margin-top", -16);
+                  $('#banner_image_form_holder').css("top", 200 + additional_height);
+
+                }
+
+                if (fb_pages_li_data !== "") {
+                    $('#fb_page_ul_div').show();
+                    $('#ul_facebook_pages').html(fb_pages_li_data);
+                    return $('#ul_facebook_pages li').click(function() {
+                        var status;
+                        status = $(this).children("input[type=checkbox]").is(":checked");
+                        return $(this).children("input[type=checkbox]").prop("checked", !status);
+                    });
+                }
+            });
+        };
+        $("#main_forms_holder").tooltip();
+        $('#publishing_container select').not("#video_video_identifier_id, #theater_collection, #free_video_video_identifier_id").selectBox('settings', {
+            hideOnWindowScroll: false
+        });
+        $("#facebook_pages").change(function() {
+            var fbClass, selectVal;
+            selectVal = $("#facebook_pages").val();
+            fbClass = $(document.getElementById(selectVal));
+            fbClass.show();
+            return $(fbClass + ".facebook_page_ckb").prop("checked", true);
+        });
+        $("#all-plat").change(function() {
+            if ($("#all-plat").prop("checked")) {
+                $("thead td").hide();
+                $("thead input").prop("checked", false);
+                $("#all-label, #open-label").removeClass("current");
+                return $("#all-label").addClass("current");
+            }
+        });
+        $("#open-plat").change(function() {
+            if ($("#open-plat").prop("checked")) {
+                $("thead td").show();
+                $("#all-label, #open-label").removeClass("current");
+                return $("#open-label").addClass("current");
+            }
+        });
+
+        $(window).bind("beforeunload", function(event) {
+            var e, msg;
+            if (ie) {
+                return;
+            }
+            if (!video_upload_completed || !preview_upload_completed || !wizard_completed) {
+                e = event || window.event;
+                msg = "Video upload is in progress!";
+                if (e) {
+                    e.returnValue = msg;
+                }
+                return msg;
+            }
+        });
+
+        $("#video_file").change(function() {
+            var file_extension, file_name, message, status, tab_position;
+            message = "";
+            status = "";
+
+            file_extension = $("#video_file").val().toLowerCase().split(".").pop();
+
+            file_name = $("#video_file").val().split(/(\\|\/)/g).pop().split(".")[0];
+
+            valid_video_file_extensions = ["3gp", "mp4", "avi", "flv", "mov", "wmv", "m4v", "mkv"];
+
+            if (valid_video_file_extensions.indexOf(file_extension) === -1 || file_extension.length === 0) {
+                message = "You have chosen an unsupported file format. Please upload a file with one of the following extensions: 3gp, mp4, avi, flv, mov, wmv, m4v, and mkv";
+                $("#custom-error").html(message);
+                $("#custom-error").show();
+                status = "fail";
+            } else {
+                $("#custom-error").hide();
+            }
+            if ($("#video_file").val() === $("#preview_uploader_web_video").val()) {
+                message = "You have already selected same file on step 2 for video preview, please use another file.";
+                status = "fail";
+            }
+            // reset_video_upload();
+            if (status !== "fail") {
+                $("#video_original_video_file_name").val($('#video_file').val());
+                $('.video-upload-button').click();
+
+            } else {
+                $("#upload_video_btn").show();
+                $("#new_video_uploader_progress").hide();
+                return $("#lbl_video_uploader").html(message);
+            }
+        });
+
+        $("#video_payment_method").change(function() {
+            if ($("#video_payment_method").val() === payment_methods) {
+                return $("#paypal_email_address").prop("type", "text");
+            } else {
+                return $("#paypal_email_address").prop("type", "hidden");
+            }
+        });
+
+        $("#preview_uploader_web_video").change(function() {
+            var file_extension, message, status;
+            file_extension = $("#preview_uploader_web_video").val().split(".").pop();
+            message = "";
+            status = "";
+            file_extension = $("#preview_uploader_web_video").val().toLowerCase().split(".").pop();
+            if (valid_video_file_extensions.indexOf(file_extension) === -1 || file_extension.length === 0) {
+                message = "";
+                $("#info_note_video_preview_uploader").addClass("tag_error");
+                status = "fail";
+            } else {
+                $("#info_note_video_preview_uploader").removeClass("tag_error");
+            }
+            if ($("#video_file").val() === $("#preview_uploader_web_video").val()) {
+                message = "You have already selected same file on step 1 for video upload, please use another file.";
+                status = "fail";
+            } else {
+                $("#preview-text").text($(this).val().split(/(\\|\/)/g).pop().split(".")[0]);
+            }
+            reset_preview_upload();
+            if (status !== "fail") {
+                $("#lbl_preview_uploader").hide();
+                $("#new_preview_uploader_progress").show();
+                $("#video_preview_key").val("");
+                $("#new_preview_uploader").submit();
+                return $("#lbl_preview_uploader").removeClass("tag_error");
+            } else {
+                $("#lbl_preview_uploader").show();
+                $("#new_preview_uploader_progress").hide();
+                $("#custom-error").html(message);
+                $("#custom-error").show();
+                $('html, body').animate({scrollTop:0}, 'slow');
+                return $("#lbl_preview_uploader").addClass("tag_error");
+            }
+        });
+
+
+        $("[name=\"video[brand_id]\"]").change(function() {
+            $("#video_brand_type").val($(this).attr("brand_type"));
+            return $("#branding_image").attr("src", $(this).parent().children("img").attr("src"));
+        });
+
+        $("#theater_collection").append("<option value=\"new_theater\" >Create New Audience</option>");
+
+        jQuery.fn.center = function() {
+            this.css("position", "absolute");
+            this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + $(window).scrollTop()) + "px");
+            this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + $(window).scrollLeft()) + "px");
+            return this;
+        };
+
+        csPageOptions = {
+            domain_key: "LWBSZM4LRQGKDEBK4HKT",
+            afterSubmitContacts: manageImportedContacts,
+            skipSourceMenu: true,
+            beforeLaunch: function() {
+                return $("#fbBox").hide();
+            },
+            afterImport: function(source, success) {
+                $("#fbBox").center();
+                $("#fbBox").show();
+                return $("#loading_icon").hide();
+            }
+        };
+        $("#thumbnail-generate-btn").click(function() {
+            return $("#user_personal_thumbnail").prop("checked", true);
+        });
+        $("#preview-generate-btn").click(function() {
+            return $("#all-plat").prop("checked", true);
+        });
+        $("#all-btn").click(function() {
+            $("#all-plat").prop("checked", true);
+            return $("#all-btn").removeClass("disabled-price");
+        });
+        $("#open-btn").click(function() {
+            $("#open-plat").prop("checked", true);
+            return $("#all-btn").addClass("disabled-price");
+        });
+
+        custom_thumbnail_upload();
+
+        manage_contacts_check_uncheck = function(elem) {
+            if ($(elem).is(":checked")) {
+                if ($('.slct-all-txt').parent().siblings('ul').find('input').length === $('.slct-all-txt').parent().siblings('ul').find('input:checkbox:checked').length) {
+                    return $('.slct-all-txt').find("input").prop("checked", true);
+                }
+            } else {
+                return $('.slct-all-txt').find("input").prop("checked", false);
+            }
+        };
+        offload_unselected_contacts = function() {
+
+            var contacts_list, source;
+            source = $('#selected_contacts_source').html();
+            source = source.charAt(0).toLowerCase() + source.slice(1);
+            contacts_list = [];
+            $('#contacts_display_div').find("div.contacts-list ul input:checkbox:checked").map(function() {
+                var email, name;
+                name = $(this).data().contact_name;
+                email = $(this).data().contact_id;
+                return contacts_list.push(name + "<" + email + ">");
+            });
+            $("#" + source + "_selected_contacts").val(contacts_list.join(","));
+            $("#" + source + "_selected_contacts").html(contacts_list.join(","));
+            show_publish_tab();
+            $("#back_button").show();
+            $("#tab_6").hide();
+            if (contacts_list.length === 0) {
+                $("#" + source + "_contacts_ckb").prop("checked", false);
+                $("#" + source + "_contacts_edit_link").parent("span").hide();
+            } else if (contacts_list.length === 1) {
+                $("#" + source + "_selected_contacts_count").html(contacts_list.length + " Contact has");
+            } else {
+                $("#" + source + "_selected_contacts_count").html(contacts_list.length + " Contacts have");
+            }
+            if (contacts_list.length === 0) {
+                $("#" + source + "_contacts_edit_link").hide();
+            }
+            $('#contacts_display_div').find("div.contacts-list ul").html("");
+            return $('#selected_contacts_source').html("");
+        };
+        update_contacts_list = function(source, theater_id) {
+            var unchecked_elements;
+            unchecked_elements = $('#contacts_display_div').find("input:checkbox:not(:checked)");
+            unchecked_elements = unchecked_elements.map(function(el, i) {
+                return $(this).attr('data-contact_id');
+            });
+            $.ajax({
+                type: "POST",
+                beforeSend: function(xhr) {
+                    return xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+                },
+                url: '/theaters/' + theater_id + '/update_contacts?source=' + source,
+                data: {
+                    deleted_contact_ids: $(unchecked_elements).get().join()
+                },
+                success: function(data) {
+                    var new_contacts_count;
+                    $("#" + source + "_selected_contacts_count").parent("span").show();
+                    new_contacts_count = parseInt($("#" + source + "_selected_contacts_count").html()) - parseInt(data.deleted_count);
+                    if (new_contacts_count === 0) {
+                        $("#" + source + "_contacts_ckb").prop("disabled", false);
+                        $("#" + source + "_contacts_ckb").prop("checked", false);
+                        return $("#" + source + "_contacts_edit_link").parent("span").hide();
+                    } else if (new_contacts_count > 1) {
+                        return $("#" + source + "_selected_contacts_count").html(new_contacts_count + " Contacts have");
+                    } else {
+                        return $("#" + source + "_selected_contacts_count").html(new_contacts_count + " Contact has");
+                    }
+                }
+            });
+            show_publish_tab();
+            $("#back_button").show();
+            return $("#tab_6").hide();
+        };
+        sync_contacts = function(source) {
+            $("#" + source + "_contacts_edit_link").hide();
+            $("#" + source + "_contacts_sync_link").hide();
+            $("#" + source + "_contacts_ckb").attr("disabled", false);
+            $("#" + source + "_contacts_ckb").attr("checked", true);
+            $("#" + source + "_selected_contacts_count").html(0);
+            $("#" + source + "_selected_contacts_count").parent("span").hide();
+            cloudsponge.launch(source);
+            if (source !== "yahoo" && source !== "gmail") {
+                $('#fbBox').center();
+                $('#fbBox').show();
+            }
+            return $.ajax({
+                type: "DELETE",
+                beforeSend: function(xhr) {
+                    return xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+                },
+                url: '/theaters/' + $('#theater_collection').val() + '/delete_contacts?source=' + source
+            });
+        };
+
+        edit_contacts = function(source) {
+            $('html, body').animate({scrollTop:0}, 'slow');
+            var contact, contacts_data, email, name, _i, _len;
+            if ($("#" + source + "_selected_contacts").val() === "") {
+                return $.get('/theaters/' + $('#theater_collection').val() + '/new_get_contacts?source=' + source, function(data) {
+                    $("#contacts_display_div").html(data);
+                    hide_publish_tab();
+                    $("#tab_6").show();
+                    $("#email_service_provider").html(source);
+                    return $("#back_button").hide();
+                });
+            } else {
+                $('#new_contacts_source').html(source.charAt(0).toUpperCase() + source.slice(1));
+                $("#email_service_provider").html(source);
+                contacts_data = $("#" + source + "_selected_contacts").val().split(",");
+                $("#new_contacts_count").html(contacts_data.length);
+                $("#selected_contacts_source").html(source);
+                $('#contacts_display_div').find("ul").empty();
+                for (_i = 0, _len = contacts_data.length; _i < _len; _i++) {
+                    contact = contacts_data[_i];
+                    email = contact.match(/<(.*)>/)[1];
+                    name = contact.match(/(.*)\</)[1];
+                    $('#contacts_display_div').find("ul").append("<li><input type=\"checkbox\" checked=\"checked\" data-contcats_importer=\"" + source + "\" data-contact_id=\"" + email + " \" id=\"contact_" + _i + "\" name=\"contact_\" data-contact_name=\"" + name + "\" onclick=\"manage_contacts_check_uncheck(this);\" /><label class=\"label-a label-flt\" for=\"contact_" + _i + "\"></label><div class=\"user-detail\"><h2>" + (name.strip() || email.strip()) + "</h2></div></li>");
+                }
+                $("#select_all_contact").prop("checked", true);
+                $('#contacts_display_div').find("ul").animate({scrollTop:0}, 'slow');
+
+                hide_publish_tab();
+                $("#tab_6").show();
+                return $("#back_button").hide();
+            }
+        };
+        hide_contacts_details = function() {
+            show_publish_tab();
+            $("#back_button").show();
+            $("#tab_6").hide();
+            $("#new_contacts_source").html("");
+            $("#new_contacts_count").html("");
+            return $("selected_contacts_source").html("");
+        };
+        $('#theater_collection').change(function() {
+            var contact_importer, record_id, _i, _len;
+            record_id = $(this).children(":selected").prop("value");
+            if (record_id === "" || record_id !== "new_theater") {
+                $('#new_theater_name').removeClass('error-field');
+                $("#theater_name_error").html("");
+                $("#theater_name_error").hide();
+                $('.error-dv').html("");
+                $('.error-dv').hide();
+                $('#new_theater_name').prop("value", "");
+                $('#theater_collection').removeClass('error-field');
+            }
+            if (record_id !== "" && record_id !== "new_theater") {
+                $("#theater_permission_div input").prop("disabled", true);
+                load_theater_contact_info(record_id);
+                if (record_id === "new_theater") {
+                    $("#theater_permission_div input").prop("disabled", false);
+                    if ($("#theater_permission_div #FACEBOOK_FRIENDS").is(":disabled") === false) {
+                        $("#theater_permission_div #FACEBOOK_FRIENDS").prop("checked", data.data.fb_friends);
+                    }
+                    if ($("#theater_permission_div #ALL").is(":disabled") === false) {
+                        $("#theater_permission_div #ALL").prop("checked", data.data.fb_friends);
+                    }
+                }
+            } else {
+                $('.sync_links').hide();
+                $('.edit_links').hide();
+                for (_i = 0, _len = default_contact_importers.length; _i < _len; _i++) {
+                    contact_importer = default_contact_importers[_i];
+                    $("#" + contact_importer + "_selected_contacts_count").html("0 Contact");
+                    $("#" + contact_importer + "_selected_contacts_count").parent("span").hide();
+                    $('#' + contact_importer + "_selected_contacts").val("");
+                    $('#' + contact_importer + "_contacts_ckb").attr("checked", false);
+                    $('#' + contact_importer + "_contacts_ckb").attr("disabled", false);
+                }
+                $('#theater_permission_div ul li input:checkbox').prop("checked", false);
+                $("#theater_permission_div input").prop("disabled", false);
+            }
+            if ($('#theater_collection option:first-child').is(":selected")) {
+                $('#new_theater_permissions_div').hide();
+                $('#new_theater_name').addClass('force-hide');
+                
+                if (new_theater_space == true){
+                    console.log("Removing space 1 ");
+                    $('.tab-pane').css( "height", "-=20px" );
+                    $('.pure-g').css( "height", "-=20px" );
+                    $('.r-box').css( "height", "-=20px" );
+                    new_theater_space =false;
+                }
+
+            } else if ($('#theater_collection option:last-child').is(":selected")) {
+                $('#new_theater_name').removeClass('force-hide');
+                if (new_theater_space == false){
+                    $('.tab-pane').css( "height", "+=20px" );
+                    $('.pure-g').css( "height", "+=20px" );
+                    $('.r-box').css( "height", "+=20px" );
+                    new_theater_space = true;
+                }
+
+            } else {
+                $('#new_theater_name').addClass('force-hide');
+                if (new_theater_space == true){
+                    $('.tab-pane').css( "height", "-=20px" );
+                    $('.pure-g').css( "height", "-=20px" );
+                    $('.r-box').css( "height", "-=20px" );
+                    new_theater_space =false; }
+            }
+            $("#LC_FOLLOWERS").prop("disabled", true);
+            $("#GMAIL_CONTACTS").prop("disabled", true);
+            $("#FACEBOOK_FRIENDS").prop("disabled", true);
+            return $("#ALL").prop("disabled", true);
+        });
+        $('#video_ownership li').click(function() {
+            if ($(this).children("input").prop("disabled") !== "disabled") {
+                $(this).children("input").prop("checked", true);
+            }
+            return window.event.cancelBubble = true;
+        });
+        $('#ul_preview_video li').click(function() {
+            $(this).children("input").prop("checked", true);
+            if ($('#radio_preview_upload').is(":checked")) {
+                $('#custom_video_preview').show();
+                $("#new_preview_uploader").show();
+                if ($('#user_personal_thumbnail').is(":checked")) {
+                    return $("#new_preview_uploader").css("top", "240px");
+                } else {
+                    return $("#new_preview_uploader").css("top", "165px");
+                }
+            } else {
+                $('#custom_video_preview').hide();
+                $("#new_preview_uploader").hide();
+                $("#new_preview_uploader_progress").hide();
+                return $('#new_preview_uploader').data('jqxhr').abort();
+            }
+        });
+        $('#ul_preview_video li input').click(function() {
+            if ($('#radio_preview_upload').is(":checked")) {
+                $('#custom_video_preview').show();
+                return $("#new_preview_uploader").show();
+            } else {
+                $('#custom_video_preview').hide();
+                return $("#new_preview_uploader").hide();
+            }
+        });
+        $('#ul_thumbnail_image li').click(function() {
+            return $(this).children("input").prop("checked", true);
+        });
+        $('#ul_thumbnail_image li input').click(function() {});
+        $('#ul_facebook_pages li').click(function() {
+            status = $(this).children("input").is(":checked");
+            return $(this).children("input").prop("checked", !status);
+        });
+        $('#ul_user_timeline li').click(function() {
+            var status;
+            status = $(this).children("input[type=checkbox]").is(":checked");
+            return $(this).children("input[type=checkbox]").prop("checked", !status);
+
+            /*status = $(this).children("input").is(":checked");
+            $(this).children("input").prop("checked", !status);
+            return true;*/
+        });
+        $('#ul_ownership li').click(function() {
+            status = $(this).children("input").is(":checked");
+            status = !status;
+            return $(this).children("input").prop("checked", status);
+        });
+        $('#ul_theater_permission li').click(function() {
+            var input_status;
+            if ($(this).children("input").is(":disabled")) {
+                return;
+            }
+            input_status = $(this).children("input").is(":checked");
+            $(this).children("input").prop("checked", !input_status);
+            if (!input_status === true) {
+                return $(this).children("input").click();
+            }
+        });
+        $('#theater_permission_div ul li input:checkbox').click(function() {
+            if ($(this).prop("id") === "ALL") {
+                if ($(this).is(":checked") === false) {
+                    $("#selected_fb_friends_list").prop("value", "");
+                    $("#selected_lc_followes").prop("value", "");
+                }
+                $("#select_all_fb_friends").prop("value", $(this).is(":checked"));
+                $('#theater_permission_div ul li input:checkbox').filter(":not(#LC_FOLLOWERS)").filter(":not(#GMAIL_CONTACTS)").prop("checked", $(this).is(":checked"));
+            } else {
+                $("#theater_permission_div #ALL").prop("checked", $('#theater_permission_div ul li input:checkbox').filter(":not(#ALL)").filter(":checked").size() === 1);
+                if ($(this).is(":checked") === false) {
+                    $('#theater_permission_div ul li input:checkbox').filter("#ALL").prop("checked", false);
+                    if ($(this).prop("id") === "FACEBOOK_FRIENDS") {
+                        $("#selected_fb_friends_list").prop("value", "");
+                    } else if ($(this).prop("id") === "LC_FOLLOWERS") {
+                        $("#selected_lc_followes").prop("value", "");
+                    }
+                } else {
+                    if ($(this).prop("id") === "FACEBOOK_FRIENDS") {
+                        $('#facebook_friends_list').modal('show');
+                    } else if ($(this).prop("id") === "LC_FOLLOWERS") {
+                        $('#little_cast_followers').modal('show');
+                    }
+                }
+            }
+            return window.event.cancelBubble = true;
+        });
+        set_permission = function(permission) {
+            return $('#theater_permission_div ul').append("<li><input type='checkbox' id='" + permission.permission_key + "' name='" + permission.permission_key + "'> " + permission.permission_display_text + "</li>");
+        };
+
+        set_default_permission = function(permission) {};
+
+        validate_form_submission = function() {
+            convert_timezone();
+            var email_sharing, error_counter, error_message, video_preview_upload_in_progress, video_upload_in_progress;
+            error_counter = 0;
+            error_message = "";
+            check_theater_duplicate_name();
+            video_upload_in_progress = false;
+            video_preview_upload_in_progress = false;
+
+            if (error_counter === 0) {
+                email_sharing = false;
+                default_contact_importers.map(function(elem) {
+                    if (elem === "file") {
+                        if ($('#csv_contacts').val() || parseInt($('#file_selected_contacts_count').html().split(" ")[0])) {
+                            return email_sharing = true;
+                        }
+                    } else if (parseInt($('#' + elem + "_selected_contacts_count").html().split(" ")[0])) {
+                        return email_sharing = true;
+                    }
+                });
+                if ($('#video_post_on_wall').prop("checked") || $('.facebook_page_ckb:checked ').size()) {
+
+                } else {
+                    if (is_new_video) {
+                        error_counter += 1;
+                    }
+                }
+                if( $('#schedule-post').prop('checked') && $('#post_time').val().length == 0 ){
+
+                    error_counter += 1;
+                    $('.error-dv').html("Please select scheduling date.");
+                }
+            }
+            if (error_counter === 0) {
+                if ($('#video_file').val() !== "" && $('#video_s3_key').val() === "") {
+                    video_upload_in_progress = true;
+                } else {
+                    $('#video_file').removeClass('error-field');
+                }
+                if ($('#preview_uploader_web_video').val() !== "") {
+                    if ($('#video_preview_key').val() === "") {
+                        video_preview_upload_in_progress = true;
+                    } else {
+                        $('#preview_uploader_web_video').removeClass('error-field');
+                    }
+                }
+                if (video_upload_failed) {
+                    $('#video_file').addClass('error-field');
+                    error_counter += 1;
+                }
+                if (video_preview_upload_failed) {
+                    $('#preview_uploader_web_video').addClass('error-field');
+                    error_counter += 1;
+                }
+            }
+            if ($('.error-field').size() !== 0) {
+                if (error_counter > 0) {
+                    $('.error-dv').html("Please enter the correct values in highlighted fields ");
+                    $('.error-dv').show();
+                    $('html, body').animate({
+                        scrollTop: 0
+                    }, 'slow');
+                    $("#submit_button").css("background", "");
+                    $("#submit_button").css("border", "");
+                    return false;
+                }
+            } else if (error_counter > 0) {
+                $('.error-dv').html("Please select Facebook Timeline or Pages to share the post");
+                $('.error-dv').show();
+                $('html, body').animate({
+                    scrollTop: 0
+                }, 'slow');
+                $("#submit_button").css("background", "");
+                $("#submit_button").css("border", "");
+                return false;
+            } else {
+                $('.error-dv').hide();
+            }
+
+            return true;
+        };
+
+        $(".current").next().click(function() {
+            return $("#next_button").click();
+        });
+        $(".current").prev().click(function() {
+            return $("#back_button").click();
+        });
+        $(".step1").click(function() {
+            return $("#restart-video").click();
+        });
+        $('#new_theater_name').focus(function() {
+            if ($(this).val() === "Enter theater name here") {
+                return $(this).val('');
+            }
+        });
+        $('#new_theater_name').focusout(function() {
+            if ($(this).val() === "") {
+                return $(this).val('Enter theater name here');
+            }
+        });
+        $("#video_video_identifier_id").change(function() {
+            var csrfToken, request;
+            if ($("#video_duration").val() && $(this).val() !== "" && $(this).val() !== "Select Price") {
+                $(".calculation_status").removeAttr("hidden");
+                $(".revenue-calculator").hide();
+                csrfToken = $("meta[name='csrf-token']").attr("content");
+                request = $.ajax({
+                    type: "POST",
+                    headers: {
+                        "X-CSRF-Token": csrfToken
+                    },
+                    url: "/publish_video/calculate_pricing.js",
+                    data: {
+                        price: $("#video_video_identifier_id  option:selected").text().replace("$", ""),
+                        duration: $("#video_duration").val(),
+                        height: $("#video_height").val(),
+                        new_video_flow: true
+                    }
+                });
+                return request.fail(function(jqXHR, textStatus) {
+                    $(".calculation_status").attr("hidden", "hidden");
+                    return alert("Sorry, request failed. Try again later.");
+                });
+            } else {
+                $('table.pure-table tr').filter('#tr1').hide();
+                return $(".drop-down").prop("disabled", true);
+            }
+        });
+        return $("#video_duration").focusout(function() {
+            if (validateCustomDuration()) {
+                resetPriceSelection();
+                return getPriceRange();
+            }
+        });
+    });
+
+    validateCustomDuration = function() {
+        if ($("#video_runtime_duration_div").css('display') !== 'none') {
+            if ($("#video_duration").val() <= 0 || isNaN($("#video_duration").val()) || $("#video_duration").val() === "") {
+                $("#video_duration").addClass('error-field');
+                return false;
+            } else if (parseFloat($('#video_duration').val()) > 300) {
+                $("#video_duration").addClass('error-field');
+                $("#video_runtime_error").html("Video run-time cannot be more than 300 minutes i.e. 5 hours");
+                return false;
+            } else {
+                $("#video_runtime_error").html("");
+                $("#video_duration").removeClass('error-field');
+                return true;
+            }
+        } else {
+            return true;
+        }
+    };
+
+    finish_wizard = function() {
+        if ($("#ul_facebook_pages input:checked").size() == 0  && !$('#ul_user_timeline li input[type=checkbox]').is(":checked")){
+            schedule_post_validation();
+            $('.error-dv').html("Please select Facebook Timeline or Pages to share the post");
+            $('.error-dv').show();
+            $('.fb-pages-div').parent("div").addClass("error-field")
+            $('html, body').animate({scrollTop: 0}, 'slow');
+            return false;
+        }else{
+          $('.fb-pages-div').parent("div").removeClass("error-field")
+          $('.error-dv').hide();
+          $('.error-dv').html("");
+        }
+        schedule_post_validation();
+        if( $('#schedule-post').prop('checked') && $('#post_time').val().length == 0 )
+           if($('.error-dv').text() != "Please select Facebook Timeline or Pages to share the post") {
+                $('.error-dv').html("Please select scheduling date.");
+                $('.error-dv').show();
+                $('html, body').animate({scrollTop: 0}, 'slow');
+                return false;
+             }
+
+
+
+
+
+        wizard_completed = true;
+
+        if (!video_upload_completed || !preview_upload_completed) {
+            if (validate_form_submission()) {
+                $("#submit_button").css("background", "grey");
+                $("#submit_button").css("border", "solid 1px grey");
+                $("#submit_button").html("PUBLISHED");
+                $("#publish_tab_back_button").unbind("click")
+                $("#publish_tab_back_button").css("background", "grey");
+                $("#publish_tab_back_button").css("color", "white");
+                $('.error-dv').html("Video is still being uploaded! Please keep browser and window open until completed.");
+                $('.error-dv').show();
+                $('html, body').animate({scrollTop: 0}, 'slow');
+                $("#upload_continue_message").show();
+                $("#main_forms_holder").css("z-index", - 1);
+                $("#tab_5").css("z-index", 1);
+            }
+        }
+        return check_and_finish_publishing();
+    };
+
+    videoUploadStarted = function(){
+      file_name = $("#video_file").val().split(/(\\|\/)/g).pop().split(".")[0];
+
+      $('#video_details').show();
+      $("#new_video_uploader_progress").show();
+
+      $("#video_s3_key").val("");
+
+      $("#tab_1").hide();
+      $("#tab_5").show();
+
+
+      $('#new_video_thumbnail_uploader').show();
+      $("#preview_to_s3_form").show();
+      set_position_of_thumb_and_video();
+
+      $("#next_button").show();
+      $("#video-upload-btn").hide();
+      $("#publish-steps").show();
+
+      $("#video_title_h1").html(file_name);
+      $("#video_title").val(file_name);
+      $("#publish-steps .step1").removeClass("current");
+      $("#publish-steps .step2").addClass("current");
+      $("#restart-video").show();
+
+      extract_video_runtime($("#video_file")[0].files[0]);
+    }
+
+    p_bar = $("#new_preview_bar");
+    p_percent = $("#new_preview_percent");
+    p_status = $("#new_preview_status");
+
+    $('#preview_to_s3_form #file').change(function(){
+        valid_video_file_extensions = ["3gp", "mp4", "avi", "flv", "mov", "wmv", "m4v", "mkv"]
+        file_extension = $("#preview_to_s3_form #file" ).val().split(".").pop().toLowerCase();
+
+        if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+          return false;
+        }
+
+        else if ($("#video_file").val() === $("#preview_to_s3_form #file").val()) {
+            $('.error-dv').html("You have already selected same file on step 1 for video, please use another file.");
+            $('.error-dv').show();
+            $('html, body').animate({scrollTop:0}, 'slow');
+            return false;
+        }
+
+        if($('.error-dv').html() == "You have already selected same file on step 1 for video, please use another file.")
+          $('.error-dv').hide();
+
+        $("#video_original_preview_file_name").val($('#preview_to_s3_form #file').val());
+        if ($("#preview_to_s3_form").data("jqxhr")){
+          cancel_existing_preview_uploading = true;
+          $("#preview_to_s3_form").data("jqxhr").abort();
+        }
+
+        $('#preview_to_s3_form').submit();
+    });
+
+    $('#preview_to_s3_form').ajaxForm({
+      beforeSerialize: function($form, options) {
+
+        $("#new_preview_percent").show();
+
+        preview_upload_completed = false;
+
+        file_extension = $("#preview_to_s3_form #file").val().toLowerCase().split(".").pop()
+
+        key_with_extension = $("#preview_to_s3_form #key").val() + "." + file_extension;
+
+        $("#preview_to_s3_form #key").val(key_with_extension);
+
+        $("#new_preview_uploader_progress").show();
+      },
+      beforeSend: function(){
+
+      },
+      uploadProgress: function(event, position, total, percentComplete){
+        if (DEBUG) {console.log("Video complete :: " + percentComplete.toString());}
+
+        var percentVal= percentComplete + "%";
+
+        p_bar.width(percentVal);
+
+        p_percent.html("Uploading Preview (" + percentVal + ")");
+
+      },
+      success:function(responseText, statusText, xhr, $form){
+
+        preview_upload_completed = true;
+
+        $('#video_preview_button').hide();
+
+        $('#video_preview_key').val($(responseText).find("Key").text());
+
+        $('#preview_status_message').show();
+
+        $('#preview_status_message').html($('#preview_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+
+        $('#preview_to_s3_form span.helping_text').css("color", "white");
+
+        $("#new_preview_percent").html("Preview Uploaded");
+        $("#preview_to_s3_form .ladda-button").hide();
+        $("#preview_to_s3_form #file").hide();
+        check_and_finish_publishing();
+      },
+      complete:function (xhr){
+
+      },
+      error:function(xhr){
+        if(typeof cancel_existing_preview_uploading != "undefined" && cancel_existing_preview_uploading == true){
+          cancel_existing_preview_uploading = false;
+          p_bar.width("0%");
+          p_percent.html("Uploading Preview (0%)");
+          return;
+        }
+
+        if ($($.parseXML(xhr. responseText)).find("Message").text() == "")
+          error_message = "Timeout"
+        else
+          error_message = $($.parseXML(xhr. responseText)).find("Message").text();
+
+
+        $('#new_preview_uploader_progress .percent-u').hide()
+        $('#preview-upload-error').show();
+        error_message = $($.parseXML(xhr. responseText)).find("Message").text();
+        $('#video-upload-error span').html("(" +error_message + ")");
+        $('html, body').animate({scrollTop:0}, 'slow');
+        $('#new_preview_bar').css("width", 0);
+      }
+    });
+
+    restart_preview_upload = function(){
+      $('#preview-upload-error').hide()
+      $('#preview_to_s3_form').submit();
+      $('html, body').animate({scrollTop:0}, 'slow');
+    }
+
+    $(function() {
+      $(".video-upload-button").unbind("click");
+      $(".video-upload-button").click(function() { // The button class passed into multipart_uploader_form (see "Getting Started")
+          $('#custom-error').hide();
+          if (! navigator.onLine)
+          {
+              $('#custom-error').show();
+              $('#custom-error').html("There is some network issue. Please try again");
+          }
+       is_paused = false;
+       mul_part_video =  new window.S3MP({
+          bucket: "<%= S3.bucket %>",
+          fileInputElement: "#video_file",
+          fileList: $("#video_file").get(0).files, // An array of files to be uploaded (see "Getting Started")
+          onStart: function(upload) {
+            console.log("File %d has started uploading", upload.key);
+            console.log(upload);
+            videoUploadStarted();
+            $('#custom-error').hide();
+            $('#custom-error').html("");
+            $('#custom-error').css("color", "#a0a0a0");
+          },
+          onComplete: function(upload) {
+            console.log("File %d successfully uploaded", upload.key)
+            console.log(upload);
+
+            window.document.title = "(100%) Publish Video | LittleCast";
+            bar.width("100%");
+
+            $('#video_uploader_web_video').removeClass('error-field');
+            video_upload_failed = false;
+            video_upload_completed = true;
+            $('#video_s3_key').val(upload.object_name);
+            $("#v-percentage img").hide();
+            $("#v-percentage").html("Video Uploaded");
+            check_and_finish_publishing();
+
+          },
+          onPause: function(key) {
+            console.log("File %d has been paused", key);
+          },
+           onResume: function(key) {
+               $('#custom-error').hide();
+               console.log("Now it is resumeing %d File", key);
+           },
+          onCancel: function(key) {
+            console.log("File upload %d was canceled", key);
+          },
+          onError: function(err, part) {
+            if (err.message == "File size is too small") {
+              error_message = "File-size is too small must be atleast 5MB";
+              $('#custom-error').html(error_message);
+              $('#custom-error').show();
+              $('#custom-error').css("color", "#444");
+              return;
+            }
+
+            console.log('Received params in Error function');
+            console.log(err);
+            console.log(part);
+            console.log("There was an error, resuming it again");
+            part.activate();
+
+          },
+          onProgress: function(num, size, done, percent, speed) {
+
+            if ( (! navigator.onLine) && ! is_paused)
+            {
+              console.log('going to pause!!');
+              is_paused = true;
+              error_message = "please make sure availability of internet connection";
+              mul_part_video.pause(0);
+              $('#custom-error').show();
+              $('#custom-error').css("color", "#444");
+              $('#custom-error').html(error_message + ' <a href="javascript:;"> Resume</a>').click(function(){ resume_video_uploading()});
+              $('html, body').animate({scrollTop: 0}, 'slow');
+            }
+            percent = parseInt(percent) + "%";
+            bar = $("#new_video_bar");
+            percent_bar = $("#new_video_percent");
+            status = $("#status");
+
+            bar.width(percent);
+            percent_bar.html(percent);
+            window.document.title = "(" + percent + ") Publish Video | LittleCast";
+
+          }
+        });
+      });
+    });
+
+    resume_video_uploading = function(){
+        is_paused = false;
+        console.log('video uploding is resuming now !!');
+        mul_part_video.resume(0);
+     }
+
+    check_and_finish_publishing = function() {
+        if (wizard_completed && video_upload_completed && preview_upload_completed) {
+            $("#publish_tab_back_button").unbind("click")
+            $("#publish_tab_back_button").css("background", "grey");
+            $("#publish_tab_back_button").css("color", "white");
+            $("#main_forms_holder").css("z-index", - 1);
+            $("#tab_5").css("z-index", 1);
+            $("#submit_button").css("background", "grey");            
+            $("#submit_button").css("border", "solid 1px grey");
+
+            $.get("/check_session_status").success(function(xhr){
+              if(xhr.is_session_alive){
+                $("#publishing_form").submit();
+              }
+              else{
+                $("#session_refresh").click();
+              }
+            })
+        }
+    };
+
+    reset_video_upload = function() {
+        if (typeof($("#new_video_uploader").data("jqxhr")) !== "undefined") {
+            $("#new_video_uploader").data("jqxhr").abort();
+            $("#new_video_percent").html("Uploading Video (0%)");
+            return $("#new_video_bar").width(0);
+        }
+    };
+
+    uploadStarted = function(bar, percent, status) {
+        var percentVal;
+        wizard_completed = false;
+        video_being_uploaded = true;
+        video_upload_completed = false;
+        status.empty();
+        if (ie) {
+            percentVal = "Video upload in progress...";
+            bar.width("0%");
+            $("#new_video_uploader_progress").css("background-color", "grey");
+            return percent.html(percentVal);
+        } else {
+            percentVal = "0%";
+            bar.width(percentVal);
+            return percent.html(percentVal);
+        }
+    };
+
+    previewUploadStarted = function(bar, percent, status) {
+        var percentVal;
+        preview_being_uploaded = true;
+        preview_upload_completed = false;
+        status.empty();
+        if (ie) {
+            percentVal = "Preview upload in progress...";
+            bar.width("0%");
+            $("#new_preview_uploader_progress").css("background-color", "grey");
+            return percent.html(percentVal);
+        } else {
+            percentVal = "0%";
+            bar.width(percentVal);
+            return percent.html(percentVal);
+        }
+    };
+
+    previewUploadFinished = function(xhr, percent, status, bar) {
+        var file_name, percentVal;
+        status.html(xhr.responseText);
+        percentVal = "100%";
+        bar.width(percentVal);
+        file_name = $("#preview_uploader_web_video").val().replace(/^.*[\\\/]/, "");
+        $("#video_preview_key").val($("#preview_uploader_key").val());
+        $("#video_preview_key").val($("#video_preview_key").val().replace("${filename}", file_name));
+        percent.html("Preview Uploaded");
+        preview_upload_completed = true;
+        return check_and_finish_publishing();
+    };
+
+    reset_preview_upload = function() {
+        if (typeof($("#new_preview_uploader").data("jqxhr")) !== "undefined") {
+            $("#new_preview_uploader").data("jqxhr").abort();
+            $("#new_preview_percent").html("Uploading Preview (0%)");
+            return $("#new_preview_bar").width(0);
+        }
+    };
+
+    check_all_check_boxes = function(check_box) {
+        return $("#check_fb_friend_all").parent().parent().find(":checkbox").attr("checked", $(check_box).is(":checked"));
+    };
+
+    collect_selected_friends = function() {
+        var array, selected_friends;
+        array = [];
+        selected_friends = [];
+        return $("#check_fb_friend_all").parent().parent().find(":checkbox").each(function() {
+            if ($(this).is(":checked")) {
+                return selected_friends.push(this);
+            }
+        });
+    };
+
+    manageImportedContacts = function(contacts, source, owner) {
+        var contact, email, emails, entry, i, name;
+        $("#" + source + "_selected_contacts_count").parent("span").show();
+        if ($(contacts).length > 1) {
+            $("#" + source + "_selected_contacts_count").html($(contacts).length + " Contacts have");
+        } else {
+            $("#" + source + "_selected_contacts_count").html($(contacts).length + " Contact has");
+        }
+        emails = [];
+        i = 0;
+        while (i < contacts.length) {
+            contact = contacts[i];
+            name = contact.fullName();
+            email = contact.selectedEmail();
+            entry = name + "<" + email + ">";
+            if (emails.indexOf(entry) < 0) {
+                emails.push(entry);
+            }
+            i++;
+        }
+        $("#" + source + "_contacts_ckb").prop("checked", true);
+        $("#" + source + "_selected_contacts").html(emails.join(", "));
+        $("#" + source + "_selected_contacts").val(emails.join(", "));
+        $("#" + source + "_contacts_edit_link").show();
+        return $("#" + source + "_edit_link_sperator").hide();
+    };
+
+    IsEmail = function(email) {
+        var regex;
+        regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email);
+    };
+
+    extract_video_runtime = function(file) {
+        var blob, bytes_to_extract, url, xhr;
+        bytes_to_extract = parseInt(file.size * 0.01);
+        if (file.type === 'video/quicktime' || file.type === 'video/3gpp' || bytes_to_extract > 1024 * 1024 * 6) {
+
+          $("#video_runtime_duration_label").show();
+          $("#video_runtime_duration_div").show();
+
+          //$("#video_duration_div").show();
+          $("#video_duration").val("");
+          return;
+        }
+        $("#video_runtime_error").html("");
+        $("#video_duration").removeClass('error-field');
+        $("#video_duration_div").hide();
+        resetPriceSelection();
+        blob = file.slice(0, bytes_to_extract);
+        url = video_chunk_upload_url;
+        xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            var resp;
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    resp = jQuery.parseJSON(xhr.response);
+                    updatePricing(resp);
+                    return $("#video_duration").val(resp.data.duration / 60);
+                } else {
+                    $("#price_status").text("Error occured, please select video again from step 1");
+                    $("#price_status").addClass("error-dv");
+                    return $("#price_loading_image").hide();
+                }
+            }
+        };
+        temp_file_name = Math.random().toString(36).substring(7) + "." + file.name.split(".").pop();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("X-File-Name", temp_file_name);
+        xhr.setRequestHeader("X-File-Size", file.size);
+        xhr.setRequestHeader("Content-Type", "application/octet-stream");
+        xhr.setRequestHeader("X-CSRF-Token", $("meta[name='csrf-token']").attr("content"));
+        return xhr.send(blob);
+    };
+
+    resetPriceSelection = function() {
+        $("#video_video_identifier_id option").first().prop("selected", true);
+        $("#video_video_identifier_id").prop("disabled", true);
+        $("#price_status").text("Please wait while we select price ranges...");
+        $("#price_status").removeClass("error-dv");
+        $("#price_loading_image").show();
+        $("#video_video_identifier_id option").each(function() {
+            return $(this).show();
+        });
+        $(".v-properties").hide();
+        $(".v-charges").hide();
+        return $(".drop-down").prop("disabled", false);
+    };
+
+    updatePricing = function(rsp) {
+        updatePriceSelection(rsp.data.min_price);
+        $("#price_loading_image").hide();
+        $("#video_video_identifier_id").prop("disabled", false);
+        $("#price_status").text("");
+        $("#price_status").removeClass("error-dv");
+        $(".v-properties").show();
+        $(".v-charges").show();
+        return setPricingInfo(rsp.data.duration, rsp.data.output_formats, rsp.data.payment_percent, rsp.data.payment_fee, rsp.data.streams, rsp.data.downloads);
+    };
+
+    updatePriceSelection = function(min_price) {
+        var item, key, price_counter, _results;
+        price_counter = 1;
+        $("#video_video_identifier_id option").remove();
+        $("#video_video_identifier_id").append(new Option("Select Price"));
+        _results = [];
+        for (item in min_price) {
+            _results.push((function() {
+                var _results1;
+                _results1 = [];
+                for (key in min_price[item]) {
+                    _results1.push($("#video_video_identifier_id").append(new Option(min_price[item][key], key)));
+                }
+                return _results1;
+            })());
+        }
+        return _results;
+    };
+
+    setPricingInfo = function(duration, output_formats, payment_percent, payment_fee, streams, downloads) {
+        var hour, min, sec;
+        hour = Math.floor(duration / (60 * 60) % 60);
+        hour = (hour < 10 ? "0" + hour : hour);
+        min = Math.floor(duration / 60 % 60);
+        min = (min < 10 ? "0" + min : min);
+        sec = Math.floor(duration % 60);
+        sec = (sec < 10 ? "0" + sec : sec);
+        $("#duration_span").html(hour + " : " + min + " : " + sec);
+        $("#format_span").html(output_formats);
+        $("#streams_span").html(streams);
+        return $("#downloads_span").html(downloads);
+    };
+
+    getPriceRange = function() {
+        var request;
+        request = $.ajax({
+            url: "/publish_video/pricing_range",
+            type: "GET",
+            data: {
+                custom_duration: $("#video_duration").val()
+            },
+            dataType: "json"
+        });
+        request.done(function(rsp) {
+            return updatePricing(rsp);
+        });
+        return request.fail(function(jqXHR, textStatus) {
+            $("#price_status").text("Error occured, please enter video run-time again.");
+            $("#price_status").addClass("error-dv");
+            return $("#price_loading_image").hide();
+        });
+    };
+
+}
+
+paid_video_bind_key_up_and_down_events = function () {
+    $('#video_title, #video_description, #video_sharing_message, #new_theater_name').keyup(function () {
+        key_up_and_down_event($(this));
+    });
+
+    $('#video_title, #video_description, #video_sharing_message, #new_theater_name').keydown(function () {
+        key_up_and_down_event($(this));
+    });
+}
+
+key_up_and_down_event = function(element) {
+    maxlimit = parseInt(element.attr('data_size'));
+    cntfield = element.next();
+
+    if (element.val().length > maxlimit) // if too long...trim it!
+        element.val(element.val().substring(0, maxlimit));
+    // otherwise, update 'characters left' counter
+    else
+        cntfield.html(maxlimit - element.val().length);
+}
+
+function setup_banner_image_upload()
+{
+  $('.delete-banner-img a').click(function(){
+    $('#banner_img').remove();
+
+    $('#paid_video_banner_image_button').show();
+    $('#paid_video_banner_image_key').val("");
+    $('#banner_image_status_message').hide();
+    $('#banner_image_status_message').html("");
+    $('#banner-text, #banner-text span').css("color", "black");
+    $('.delete-banner-img').hide();
+    $('#paid_video_banner_image_to_s3_form').stop();
+    $('#paid_video_banner_image_to_s3_form #file').val("");
+    $('#paid_video_banner_image_to_s3_form #file').css("width", 142);
+
+    if(typeof(banner_ladda) != "undefined")
+    {
+      $("#paid_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+      banner_ladda.stop();
+      banner_xhr.abort();
+    }else{
+      $("#paid_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+    }
+  });
+
+
+  $('#paid_video_banner_image_to_s3_form').ajaxForm({
+    beforeSerialize: function($form, options) {
+      original_banner_key_name = $("#paid_video_banner_image_to_s3_form #key").val();
+      file_extension = $("#paid_video_banner_image_to_s3_form #file").val().toLowerCase().split(".").pop()
+      key_with_extension = $("#paid_video_banner_image_to_s3_form #key").val() + "." + file_extension;
+      $("#paid_video_banner_image_to_s3_form #key").val(key_with_extension);
+      $('#banner_img').remove();
+    },
+    beforeSend: function(xhr){
+      console.log('--------------------   beforeSend: function(xhr)');
+      banner_xhr = xhr;
+      banner_ladda  = Ladda.create($('#paid_video_banner_image_button')[0]);
+      banner_ladda.start();
+      $('.delete-banner-img').show();
+    },
+    uploadProgress: function(event, position, total, percentComplete){
+        banner_ladda.setProgress(percentComplete/100);
+    },
+    success:function(responseText, statusText, xhr, $form){
+      banner_ladda.stop();
+      $('#paid_video_banner_image_button').hide();
+      $('#video_banner_image_key').val($(responseText).find("Key").text());
+      $('#banner_image_status_message').show();
+      $('#banner_image_status_message').html($('#paid_video_banner_image_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+      $('#banner-text, #banner-text span').css("color", "white");
+      $('#paid_video_banner_image_to_s3_form #file').val("");
+      $('#paid_video_banner_image_to_s3_form #file').css("width", $('#banner_image_status_message').width());
+    },
+    complete:function (xhr){},
+    error:function(xhr){banner_ladda.stop; }
+  });
+
+
+  $('#paid_video_banner_image_to_s3_form #file').change(function(){
+   console.log('--   #paid_video_banner_image_to_s3_form #file');
+      valid_video_file_extensions = ["jpg", "jpeg", "png"]
+      file_extension = $("#paid_video_banner_image_to_s3_form #file" ).val().split(".").pop().toLowerCase();
+      if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+        return false;
+      }
+    if(typeof(banner_ladda) != "undefined"){
+      $('#paid_video_banner_image_button').show();
+      $('#paid_video_banner_image_key').val("");
+      $('#banner_image_status_message').hide();
+      $("#paid_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+    }
+    console.log('submitting the video banner form');
+    $('#paid_video_banner_image_to_s3_form').submit();
+  });
+}
+
+function bind_single_field_tag()
+{
+  $("#singleFieldTags").on("keyup change", function(){
+      currentTags = $("#singleFieldTags").tagHandler("getSerializedTags")
+      set_position_of_thumb_and_video();
+      $("#video_tags").val(currentTags)
+    })
+}
+
+
+
+
+// THIS JS FOR EDIT
+
+FreeVideosController.prototype.edit= function(){
+
+  action_button = 'Update';
+  convert_local_time();
+  $("#session_refresh").fancybox({
+    'width': '75%',
+    'height': '75%',
+    'autoScale': false,
+    'transitionIn': 'none',
+    'transitionOut': 'none',
+    'type': 'iframe',
+    afterLoad: function() {
+      $("meta[name='csrf-token']").prop("content", JSON.parse($(".fancybox-iframe").contents().find("body").find("pre").html()).csrfToken);
+      $('[name=authenticity_token]').prop("value", JSON.parse($(".fancybox-iframe").contents().find("body").find("pre").html()).csrfToken);
+      $("#publishing_form").submit();
+    },
+    beforeShow: function() {
+      return $('.fancybox-wrap').hide();
+    }
+  });
+
+  $(document).ready(function(){
+      set_position_of_thumb_and_video();
+  });
+
+  var IsEmail, check_all_check_boxes, check_and_finish_publishing, collect_selected_friends, extract_video_runtime, ie, manageImportedContacts, valid_video_file_extensions;
+
+  window.tab_position = 0;
+
+  window.default_contact_importers = ["gmail", "yahoo", "windowslive", "aol", "plaxo", "addressbook", "file"];
+
+  valid_video_file_extensions = ["3gp", "mp4", "avi", "flv", "mov", "wmv", "m4v", "mkv"];
+
+  ie = navigator.userAgent.indexOf("MSIE") > 0;
+
+  user_sumbitted_form = false;
+
+  $('#preview-upload-btn').css("top", '584px');
+  $('#preview-text').removeClass('preview');
+
+  if (navigator.userAgent.indexOf("Firefox")!=-1) // adding this for Firefox browser
+  {
+    $('#preview-text').css({ 'margin-top': '58px', 'margin-right':'0px', 'margin-bottom':'16px', 'margin-left':'145px'});
+    $('.botoom-btn').css('margin-top', '-=15');
+  }
+  else
+  {  
+    $('#preview-text').css({ 'margin-top': '71px', 'margin-right':'0px', 'margin-bottom':'16px', 'margin-left':'145px'});
+  }
+
+  $('#new_video_thumbnail_uploader').show();
+  paid_video_bind_key_up_and_down_events();
+  bind_schedule_post_checkbox();
+
+  no_of_facebook_page = $("#ul_facebook_pages").find("li").size();
+  console.log("1-1-1---------------------" +no_of_facebook_page )
+
+  if(no_of_facebook_page == 1){
+    console.log("INSIDE IF ON PAGES1-1-1---------------------")
+
+    $('#ul_facebook_pages').css("columns", "1");
+    $('#ul_facebook_pages').css("-webkit-columns", "1");
+    $('#ul_facebook_pages').css("-moz-columns", "1");
+  }
+  console.log("2-2-2---------------------")
+  $("#singleFieldTags").tagHandler({maxTags: 10,delimiter: ',', assignedTags: $('#existing_tags').val().split(","), afterDelete: function(tag) {set_position_of_thumb_and_video();}})
+  $("#video_tags").val($('#existing_tags').val());
+  $("#video_title_char_count").html(parseInt($("#video_title_char_count").html()) - $('#video_title').val().length)
+  $("#video_description_char_count").html(parseInt($("#video_description_char_count").html()) - $('#video_description').val().length);
+  $("#video_sharing_message_char_count").html(parseInt($("#video_sharing_message_char_count").html()) - $('#video_sharing_message').val().length);
+
+  $('#video_details').find(".f-box").css("height", '700px');
+  $('#video_details').find(".r-box").css("height", '670px');
+  $('#video_details').find(".edit-tags-h").css("padding-top", '50px');
+  $('#video_details').find(".edit-thumb-h").css("padding-top", '65px');
+  $('#video_details').find(".edit-preview-h").css("padding-top", '20px');
+
+
+  if(no_of_facebook_page > 10)
+    $('#fb_page_ul_div').css("overflow-y", "scroll");
+
+  new_height = (Math.ceil(no_of_facebook_page/2)  > 5 ? 5 : Math.ceil(no_of_facebook_page/2) )* 35;
+  additional_height = new_height;
+
+  $('#fb_page_ul_div').css("height", 15 + new_height + "px");
+
+  //$('.banner-img').css("margin-top", parseInt($('.banner-img').css("margin-top").split("px")[0]) + 20 + additional_height);
+  existing_tab_height = $('#publish_tab').find(".f-box").css("height").split("px")[0];
+  $('#publish_tab').find(".f-box").css("height", 670 + 30 + additional_height);
+
+  existing_margin_top = $('.label-fb-paid').css("margin-top").split("px")[0];
+
+  existing_top = $('#banner_image_form_holder').css("top").split("px")[0];
+  $('#banner_image_form_holder').css('top', existing_top - 222);
+
+  existing_height = $('#publish_tab').find(".f-box").css("height").split("px")[0];
+  $('#publish_tab').find(".f-box").css("height", existing_height - 235);
+
+  existing_height = $('#publish_tab').find(".f-box").css("height").split("px")[0];
+
+  $('#publish_tab').find(".r-big-box-publish-edit").css("height", existing_height);
+  if (existing_height < 470)
+    existing_height  = 500
+  $('#publish_tab').find(".r-box").css("height", existing_height-30);
+  $('#label_banner_image').css("margin-top",no_of_facebook_page*15)
+
+  existing_top = $('#publish_tab').find('.back-button').css("top").split("px")[0];
+  $('#publish_tab').find('.back-button').css('top', 0);
+
+  existing_top = $('#publish_tab').find('.next-button').css("top").split("px")[0];
+  $('#publish_tab').find('.next-button').css('top', 0);
+
+  height = additional_height/9;
+  if (height < 45)
+    height = 45;
+  $('.fb-bottom').css("margin-top", height );
+  $('#banner_image_form_holder').css("top", 220 + additional_height);
+  if(no_of_facebook_page < 1)
+   $('.botoom-btn').css("margin-top", 60);
+
+  bind_single_field_tag();
+
+  $("#video_title").on("keyup change", function(){
+    $("#video_title_h1").text($(this).val());
+  })
+  $("#main_forms_holder").tooltip();
+  $('#publishing_container select').not("#video_video_identifier_id, #theater_collection, #free_video_video_identifier_id ").selectBox('settings', {hideOnWindowScroll: false});
+
+    $("#owner_video_permission").change(function(){
+      if($("#owner_video_permission").prop("checked") && $("#terms").prop("checked")){
+          $("#tos").hide();
+          $('#video-upload-btn').fadeIn();
+        }
+    });
+
+  $("#terms").change(function(){
+      if($("#owner_video_permission").prop("checked") && $("#terms").prop("checked")){
+        $("#tos").hide();
+        $('#video-upload-btn').fadeIn();
+      }
+    });
+
+    $('.back-button').click(function(element){
+      $('.error-dv').hide();
+      if($(element.target).data().tab_name == "pricing_tab"){
+        $('html, body').animate({scrollTop:0}, 'slow');
+
+        $('#pricing_tab').hide();
+        $("#new_video_thumbnail_uploader, #video_details, #preview_to_s3_form").show();
+        set_position_of_thumb_and_video();
+
+        $('.step2').addClass('current');
+        $('.step3').removeClass('current');
+      }
+
+      if($(element.target).data().tab_name == "publish_tab"){
+        $('html, body').animate({scrollTop:0}, 'slow');
+
+        $('#pricing_tab').show();
+        hide_publish_tab();
+
+        $('.step3').addClass('current');
+        $('.step4').removeClass('current');
+      }
+    })
+
+    $('.next-button').click(function(element){
+
+      error_counter = 0;
+      console.log($(element.target).data().tab_name);
+
+      if($(element.target).data().tab_name == "video_details"){
+        if($('#video_title').val().trim() == ""){
+          $('#video_title').addClass('error-field')
+          error_counter += 1;}
+        else
+          $('#video_title').removeClass('error-field')
+
+        if($('#video_title').val().trim().length  > 50){
+          $('#video_title').addClass('error-field')
+          error_counter += 1;
+          $("#video_title_error").html("Title length should not exceed 50 characters");}
+
+        if($('#video_category_name').val().trim() == "Select Category"){
+          $('#video_category_name').addClass('error-field')
+          error_counter += 1;
+        }
+        else
+          $('#video_category_name').removeClass('error-field')
+
+        if($('#video_rating').val().trim() == "Select Rating"){
+          $('#video_rating').addClass('error-field')
+          error_counter += 1;
+        }
+        else
+          $('#video_rating').removeClass('error-field')
+
+        if($('#video_description').val().trim() == ""){
+          $('#video_description').addClass('error-field')
+          error_counter += 1;}
+        else
+          $('#video_description').removeClass('error-field')
+
+        if($('#video_description').val().trim().length  > 1500){
+          $('#video_description').addClass('error-field')
+          error_counter += 1;
+          $("#video_description_error").html("Description of video should not exceed 1500 characters");}
+
+        if($('#singleFieldTags').children().size() < 4  ){
+          $('#singleFieldTags').addClass('error-field')
+          error_counter += 1}
+        else
+          $('#singleFieldTags').removeClass('error-field')
+
+        if($('#video_category_name').val().trim() == ""){
+          $('#tab_5 .selectBox-dropdown:eq(0)').addClass('error-field')
+          error_counter += 1;}
+        else
+          $('#tab_5 .selectBox-dropdown:eq(0)').removeClass('error-field')
+
+        $('html, body').animate({scrollTop:0}, 'slow');
+
+        if (error_counter == 0){
+          $('#video_details').hide();
+          $('#pricing_tab').show();
+          $('#new_video_thumbnail_uploader').hide();
+          $('#preview_to_s3_form').hide();
+
+          $('.step2').removeClass('current');
+          $('.step3').addClass('current');
+          $('.error-dv').hide();
+        }else{
+          $('.error-dv').html("Please enter the correct values in highlighted fields ")
+          $('.error-dv').show();
+
+        }
+      }
+
+      if($(element.target).data().tab_name == "pricing_tab"){
+
+        if ($('#video_video_identifier_id').val().trim() === "Select Price" && is_new_video) {
+          $('#video_video_identifier_id').addClass('error-field');
+          error_counter += 1;
+        } else {
+          $('#video_video_identifier_id').removeClass('error-field');
+        }
+
+        $('html, body').animate({scrollTop:0}, 'slow');
+
+        if( error_counter == 0)
+        {
+          $('#pricing_tab').hide();
+
+          show_publish_tab();
+
+          $('.step4').addClass('current');
+          $('.step3').removeClass('current');
+
+          $('.error-dv').hide();
+        }
+        else
+        {
+          $('.error-dv').html("Please enter the correct values in highlighted fields ")
+          $('.error-dv').show();
+        }
+
+      }
+    })
+
+    function show_publish_tab()
+    {
+        $('#publish_tab').show();
+        $('#banner_image_form_holder').css({"top" : $("#banner-button-holder").position().top +25 + "px"});
+        $('#paid_video_banner_image_to_s3_form, #banner_image_status_message, #banner_image_form_holder').show();
+
+        if($("#banner_image_status_message").html().length > 0 || $("#banner_img").is(":visible") == true)
+        {
+          $(".delete-banner-img").show();
+        }
+    }
+
+    function hide_publish_tab()
+    {
+        $('#publish_tab').hide();
+        $('#paid_video_banner_image_to_s3_form, #banner_image_status_message, #banner_image_form_holder .delete-banner-img').hide();
+    }
+
+    window.validates_video_type = function(video_file_attribute) {
+        var file_extension, message;
+        file_extension = $("#" + video_file_attribute).val().toLowerCase().split(".").pop();
+        if (valid_video_file_extensions.indexOf(file_extension) === -1 || file_extension.length === 0) {
+            message = "You have chosen an unsupported file format. Please upload a file with one of the following extensions: 3gp, mp4, avi, flv, mov, wmv, m4v, and mkv";
+            $("#custom-error").html(message);
+            $("#custom-error").show();
+            return false;
+        } else {
+            return true;
+        }
+        return end;
+    };
+
+    jQuery(function() {
+        var bar, csPageOptions, getUserFBPages, isFBPermissionsGrantedForPublishVideo, p_bar, p_percent, p_status, percent, set_default_permission, set_permission, status;
+
+        isFBPermissionsGrantedForPublishVideo = function(callback) {
+                return FB.getLoginStatus(function(response) {
+                if (response.status === "connected") {
+                    return FB.api("/me/permissions", function(response) {
+                        var permissions;
+                        if (response && response.data && response.data.length) {
+                            permissions = response.data.shift();
+                            if (permissions.manage_pages) {
+                                getUserFBPages();
+                            }
+                            if (permissions.publish_stream) {
+                                $('#post_wall_fb_div').show();
+                            }
+                            return callback(permissions.publish_stream && permissions.manage_pages);
+                        }
+                    });
+                } else {
+                    return callback(false);
+                }
+            });
+        };
+        isFBPermissionsGrantedForPublishVideo(function(fb_permission_response) {
+            if (fb_permission_response) {
+                $(".waiting_state_div").hide();
+                $(".permission_buttons_div").hide();
+                $("#new_video_uploader").show();
+                $("#tos").show();
+                return $("#tab_1 .q-answer").hide();
+            } else {
+                $(".waiting_state_div").hide();
+                return $(".permission_buttons_div").show();
+            }
+        });
+        $('#fb_get_permissions_button').click(function() {
+            return FB.login(function(response) {
+                return isFBPermissionsGrantedForPublishVideo(function(fb_permission_response) {
+                    if (fb_permission_response) {
+                        $(".waiting_state_div").hide();
+                        $(".permission_buttons_div").hide();
+                        $("#new_video_uploader").show();
+                        $("#tab_1 .q-answer").hide();
+                        return $("#tos").fadeIn();
+                    } else {
+                        $(".waiting_state_div").hide();
+                        return $(".permission_buttons_div").show();
+                    }
+                });
+            }, {
+                scope: "publish_stream,manage_pages"
+            });
+        });
+        getUserFBPages = function() {
+            var fb_pages_query = 'select page_id, pic, pic_small, name, page_url from page where page_id in (select page_id from page_admin where uid = ' + $('#users_fb_id').prop("value") + ') order by name';
+            return FB.api({
+                method: 'fql.query',
+                query: fb_pages_query
+            }, function(data) {
+                var fb_pages_li_data;
+                fb_pages_li_data = "";
+                pages = $('#video_fan_pages').val().split(",")
+
+                $(data).each(function(index) {
+
+                    checkbox_checked = pages.indexOf( this.page_id.toString() ) >=0 ? "checked" : "false"
+                    return fb_pages_li_data += "<li id='" + this.name + " '> <input name='facebook_pages[" + this.page_id + "]' type='hidden' value='0'><input  "+checkbox_checked+"  type='checkbox' class='facebook_page_ckb' id='facebook_pages_" + this.page_id + "' name='facebook_pages[" + this.page_id + "]' value='1' />                                   <label class='label-a' for='1'></label>                                  <img src='" + this["pic"] + "' width='32px' heigh='32px'/> " + this.name + "                                  </li>";
+                });
+                if (fb_pages_li_data !== "") {
+                    $('#user_pages_list_div').show();
+                    $('#ul_facebook_pages').html(fb_pages_li_data);
+                    return $('#ul_facebook_pages li').click(function() {
+                        var status;
+                        status = $(this).children("input[type=checkbox]").is(":checked");
+                        return $(this).children("input[type=checkbox]").prop("checked", !status);
+                    });
+                }
+            });
+        };
+        $("#main_forms_holder").tooltip();
+        $('#publishing_container select').not("#video_video_identifier_id, #theater_collection, #free_video_video_identifier_id").selectBox('settings', {
+            hideOnWindowScroll: false
+        });
+        $("#facebook_pages").change(function() {
+            var fbClass, selectVal;
+            selectVal = $("#facebook_pages").val();
+            fbClass = $(document.getElementById(selectVal));
+            fbClass.show();
+            return $(fbClass + ".facebook_page_ckb").prop("checked", true);
+        });
+
+        $("#all-plat").change(function() {
+            if ($("#all-plat").prop("checked")) {
+                $("thead td").hide();
+                $("thead input").prop("checked", false);
+                $("#all-label, #open-label").removeClass("current");
+                return $("#all-label").addClass("current");
+            }
+        });
+
+        $("#open-plat").change(function() {
+            if ($("#open-plat").prop("checked")) {
+                $("thead td").show();
+                $("#all-label, #open-label").removeClass("current");
+                return $("#open-label").addClass("current");
+            }
+        });
+
+        $(window).bind("beforeunload", function(event) {
+            var e, msg;
+            if (ie) {
+                return;
+            }
+            if (dataUploadingInProgress()) {
+                e = event || window.event;
+                msg = "Video upload is in progress!";
+                if (e) {
+                    e.returnValue = msg;
+                }
+                return msg;
+            }
+        });
+
+        $("#video_payment_method").change(function() {
+            if ($("#video_payment_method").val() === payment_methods) {
+                return $("#paypal_email_address").prop("type", "text");
+            } else {
+                return $("#paypal_email_address").prop("type", "hidden");
+            }
+        });
+
+        $("[name=\"video[brand_id]\"]").change(function() {
+            $("#video_brand_type").val($(this).attr("brand_type"));
+            return $("#branding_image").attr("src", $(this).parent().children("img").attr("src"));
+        });
+
+
+        $('#paid_video_banner_image_to_s3_form').ajaxForm({
+          beforeSerialize: function($form, options) {
+            original_banner_key_name = $("#paid_video_banner_image_to_s3_form #key").val();
+            file_extension = $("#paid_video_banner_image_to_s3_form #file").val().toLowerCase().split(".").pop()
+            key_with_extension = $("#paid_video_banner_image_to_s3_form #key").val() + "." + file_extension;
+            $("#paid_video_banner_image_to_s3_form #key").val(key_with_extension);
+            $('#banner_img').remove();
+
+            if($('.error-dv').html() == "Banner Image upload failed, please try again."){
+              $('.error-dv').hide();
+            }
+          },
+          beforeSend: function(xhr){
+            banner_xhr = xhr;
+            banner_ladda  = Ladda.create($('#paid_video_banner_image_button')[0]);
+            banner_ladda.start();
+            $('.delete-banner-img').show();
+          },
+          uploadProgress: function(event, position, total, percentComplete){
+              banner_ladda.setProgress(percentComplete/100);
+          },
+          success:function(responseText, statusText, xhr, $form){
+            banner_ladda.stop();
+            $('#paid_video_banner_image_button').hide();
+            $('#video_banner_image_key').val($(responseText).find("Key").text());
+            $('#banner_image_status_message').show();
+            $('#banner_image_status_message').html($('#paid_video_banner_image_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+            $('#banner-text, #banner-text span').css("color", "white");
+            $('#paid_video_banner_image_to_s3_form #file').val("");
+            $('#paid_video_banner_image_to_s3_form #file').css("width", $('#banner_image_status_message').width());
+            submitForm();
+          },
+          complete:function (xhr){},
+          error:function(xhr){
+            banner_ladda.stop();
+            $('.delete-banner-img').hide();
+            $('.error-dv').html("Banner Image upload failed, please try again.");
+            $('html, body').animate({scrollTop: 0}, 'slow');
+            $('.error-dv').show();
+            $("#main_forms_holder").css("z-index", 1);
+            $('#paid_video_banner_image_to_s3_form #file').val("");
+          }
+        });
+
+        $('.delete-banner-img a').click(function(){
+          $('#banner_img').remove();
+
+          $('#paid_video_banner_image_button').show();
+          $('#video_banner_image_key').val("");
+          $('#banner_image_status_message').hide();
+          $('#banner_image_status_message').html("");
+          $('#banner-text, #banner-text span').css("color", "black");
+          $('.delete-banner-img').hide();
+          $('#paid_video_banner_image_to_s3_form').stop();
+          $('#paid_video_banner_image_to_s3_form #file').val("");
+          $('#paid_video_banner_image_to_s3_form #file').css("width", 142);
+
+          if(typeof(banner_ladda) != "undefined")
+          {
+            banner_ladda.stop();
+            banner_xhr.abort();
+          }
+        });
+
+        $('#paid_video_banner_image_to_s3_form #file').change(function(){
+         console.log('--   #paid_video_banner_image_to_s3_form #file');
+            valid_video_file_extensions = ["jpg", "jpeg", "png"]
+            file_extension = $("#paid_video_banner_image_to_s3_form #file" ).val().split(".").pop().toLowerCase();
+            if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+              return false;
+            }
+          if(typeof(banner_ladda) != "undefined"){
+            $('#paid_video_banner_image_button').show();
+            $('#paid_video_banner_image_key').val("");
+            $('#banner_image_status_message').hide();
+            $("#paid_video_banner_image_to_s3_form #key").val(original_banner_key_name);
+          }
+          console.log('submitting the video banner form');
+          $('#paid_video_banner_image_to_s3_form').submit();
+        });
+
+        p_bar = $("#new_preview_bar");
+        p_percent = $("#new_preview_percent");
+        p_status = $("#new_preview_status");
+
+        $('#preview_to_s3_form #file').change(function(){
+            valid_video_file_extensions = ["3gp", "mp4", "avi", "flv", "mov", "wmv", "m4v", "mkv"]
+            file_extension = $("#preview_to_s3_form #file").val().split(".").pop().toLowerCase();
+
+            if(valid_video_file_extensions.indexOf(file_extension) == -1 || file_extension.length == 0){
+              return false;
+            }
+
+            $("#video_original_preview_file_name").val($('#preview_to_s3_form #file').val());
+            $('#preview_to_s3_form #file').css("z-index", -1);
+            $('#preview_to_s3_form').submit();
+        });
+
+        $('#preview_to_s3_form').ajaxForm({
+          beforeSerialize: function($form, options) {
+
+            preview_upload_completed = false;
+
+            file_extension = $("#preview_to_s3_form #file").val().toLowerCase().split(".").pop()
+
+            key_with_extension = $("#preview_to_s3_form #key").val() + "." + file_extension;
+
+            $("#preview_to_s3_form #key").val(key_with_extension);
+
+            $("#new_preview_uploader_progress").show();
+          },
+          beforeSend: function(){
+
+          },
+          uploadProgress: function(event, position, total, percentComplete){
+            if (DEBUG) {console.log("Video complete :: " + percentComplete.toString());}
+
+            var percentVal= percentComplete + "%";
+
+            p_bar.width(percentVal);
+            p_percent.html("Uploading Preview (" + percentVal + ")");
+
+          },
+          success:function(responseText, statusText, xhr, $form){
+
+            preview_upload_completed = true;
+
+            $('#video_preview_button, #preview_to_s3_form #file, #preview_to_s3_form .ladda-button').hide();
+
+            $('#video_preview_key').val($(responseText).find("Key").text());
+
+            $('#preview_status_message').show();
+
+            $('#preview_status_message').html($('#preview_to_s3_form #file').val().replace(/^.*[\\\/]/, ''));
+
+            $('#preview_to_s3_form span.helping_text').css("color", "white");
+
+            $("#new_preview_percent").html("Preview Uploaded");
+
+            submitForm();
+
+          },
+          complete:function (xhr){
+
+          },
+          error:function(xhr){
+            $('#preview_to_s3_form #file').css("z-index", 1);
+            $('#new_preview_uploader_progress .percent-u').hide();
+            $('#video-upload-error').show();
+
+            if ($($.parseXML(xhr. responseText)).find("Message").text() == "")
+              error_message = "Timeout"
+            else
+              error_message = $($.parseXML(xhr. responseText)).find("Message").text();
+
+            $('#video-upload-error span').html("(" +error_message + ")");
+            $('html, body').animate({scrollTop:0}, 'slow');
+            $('#new_video_bar').css("width", 0);
+          }
+        });
+
+        restartPreviewUpload = function(){
+          $('#preview_to_s3_form').submit();
+          $('#new_preview_uploader_progress .percent-u').show();
+          $('#video-upload-error').hide();
+        }
+
+        $("#theater_collection").append("<option value=\"new_theater\" >Create New Audience</option>");
+
+        jQuery.fn.center = function() {
+            this.css("position", "absolute");
+            this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + $(window).scrollTop()) + "px");
+            this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + $(window).scrollLeft()) + "px");
+            return this;
+        };
+
+        csPageOptions = {
+            domain_key: "LWBSZM4LRQGKDEBK4HKT",
+            afterSubmitContacts: manageImportedContacts,
+            skipSourceMenu: true,
+            beforeLaunch: function() {
+                return $("#fbBox").hide();
+            },
+            afterImport: function(source, success) {
+                $("#fbBox").center();
+                $("#fbBox").show();
+                return $("#loading_icon").hide();
+            }
+        };
+        $("#thumbnail-generate-btn").click(function() {
+            return $("#user_personal_thumbnail").prop("checked", true);
+        });
+        $("#preview-generate-btn").click(function() {
+            return $("#all-plat").prop("checked", true);
+        });
+        $("#all-btn").click(function() {
+            $("#all-plat").prop("checked", true);
+            return $("#all-btn").removeClass("disabled-price");
+        });
+        $("#open-btn").click(function() {
+            $("#open-plat").prop("checked", true);
+            return $("#all-btn").addClass("disabled-price");
+        });
+
+        custom_thumbnail_upload();
+
+        manage_contacts_check_uncheck = function(elem) {
+            if ($(elem).is(":checked")) {
+                if ($('.slct-all-txt').parent().siblings('ul').find('input').length === $('.slct-all-txt').parent().siblings('ul').find('input:checkbox:checked').length) {
+                    return $('.slct-all-txt').find("input").prop("checked", true);
+                }
+            } else {
+                return $('.slct-all-txt').find("input").prop("checked", false);
+            }
+        };
+
+        offload_unselected_contacts = function() {
+
+            var contacts_list, source;
+            source = $('#selected_contacts_source').html();
+            source = source.charAt(0).toLowerCase() + source.slice(1);
+            contacts_list = [];
+            $('#contacts_display_div').find("div.contacts-list ul input:checkbox:checked").map(function() {
+                var email, name;
+                name = $(this).data().contact_name;
+                email = $(this).data().contact_id;
+                return contacts_list.push(name + "<" + email + ">");
+            });
+            $("#" + source + "_selected_contacts").val(contacts_list.join(","));
+            $("#" + source + "_selected_contacts").html(contacts_list.join(","));
+            show_publish_tab();
+            $("#back_button").show();
+            $("#tab_6").hide();
+            if (contacts_list.length === 0) {
+                $("#" + source + "_contacts_ckb").prop("checked", false);
+                $("#" + source + "_contacts_edit_link").parent("span").hide();
+            } else if (contacts_list.length === 1) {
+                $("#" + source + "_selected_contacts_count").html(contacts_list.length + " Contact has");
+            } else {
+                $("#" + source + "_selected_contacts_count").html(contacts_list.length + " Contacts have");
+            }
+            if (contacts_list.length === 0) {
+                $("#" + source + "_contacts_edit_link").hide();
+            }
+            $('#contacts_display_div').find("div.contacts-list ul").html("");
+            return $('#selected_contacts_source').html("");
+        };
+
+        update_contacts_list = function(source, theater_id) {
+            var unchecked_elements;
+            unchecked_elements = $('#contacts_display_div').find("input:checkbox:not(:checked)");
+            unchecked_elements = unchecked_elements.map(function(el, i) {
+                return $(this).attr('data-contact_id');
+            });
+            $.ajax({
+                type: "POST",
+                beforeSend: function(xhr) {
+                    return xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+                },
+                url: '/theaters/' + theater_id + '/update_contacts?source=' + source,
+                data: {
+                    deleted_contact_ids: $(unchecked_elements).get().join()
+                },
+                success: function(data) {
+                    var new_contacts_count;
+                    $("#" + source + "_selected_contacts_count").parent("span").show();
+                    new_contacts_count = parseInt($("#" + source + "_selected_contacts_count").html()) - parseInt(data.deleted_count);
+                    if (new_contacts_count === 0) {
+                        $("#" + source + "_contacts_ckb").prop("disabled", false);
+                        $("#" + source + "_contacts_ckb").prop("checked", false);
+                        return $("#" + source + "_contacts_edit_link").parent("span").hide();
+                    } else if (new_contacts_count > 1) {
+                        return $("#" + source + "_selected_contacts_count").html(new_contacts_count + " Contacts have");
+                    } else {
+                        return $("#" + source + "_selected_contacts_count").html(new_contacts_count + " Contact has");
+                    }
+                }
+            });
+            show_publish_tab();
+            $("#back_button").show();
+            return $("#tab_6").hide();
+        };
+
+        sync_contacts = function(source) {
+            $("#" + source + "_contacts_edit_link").hide();
+            $("#" + source + "_contacts_sync_link").hide();
+            $("#" + source + "_contacts_ckb").attr("disabled", false);
+            $("#" + source + "_contacts_ckb").attr("checked", true);
+            $("#" + source + "_selected_contacts_count").html(0);
+            $("#" + source + "_selected_contacts_count").parent("span").hide();
+            cloudsponge.launch(source);
+            if (source !== "yahoo" && source !== "gmail") {
+                $('#fbBox').center();
+                $('#fbBox').show();
+            }
+            return $.ajax({
+                type: "DELETE",
+                beforeSend: function(xhr) {
+                    return xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+                },
+                url: '/theaters/' + $('#theater_collection').val() + '/delete_contacts?source=' + source
+            });
+        };
+
+        edit_contacts = function(source) {
+            $('html, body').animate({scrollTop:0}, 'slow');
+            var contact, contacts_data, email, name, _i, _len;
+            if ($("#" + source + "_selected_contacts").val() === "") {
+                return $.get('/theaters/' + $('#theater_collection').val() + '/new_get_contacts?source=' + source, function(data) {
+                    $("#contacts_display_div").html(data);
+                    hide_publish_tab();
+                    $("#tab_6").show();
+                    $("#email_service_provider").html(source);
+                    return $("#back_button").hide();
+                });
+            } else {
+                $('#new_contacts_source').html(source.charAt(0).toUpperCase() + source.slice(1));
+                $("#email_service_provider").html(source);
+                contacts_data = $("#" + source + "_selected_contacts").val().split(",");
+                $("#new_contacts_count").html(contacts_data.length);
+                $("#selected_contacts_source").html(source);
+                $('#contacts_display_div').find("ul").empty();
+                for (_i = 0, _len = contacts_data.length; _i < _len; _i++) {
+                    contact = contacts_data[_i];
+                    email = contact.match(/<(.*)>/)[1];
+                    name = contact.match(/(.*)\</)[1];
+                    console.log(email || name);
+                    $('#contacts_display_div').find("ul").append("<li><input type=\"checkbox\" checked=\"checked\" data-contcats_importer=\"" + source + "\" data-contact_id=\"" + email + " \" id=\"contact_" + _i + "\" name=\"contact_\" data-contact_name=\"" + name + "\" onclick=\"manage_contacts_check_uncheck(this);\" /><label class=\"label-a label-flt\" for=\"contact_" + _i + "\"></label><div class=\"user-detail\"><h2>" + (name.strip() || email.strip()) + "</h2></div></li>");
+                }
+
+                $("#select_all_contact").prop("checked", true);
+                $('#contacts_display_div').find("ul").animate({scrollTop:0}, 'slow');
+
+                hide_publish_tab();
+                $("#tab_6").show();
+                return $("#back_button").hide();
+            }
+        };
+
+        hide_contacts_details = function() {
+            show_publish_tab();
+            $("#back_button").show();
+            $("#tab_6").hide();
+            $("#new_contacts_source").html("");
+            $("#new_contacts_count").html("");
+            return $("selected_contacts_source").html("");
+        };
+
+        $('#theater_collection').change(function() {
+            var contact_importer, record_id, _i, _len;
+            record_id = $(this).children(":selected").prop("value");
+            if (record_id === "" || record_id !== "new_theater") {
+                $('#new_theater_name').removeClass('error-field');
+                $("#theater_name_error").html("");
+                $("#theater_name_error").hide();
+                $('.error-dv').html("");
+                $('.error-dv').hide();
+                $('#new_theater_name').prop("value", "");
+                $('#theater_collection').removeClass('error-field');
+            }
+            if (record_id !== "" && record_id !== "new_theater") {
+                $("#theater_permission_div input").prop("disabled", true);
+                load_theater_contact_info(record_id);
+                if (record_id === "new_theater") {
+                    $("#theater_permission_div input").prop("disabled", false);
+                    if ($("#theater_permission_div #FACEBOOK_FRIENDS").is(":disabled") === false) {
+                        $("#theater_permission_div #FACEBOOK_FRIENDS").prop("checked", data.data.fb_friends);
+                    }
+                    if ($("#theater_permission_div #ALL").is(":disabled") === false) {
+                        $("#theater_permission_div #ALL").prop("checked", data.data.fb_friends);
+                    }
+                }
+            } else {
+                $('.sync_links').hide();
+                $('.edit_links').hide();
+                for (_i = 0, _len = default_contact_importers.length; _i < _len; _i++) {
+                    contact_importer = default_contact_importers[_i];
+                    $("#" + contact_importer + "_selected_contacts_count").html("0 Contact");
+                    $("#" + contact_importer + "_selected_contacts_count").parent("span").hide();
+                    $('#' + contact_importer + "_selected_contacts").val("");
+                    $('#' + contact_importer + "_contacts_ckb").attr("checked", false);
+                    $('#' + contact_importer + "_contacts_ckb").attr("disabled", false);
+                }
+                $('#theater_permission_div ul li input:checkbox').prop("checked", false);
+                $("#theater_permission_div input").prop("disabled", false);
+            }
+            if ($('#theater_collection option:first-child').is(":selected")) {
+                $('#new_theater_permissions_div').hide();
+                $('#new_theater_name').addClass('force-hide');
+            } else if ($('#theater_collection option:last-child').is(":selected")) {
+                $('#new_theater_name').removeClass('force-hide');
+            } else {
+                $('#new_theater_name').addClass('force-hide');
+            }
+            $("#LC_FOLLOWERS").prop("disabled", true);
+            $("#GMAIL_CONTACTS").prop("disabled", true);
+            $("#FACEBOOK_FRIENDS").prop("disabled", true);
+            return $("#ALL").prop("disabled", true);
+        });
+
+        $('#video_ownership li').click(function() {
+            if ($(this).children("input").prop("disabled") !== "disabled") {
+                $(this).children("input").prop("checked", true);
+            }
+            return window.event.cancelBubble = true;
+        });
+
+        $('#ul_preview_video li').click(function() {
+            $(this).children("input").prop("checked", true);
+            if ($('#radio_preview_upload').is(":checked")) {
+                $('#custom_video_preview').show();
+                $("#new_preview_uploader").show();
+                if ($('#user_personal_thumbnail').is(":checked")) {
+                    return $("#new_preview_uploader").css("top", "240px");
+                } else {
+                    return $("#new_preview_uploader").css("top", "165px");
+                }
+            } else {
+                $('#custom_video_preview').hide();
+                $("#new_preview_uploader").hide();
+                $("#new_preview_uploader_progress").hide();
+                return $('#new_preview_uploader').data('jqxhr').abort();
+            }
+        });
+
+        $('#ul_preview_video li input').click(function() {
+            if ($('#radio_preview_upload').is(":checked")) {
+                $('#custom_video_preview').show();
+                return $("#new_preview_uploader").show();
+            } else {
+                $('#custom_video_preview').hide();
+                return $("#new_preview_uploader").hide();
+            }
+        });
+        $('#ul_thumbnail_image li').click(function() {
+            return $(this).children("input").prop("checked", true);
+        });
+        $('#ul_thumbnail_image li input').click(function() {});
+        $('#ul_facebook_pages li').click(function() {
+            status = $(this).children("input").is(":checked");
+            return $(this).children("input").prop("checked", !status);
+        });
+        $('#ul_user_timeline li').click(function() {
+            status = $(this).children("input").is(":checked");
+            return $(this).children("input").prop("checked", !status);
+        });
+        $('#ul_ownership li').click(function() {
+            status = $(this).children("input").is(":checked");
+            status = !status;
+            return $(this).children("input").prop("checked", status);
+        });
+
+        $('#ul_theater_permission li').click(function() {
+            var input_status;
+            if ($(this).children("input").is(":disabled")) {
+                return;
+            }
+            input_status = $(this).children("input").is(":checked");
+            $(this).children("input").prop("checked", !input_status);
+            if (!input_status === true) {
+                return $(this).children("input").click();
+            }
+        });
+
+        $('#theater_permission_div ul li input:checkbox').click(function() {
+            if ($(this).prop("id") === "ALL") {
+                if ($(this).is(":checked") === false) {
+                    $("#selected_fb_friends_list").prop("value", "");
+                    $("#selected_lc_followes").prop("value", "");
+                }
+                $("#select_all_fb_friends").prop("value", $(this).is(":checked"));
+                $('#theater_permission_div ul li input:checkbox').filter(":not(#LC_FOLLOWERS)").filter(":not(#GMAIL_CONTACTS)").prop("checked", $(this).is(":checked"));
+            } else {
+                $("#theater_permission_div #ALL").prop("checked", $('#theater_permission_div ul li input:checkbox').filter(":not(#ALL)").filter(":checked").size() === 1);
+                if ($(this).is(":checked") === false) {
+                    $('#theater_permission_div ul li input:checkbox').filter("#ALL").prop("checked", false);
+                    if ($(this).prop("id") === "FACEBOOK_FRIENDS") {
+                        $("#selected_fb_friends_list").prop("value", "");
+                    } else if ($(this).prop("id") === "LC_FOLLOWERS") {
+                        $("#selected_lc_followes").prop("value", "");
+                    }
+                } else {
+                    if ($(this).prop("id") === "FACEBOOK_FRIENDS") {
+                        $('#facebook_friends_list').modal('show');
+                    } else if ($(this).prop("id") === "LC_FOLLOWERS") {
+                        $('#little_cast_followers').modal('show');
+                    }
+                }
+            }
+            return window.event.cancelBubble = true;
+        });
+
+        set_permission = function(permission) {
+            return $('#theater_permission_div ul').append("<li><input type='checkbox' id='" + permission.permission_key + "' name='" + permission.permission_key + "'> " + permission.permission_display_text + "</li>");
+        };
+
+        set_default_permission = function(permission) {};
+
+        validate_form_submission = function() {
+            convert_timezone();
+            var email_sharing, error_counter, error_message, video_preview_upload_in_progress, video_upload_in_progress;
+
+            error_counter = 0;
+            error_message = "";
+
+            check_theater_duplicate_name();
+
+            if (error_counter === 0) {
+                email_sharing = false;
+                default_contact_importers.map(function(elem) {
+                    if (elem === "file") {
+                        if (is_new_video && ($('#csv_contacts').val() || parseInt($('#file_selected_contacts_count').html().split(" ")[0]))) {
+                            return email_sharing = true;
+                        }
+                    } else if (is_new_video && (parseInt($('#' + elem + "_selected_contacts_count").html().split(" ")[0]))) {
+                        return email_sharing = true;
+                    }
+                });
+                if (is_new_video && ($('#video_post_on_wall').prop("checked") || $('.facebook_page_ckb:checked ').size())) {
+
+                } else {
+                    if (is_new_video) {
+                        error_counter += 1;
+                    }
+                }
+            }
+
+            if ($('.error-field').size() !== 0) {
+                if (error_counter > 0) {
+                    $('.error-dv').html("Please enter the correct values in highlighted fields ");
+                    $('.error-dv').show();
+                    $('html, body').animate({
+                        scrollTop: 0
+                    }, 'slow');
+                    $("#submit_button").css("background", "");
+                    $("#submit_button").css("border", "");
+                    return false;
+                }
+            } else if (error_counter > 0) {
+                $('.error-dv').html("Please select Facebook Timeline or Pages to share the post");
+                $('.error-dv').show();
+                $('html, body').animate({
+                    scrollTop: 0
+                }, 'slow');
+                $("#submit_button").css("background", "");
+                $("#submit_button").css("border", "");
+                return false;
+            } else {
+                $('.error-dv').hide();
+            }
+
+            return true;
+        };
+
+
+        $(".current").next().click(function() {
+            return $("#next_button").click();
+        });
+        $(".current").prev().click(function() {
+            return $("#back_button").click();
+        });
+        $(".step1").click(function() {
+            return $("#restart-video").click();
+        });
+        $('#new_theater_name').focus(function() {
+            if ($(this).val() === "Enter theater name here") {
+                return $(this).val('');
+            }
+        });
+        $('#new_theater_name').focusout(function() {
+            if ($(this).val() === "") {
+                return $(this).val('Enter theater name here');
+            }
+        });
+        $("#video_video_identifier_id").change(function() {
+            var csrfToken, request;
+            if ($("#video_duration").val() && $(this).val() !== "" && $(this).val() !== "Select Price") {
+                $(".calculation_status").removeAttr("hidden");
+                $(".revenue-calculator").hide();
+                csrfToken = $("meta[name='csrf-token']").attr("content");
+                request = $.ajax({
+                    type: "POST",
+                    headers: {
+                        "X-CSRF-Token": csrfToken
+                    },
+                    url: "/publish_video/calculate_pricing.js",
+                    data: {
+                        price: $("#video_video_identifier_id  option:selected").text().replace("$", ""),
+                        duration: $("#video_duration").val(),
+                        height: $("#video_height").val(),
+                        new_video_flow: true
+                    }
+                });
+                return request.fail(function(jqXHR, textStatus) {
+                    $(".calculation_status").attr("hidden", "hidden");
+                    return alert("Sorry, request failed. Try again later.");
+                });
+            } else {
+                return $(".drop-down").prop("disabled", true);
+            }
+        });
+    });
+
+    finish_wizard = function() {
+      if ($("#ul_facebook_pages input:checked").size() == 0  && !$('#ul_user_timeline li input[type=checkbox]').is(":checked")){
+          schedule_post_validation();
+          $('.error-dv').html("Please select Facebook Timeline or Pages to share the post");
+          $('.error-dv').show();
+          $('.fb-pages').parent("div").addClass("error-field")
+          $('html, body').animate({scrollTop: 0}, 'slow');
+          return false;
+      }else{
+        $('.fb-pages').parent("div").removeClass("error-field")
+        $('.error-dv').hide();
+        $('.error-dv').html("");
+      }
+      schedule_post_validation();
+      if( $('#schedule-post').prop('checked') && $('#post_time').val().length == 0 )
+          if($('.error-dv').text() != "Please select Facebook Timeline or Pages to share the post") {
+              $('.error-dv').html("Please select scheduling date.");
+              $('.error-dv').show();
+              $('html, body').animate({scrollTop: 0}, 'slow');
+              return false;
+          }
+
+      user_sumbitted_form = true;
+
+      $("#submit_button").css("background", "grey");
+      $("#submit_button").css("border", "solid 1px grey");
+      $("#submit_button").html("UPDATED");
+
+      $("#publish_tab_back_button").unbind("click")
+      $("#publish_tab_back_button").css("background", "grey");
+      $("#publish_tab_back_button").css("color", "white");
+
+      $('.error-dv').html("Video is still being uploaded! Please keep browser and window open until completed.");
+      $('.error-dv').show();
+
+      $('html, body').animate({scrollTop: 0}, 'slow');
+      $("#upload_continue_message").show();
+
+      $("#main_forms_holder").css("z-index", - 1);
+      $("#tab_5").css("z-index", 1);
+
+      submitForm();
+    };
+
+    dataUploadingInProgress = function(){
+      if(typeof preview_upload_completed != "undefined" && preview_upload_completed == false)
+        return true;
+
+      else if( typeof(banner_ladda) != "undefined" && banner_ladda.isLoading())
+        return true;
+
+      else
+        return false;
+    }
+
+    submitForm = function(){
+      if (!dataUploadingInProgress() && user_sumbitted_form){
+        $('.error-dv').hide();
+
+        $.get("/check_session_status").success(function(xhr){
+          if(xhr.is_session_alive){
+            $("#publishing_form").submit();
+          }
+          else{
+            $("#session_refresh").click();
+          }
+        })
+      }
+    }
+
+    check_all_check_boxes = function(check_box) {
+        return $("#check_fb_friend_all").parent().parent().find(":checkbox").attr("checked", $(check_box).is(":checked"));
+    };
+
+    collect_selected_friends = function() {
+        var array, selected_friends;
+        array = [];
+        selected_friends = [];
+        return $("#check_fb_friend_all").parent().parent().find(":checkbox").each(function() {
+            if ($(this).is(":checked")) {
+                return selected_friends.push(this);
+            }
+        });
+    };
+
+    manageImportedContacts = function(contacts, source, owner) {
+        var contact, email, emails, entry, i, name;
+        $("#" + source + "_selected_contacts_count").parent("span").show();
+        if ($(contacts).length > 1) {
+            $("#" + source + "_selected_contacts_count").html($(contacts).length + " Contacts have");
+        } else {
+            $("#" + source + "_selected_contacts_count").html($(contacts).length + " Contact has");
+        }
+        emails = [];
+        i = 0;
+        while (i < contacts.length) {
+            contact = contacts[i];
+            name = contact.fullName();
+            email = contact.selectedEmail();
+            entry = name + "<" + email + ">";
+            if (emails.indexOf(entry) < 0) {
+                emails.push(entry);
+            }
+            i++;
+        }
+        $("#" + source + "_contacts_ckb").prop("checked", true);
+        $("#" + source + "_selected_contacts").html(emails.join(", "));
+        $("#" + source + "_selected_contacts").val(emails.join(", "));
+        $("#" + source + "_contacts_edit_link").show();
+        return $("#" + source + "_edit_link_sperator").hide();
+    };
+
+    IsEmail = function(email) {
+        var regex;
+        regex = /^([a-zA-Z0-9_\.\-\+])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email);
+    };
+
+
+
+}
+
+custom_thumbnail_upload = function(){
+    $('#new_video_thumbnail_uploader').change(function() {
+        var file_extension, valida_image_types;
+        valida_image_types = ["jpg", "jpeg", "tiff", "png"];
+        file_extension = $("#new_video_thumbnail_uploader #file").val().toLowerCase().split(".").pop();
+        if (valida_image_types.indexOf(file_extension) === -1 || file_extension.length === 0) {
+
+        } else {
+            $("#new_video_thumbnail_uploader").removeClass("error-field ");
+            $("#new_video_thumbnail_uploader .helping_text").text($(this).val().split(/(\\|\/)/g).pop().split(".")[0]);
+            return $('#new_video_thumbnail_uploader').submit();
+        }
+    });
+
+    $('#new_video_thumbnail_uploader').ajaxForm({
+        beforeSerialize: function($form, options) {
+            file_extension = $("#new_video_thumbnail_uploader #file").val().toLowerCase().split(".").pop()
+            key_with_extension = $("#new_video_thumbnail_uploader #key").val() + "." + file_extension;
+            $("#new_video_thumbnail_uploader #key").val(key_with_extension);
+        },
+        beforeSend: function(){
+            thumbnail_ladda = Ladda.create($('#video_thumbnail_button')[0]);
+            thumbnail_ladda.start();
+        },
+        uploadProgress: function(event, position, total, percentComplete){
+            thumbnail_ladda.setProgress(percentComplete/100);
+        },
+        success:function(responseText, statusText, xhr, $form){
+            thumbnail_ladda.stop();
+            $('#video_thumbnail_button').hide();
+
+            $('#video_custom_thumbnail_key').val($(responseText).find("Key").text());
+
+            $('#thumbnail_status_message').show();
+            $('#thumbnail_status_message').html($('#new_video_thumbnail_uploader #file').val().replace(/^.*[\\\/]/, ''));
+            $('#new_video_thumbnail_uploader  span.helping_text').css("color", "white");
+
+            new_thumbnail_file = $("#new_video_thumbnail_uploader #file")[0].files[0];
+            var imageType = /image.*/;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = $("#video_edit_thumbnail img");
+                $(img).prop("src", reader.result);
+                $(img).css("height", "100px");
+            }
+            reader.readAsDataURL(new_thumbnail_file);
+
+            // auto_submit_form();
+        },
+        complete:function (xhr){},
+        error:function(xhr){
+            thumbnail_ladda.stop();
+            $('html, body').animate({scrollTop:0}, 'slow');
+            $('.error-dv').html("Thumbnail Image upload failed, please try again.");
+            $('.error-dv').show().delay(3000).fadeOut("slow");
+        }
+    });
+}
+
+convert_timezone= function() {
+    time_str = $("#post_time").val()
+    now = new Date(time_str);
+    nowUtc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+    $("#time_zone").val(nowUtc)
+
+}
+schedule_post_validation= function(){
+
+    if( $('#schedule-post').prop('checked') && $('#post_time').val().length == 0 ){
+
+        $('#schedule-post').parent("div").addClass("error-field");
+    }else{
+        $('#schedule-post').parent("div").removeClass("error-field")
+
+    }
+}
+
+convert_local_time= function(){
+    old_time =$("#post_time").val().toString();
+    if (old_time.length > 1) {
+        d = old_time.replace(/-/g, "/")
+        new_date = new Date(d)
+        $("#post_time").val(new_date.dateFormat("Y/m/d") + " " +new_date.toTimeString().substr(0, 5));
+        $("#datepicker").show();
+    }
+}
+
+bind_schedule_post_checkbox = function(){
+
+    $('#post_time').datetimepicker({ minDate: 0, allowBlank: true });
+    $('#schedule-post').click(function(){
+        show_calender_change_action_button();
+    });
+}
+
+show_calender_change_action_button= function() {
+    if( $('#schedule-post').prop('checked'))
+    {
+        $('#datepicker').show();
+        local_time = new Date();
+        display_time = local_time.format0().toString()+ " " + local_time.format1().toString();
+        $("#post_time").val(display_time);
+        $("#submit_button").text("Schedule")
+    }else{
+        $("#post_time").val("");
+        $('#datepicker').hide();
+        $("#submit_button").text(action_button);
+    }
+}
+
+
+set_position_of_thumb_and_video = function()
+{
+    $('#new_video_thumbnail_uploader').css({"top": $("#paid_video_thumnail").position().top + 15 + "px"});
+    $("#preview_to_s3_form").css({"top": $("#paid_video_preview").position().top + 15 + "px"});
+}

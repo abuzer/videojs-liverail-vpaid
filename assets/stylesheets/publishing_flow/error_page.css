@@ -1,0 +1,9 @@
+.alerted { display:block; width:100%; margin:71px auto 299px auto;}
+.not-working { display:block; text-align:center; border: solid 1px gray; border-radius: 5px;background-color: white;}
+.not-working h3{ display:block; font-size:25px; color:#000000; font-weight:bold;margin: 0px;}
+.not-working h4{ display:block; font-size:20px; color:#000000; font-weight:normal;margin: 0px;margin-top:10px;}
+.not-working p{ display:block; font-size:16px; color:#000000; line-height:45px;margin: 0px;}
+.not-working p a{ color:#be3030; text-decoration:none;}
+.not-working p a:hover{text-decoration:underline;}
+.erroe-text { color:#999999; font-size:14px; text-align:center; display:block; margin:5px 0;}
+.error-page-btn{width:115px !important;padding:10px 0 !important;font-size: 17px !important;font-weight: bold !important;color: #fff !important;padding: 10px 0 !important;margin-right: 11px !important;margin-top: 6px;}

@@ -1,0 +1,324 @@
+@charset "utf-8";
+/* CSS Document */
+@font-face {
+	font-family: 'helvetica_neueregular';
+	src: url('/fb_app/fonts/helveticaneue-webfont.eot');
+	src: url('/fb_app/fonts/helveticaneue-webfont.eot?#iefix') format('embedded-opentype'), url('/fb_app/fonts/helveticaneue-webfont.woff') format('woff'), url('/fb_app/fonts/helveticaneue-webfont.ttf') format('truetype'), url('/fb_app/fonts/helveticaneue-webfont.svg#helvetica_neueregular') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'helvetica_neue-medium';
+	src: url('/fb_app/fonts/helveticaneue-medium-webfont.eot');
+	src: url('/fb_app/fonts/helveticaneue-medium-webfont.eot?#iefix') format('embedded-opentype'), url('/fb_app/fonts/helveticaneue-medium-webfont.woff') format('woff'), url('/fb_app/fonts/helveticaneue-medium-webfont.ttf') format('truetype'), url('/fb_app/fonts/helveticaneue-medium-webfont.svg#helvetica_neueregular') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'helvetica_neue-bold';
+	src: url('/fb_app/fonts/helveticaneue-bold-webfont.eot');
+	src: url('/fb_app/fonts/helveticaneue-bold-webfont.eot?#iefix') format('embedded-opentype'), url('/fb_app/fonts/helveticaneue-bold-webfont.woff') format('woff'), url('/fb_app/fonts/helveticaneue-bold-webfont.ttf') format('truetype'), url('/fb_app/fonts/helveticaneue-bold-webfont.svg#helvetica_neueregular') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+body {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 11px;
+	background: url("<%=asset_path "/fb_app/images/bg-body.png"%>") 0 0 repeat;
+}
+body.publisher-bg {
+   background: none;
+}
+.inner-body {
+	margin: 0;
+	padding: 0;
+}
+header {
+	margin: 0;
+	padding: 0;
+	height: 54px;
+	background:transparent;
+	/*background: url(/assets/fb_app/images/header-top.png) 0 0 repeat-x;*/
+	position: relative;
+	border-bottom:2px solid #133783;
+}
+section {
+	margin: 0 auto;
+	padding: 0;/*width: 664px;*/
+}
+.content-section {
+	margin-top: -7px;
+}
+.content-section section {
+	padding: 15px;
+	width: 95.7%;/*border: 1px solid #cccccc;
+	border-top: 0;
+	background: #fff;*/
+}
+.logo-section {
+	margin: 10px 0 0 15px;
+	width: 167px;
+	float: left;
+}
+.user-comments-panel {
+	margin: 0 0 18px 0;
+	padding: 0;
+	clear: both;
+}
+.user-row {
+	margin: 0 0 18px 0;
+	padding: 0;
+	clear: both;
+}
+.user-row .user-img {
+	float: left;
+	width: 50px;
+	height: 50px;
+	margin-right: 10px;
+}
+.user-data {
+	width: 150px;
+	float: right;
+	text-align: right;
+	margin: 10px 15px 0 0;
+}
+.user-image {
+	width: 32px;
+	height: 32px;
+	float: left;
+}
+.user-data .user-image img {
+	width: 32px;
+	height: 32px;
+	border: 1px solid #999999;
+	vertical-align: middle;
+	margin-right: 5px;
+}
+.user-data a {
+	margin-left:10px;
+	margin-top:10px;
+	width:108px;
+	overflow:hidden;
+	color: #fff;
+	text-decoration: none;
+	font-size: 12px;
+	font-family: 'helvetica_neueregular', Arial, Helvetica, sans-serif;
+	float:left;
+	text-align:left;
+}
+.video-data {
+	width: 75%;
+	float: left;
+}
+.video-data h2 {
+	margin: 0;
+	padding: 5px 0 0 0;
+	font-size: 18px;
+	font-family: 'helvetica_neue-bold', Arial, Helvetica, sans-serif;
+	color: #666666;
+}
+.video-data h2 a, .video-data h2 a:visited {
+	color: #666666;
+}
+.video-data h2 a:hover {
+	color: #333333;
+}
+.release-data {
+	margin-top: 5px;
+	font-size: 12px;
+	font-family: 'helvetica_neueregular', Arial, Helvetica, sans-serif;
+	color: #aaaaaa;
+}
+.btn-upload {
+	margin-top: 10px;
+	width: 116px;
+	float: right;
+}
+/*
+.btn-upload a, .btn-upload a:visited {
+	width: 105px;
+	height: 24px;
+	background: url(/assets/fb_app/images/btn-upload.png) 0 0 no-repeat;
+	display: block;
+	text-align: center;
+	line-height: 20px;
+	font-family: 'helvetica_neue-medium', Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color: #ffffff;
+	text-decoration: none;
+}
+.btn-upload a:hover {
+	color: #efefef;
+	text-decoration: none;
+}
+*/
+.video-player {
+	margin: 0 auto;
+	padding: 0 0 0px 0;
+	/*padding: 0 0 10px 0;*/	
+	/*width: 720px;*/
+	/*width: 626px;*/
+	width:100%;
+	height: 364px;
+	/*height: 500px;*/
+	background: transparent;
+	background-color: #131313;
+	position: relative;
+}
+.video-list {
+	margin: 0 auto;
+	padding: 0 0 10px 0;
+	width: 626px;
+	height: 240px;
+	background: url(/assets/fb_app/images/ph-logo.png) center no-repeat;
+	background-color: #131313;
+}
+.play-video {
+	margin: 0 auto;
+	padding: 0 0 10px 0;
+	width: 100%;
+	height: 240px;
+	background: url(/assets/fb_app/images/play-transparent.png) center no-repeat;
+}
+.video-title {
+	margin: 0 auto;
+	padding: 0 0 10px 0;
+	width: 100%;
+	height: 20px;
+	background-color: #000;
+	opacity: 0.5;
+	vertical-align: central;
+}
+.video-title h1 {
+	font-size: 16px;
+	font-family: 'helvetica_neueregular', Arial, Helvetica, sans-serif;
+	color: #FFF;
+	padding-top: 5px;
+	padding-left: 5px;
+}
+.action-panel {
+	margin: 0;
+	padding: 4px 0 10px 0;
+}
+.action-panel ul {
+	margin: 0;
+	padding: 0;
+}
+.action-panel ul li {
+	margin: 0;
+	padding: 0 7px 0 0;
+	float: left;
+}
+.action-panel ul li span {
+	font-weight: bold;
+}
+.action-panel ul li a, .action-panel ul li a:visited {
+	text-decoration: none;
+	color: #666666;
+	font-size: 14px;
+	font-family: 'helvetica_neueregular', Arial, Helvetica, sans-serif;
+	display: block;
+	float: left;
+}
+.action-panel ul li a:hover {
+	text-decoration: underline;
+}
+ul.image-base {
+	margin: 0;
+	padding: 0;
+}
+ul.image-base li {
+	line-height: 21px;
+	color: #666666;
+	font-size: 14px;
+	font-family: 'helvetica_neueregular', Arial, Helvetica, sans-serif;
+	display: inline-block;/*float: left;*/
+}
+ul.image-base li span {
+	font-size: 12px;
+	color: #999;
+}
+ul.image-base li a, ul.image-base li a:visited {
+	/*width: 17px;*/
+	height: 21px;
+	padding-left: 16px;
+	line-height: 21px;
+	display: block;
+	font-size: 13px;
+	color: #333;
+}
+ul.image-base li a:hover {
+	text-decoration: none;
+}
+ul.image-base li a.comments, ul.image-base li a.comments:visited {
+	background: url("<%=asset_path "/fb_app/images/ico-comments.png"%>") 0 3px no-repeat;
+}
+ul.image-base li a.sold, ul.image-base li a.sold:visited {
+	background: url("<%=asset_path "/fb_app/images/ico-sold.png"%>") 0 4px no-repeat;
+}
+ul.image-base li a.like, ul.image-base li a.like:visited {
+	background: url("<%=asset_path "/fb_app/images/ico-like.png"%>") 0 0 no-repeat;
+}
+ul.image-base li a.like:hover {
+	background: url("<%=asset_path "/fb_app/images/ico-like.png"%>") 0 -21px no-repeat;
+}
+ul.image-base li a.unlike, ul.image-base li a.unlike:visited {
+	background: url("<%=asset_path "/fb_app/images/ico-unlike.png"%>") 0 0 no-repeat;
+}
+ul.image-base li a.unlike:hover {
+	background: url("<%=asset_path "/fb_app/images/ico-unlike.png"%>") 0 -21px no-repeat;
+}
+.coment-panel .user-img {
+	border: none;
+}
+.comment-area, .comment-listing {
+	width: 90%;
+	float: left;
+}
+.comment-area textarea {
+	margin: 0;
+	padding: 0;
+	width: 96.5%;
+	height: 38px;
+	padding: 5px 10px 5px 10px;
+	border: 1px solid #999999;
+	color: #000000;
+	font-size: 14px;
+	line-height: 20px;
+	font-family: 'helvetica_neueregular', Arial, Helvetica, sans-serif;
+	resize: none;
+	background-color: #f0f0f0;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+.comment-info {
+	margin: 0;
+	padding: 0 0 5px 0;
+	display: block;
+	clear: both;
+}
+.user-title {
+	margin: 0 17px 0 0;
+	font-family: 'helvetica_neueregular', Arial, Helvetica, sans-serif;
+	color: #cc3333;
+	font-size: 14px;
+	font-weight: bold;
+	float: left;
+	line-height: 20px;
+}
+.comment-time {
+	float: left;
+	line-height: 20px;
+	font-size: 11px;
+	color: #999999;
+}
+.comment-content {
+	clear: both;
+}
+.comment-content p {
+	margin: 0;
+	padding: 1px 0 0 0;
+	font-size: 14px;
+	color: #333333;
+}

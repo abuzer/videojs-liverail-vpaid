@@ -1,0 +1,46 @@
+FanPlayerController = Paloma.controller('FanPlayer');
+
+FanPlayerController.prototype.index= function(){
+  $('#account-menu').hide();
+  $('#h-account').click(function(){
+    $('#account-menu').toggle();
+  });
+  
+  $(document).click(function (e) {
+    if (!$(e.target).closest('.name-header').length)
+      $('#account-menu').hide();
+  });
+
+  $(".upload_your_video_link").click(function(){
+    console.log($(this).html().trim());
+    if($(this).html().trim() == "Login")
+      url = "/auth/facebook"
+    else
+      url = "/auth/facebook?state=/fanconnect-upload"    
+
+    window.location.replace(url);
+  })
+}
+
+MerchandiseVideoController = Paloma.controller('MerchandiseVideos');
+
+MerchandiseVideoController.prototype.landing= function(){  
+  $('#account-menu').hide();
+  $('#h-account').click(function(){
+    $('#account-menu').toggle();
+  });
+  
+  $(document).click(function (e) {
+    if (!$(e.target).closest('.name-header').length)
+      $('#account-menu').hide();
+  });
+
+  $(".upload_your_video_link").click(function(){
+    if($(this).html().trim() == "Login")
+      url = "/auth/facebook"
+    else
+      url = "/auth/facebook?state=/shopconnect-upload"
+    
+    window.location.replace(url);
+  })
+}

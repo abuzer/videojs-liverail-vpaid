@@ -1,0 +1,314 @@
+//= require javascript_settings.js
+//= require jquery.js
+//= require fb_app/md5.js
+//= require fb_app/date.format.js
+//= require fb_app/browser.js
+//= require fb_app/social-likes.min.js
+//= require public_videos/login
+//= require public_videos/common
+//= require public_videos/services
+
+var SERVER = SERVER_URL;
+var SERVER_WITHOUT_API_VERSION = '<%= APP_CONFIG["APP_INFORMATION"]["BASE_URI_WITHOUT_PROTOCOL"] %>';
+
+// SERVICES
+var IS_UNPUBLISHED = "can_purchase.json";
+var IS_DELETED = "is_deleted.json";
+var VIDEO_INFORMATION = "detail_information.json";
+var VIDEO_COMMENTS = "make_payment/";
+var COMMENT = "add_comment.json";
+var VIDEO_LIKES = "video_likes.json";
+var LIKE = "liked.json";                  // >> VIDEOS
+var UNLIKE = "unliked.json";                // >> VIDEOS
+var VIDEO_ACCESS = "detail_information.json";       // >> LIBRARY
+var PUBLISHER_VIDEOS = "make_purchase.json";
+var MY_VIDEOS = "videos.json";                // NO METHOD. USING <LIBRARY>.json INSTEAD
+var REGISTER = "device_signup/";
+var SETUP_PAYMENT = "started.json";             // >> PAYMENTS
+var PAYMENT_SUCCESS = "success.json";           // >> PAYMENTS
+var PAYMENT_FAIL = "cancel.json";             // >> PAYMENTS
+var PAYMENT_STATUS = "status";                // >> PAYMENTS
+var STREAM_REQUEST = "stream_request.json";         // >> VIDEOS
+var PREVIEWED = "/previewed.json";
+var UPDATE_STREAM = "/update_stream_stats.json";
+var IS_MOBILE_VIEW = false;
+//log preview
+var IS_EMBED = false;
+var videoPlayer;
+var AD_COMPLETED = true;
+var INIT_Ad = false;
+var canvas_link = '';
+//introduce these becasue videojs fire timeupdate event more than once for same sec.
+var is_preview_logged_3_sec = false;
+var is_played = false;
+var is_preview_logged_10_sec = false;
+
+var activityId = 0;
+var postId = "";
+var social_sharing = false;
+
+VIDEOS = 'videos/'
+PUBLIC_VIDEOS= 'freevideo-upload/'
+
+VIDEO_ID = ''
+var DEBUG = true;
+var DEVICE_AUTH = ""
+
+$(function() {
+
+    VIDEO_ID = getParameterByName('watch');
+    FB.init({
+        appId      : FB_APP_ID,
+        status     : true,
+        cookie     : true,
+        xfbml      : true,
+        oauth      : true
+    });
+
+    //fbLoginStatus();
+    BROWSER = Browser();
+    FB.Canvas.setAutoGrow(1000);
+
+    comment_text = getCookie("comment_text");
+    if(comment_text != ""){
+        deleteCookie("comment_text")
+        evt = new Event("keydown");
+        evt.keyCode = 13;
+        $('#comment_text').val(comment_text);
+        addComment(evt);
+    }
+
+    like_video = getCookie("like_video");
+    if(like_video == "like"){
+        deleteCookie("like_video");
+        $('#video-like').click();
+    }
+
+    //only for Mobile view if user coming form mobile browser than call devise signup call
+    if(IS_MOBILE_VIEW) {
+        fbLoginStatus();
+    }
+
+    var doPoster = function() {
+   jQuery(".vjs-poster").css("display","inline");
+
+};
+
+var vastArray = [
+  'http://ad3.liverail.com/?LR_PUBLISHER_ID=1331&LR_CAMPAIGN_ID=229&LR_SCHEMA=vast2', 
+  SERVER_WITHOUT_API_VERSION+"static/vast.xml"];
+ var vid = videojs("player", {
+        plugins : { LCLogo : {}, About : {}, resolutionSelector: {} }
+      }, function() {
+         
+         videoPlayer = this;
+          $('.vjs-control-bar').show(); // show player every time when we open canvas app
+          $('.videocontent').css("background", 'black');
+          $('.video-js').css("z-index", '9999')
+          //$('.vjs-fullscreen-control').addClass('full-scrn').removeClass('vjs-fullscreen-control');
+          videoPlayer.on("ended", function() {
+            if( AD_COMPLETED ){
+              logWatchActivity('true', 'false', <%= Video::PREVIEW_DURATION[:full_watched]%>);
+              setTimeout(function() { 
+                videoPlayer.posterImage.show();  
+                videoPlayer.bigPlayButton.show();  
+                videoPlayer.cancelFullScreen();
+                videoPlayer.pause();
+                if( BROWSER.browser != 'IE'){
+                  videoPlayer.currentTime(0);  
+                }
+               }, 500);
+
+                is_preview_logged_3_sec = false;
+                is_played = false;
+                ga('send', 'event', 'FreeVideo', 'Finished Video', VIDEO_ID + ':' + $('#video-title-in').html());
+              }
+            
+          });
+
+          videoPlayer.on("ended", function(){
+            if( AD_COMPLETED ){
+              doPoster();
+            }
+          });
+          videoPlayer.on('pause', function(e)
+          {
+            console.log( 'pause');
+          });
+
+          videoPlayer.on('play', function(e)
+          {
+
+            if(AD_COMPLETED){
+              $('.vjs-res-button').show();
+              $('#about-btn').show();
+            }
+            videoPlayer.posterImage.hide();
+            videoPlayer.bigPlayButton.hide();
+            if (is_played == false && AD_COMPLETED) {
+                console.log('------ played  ----    ');
+                is_played = true;
+                ga('send', 'event', 'FreeVideo', 'Video Play', VIDEO_ID + ':' + $('#video-title-in').html());
+            }
+            console.log('play');
+            $('#about-video-in').hide();
+            $('#about-header-info').hide();
+          });
+
+          videoPlayer.on('resize', function(e)
+          {
+            console.log( 'resize');
+          });
+
+
+        videoPlayer.on("adend", function(){
+            AD_COMPLETED = true;
+            console.log( "AD_COMPLETED: " + AD_COMPLETED )
+        });
+        videoPlayer.on("adstart", function(){
+            AD_COMPLETED = false;
+            $('.vjs-res-button').hide();
+            $('#about-btn').hide();
+            console.log( "AD_COMPLETED: " + AD_COMPLETED )
+        });
+
+          videoPlayer.on("timeupdate", function() {
+            if(Math.ceil(videoPlayer.currentTime()) == 3 && is_preview_logged_3_sec==false && AD_COMPLETED)
+            {
+                is_preview_logged_3_sec = true;
+                ga('send', 'event', 'FreeVideo', 'Video View', VIDEO_ID + ':' + $('#video-title-in').html());
+                console.log('------ timeupdate  ----    3' + AD_COMPLETED);
+                logWatchActivity('true', 'false',<%=Video::PREVIEW_DURATION[:three_sec_preview]%>);
+            }
+            
+
+            if(Math.ceil(videoPlayer.currentTime()) == 10 && is_preview_logged_10_sec == false && AD_COMPLETED)
+            {
+                is_preview_logged_10_sec = true;
+                console.log('------ timeupdate  ----    10' + AD_COMPLETED);
+                logWatchActivity('false', 'true',<%=Video::PREVIEW_DURATION[:ten_sec_preview]%> );
+            }
+          });
+        $('#player').append($('#about-section').html());
+        $('#about-section').html('');
+        $('#about-header-info').fadeIn();
+
+        }); //End of video player initialization
+    if( !INIT_Ad) {
+      vid.ads();
+      vid.vast({
+        url: vastArray[Math.floor(Math.random() * vastArray.length)]
+      });    
+      INIT_Ad = true;
+    }
+  
+    $('#about-btn').click(function(){
+      if( $('#about-video-in').is(":visible")) {
+        $('#about-video-in').fadeOut('slow');
+        if (videoPlayer.paused() && is_played)
+            videoPlayer.play();
+      } else {
+        videoPlayer.pause();
+        $('#about-video-in').fadeIn();
+        $('#about-header-info').fadeIn();
+      }
+    });
+
+    $('#toggle-share').click(function(){
+      if($('#prev-text-for-user').is(":visible"))
+      {
+          $('#prev-text-for-user').hide();
+      }
+      $('.share-video').fadeToggle(300);
+    });
+
+}); // end ready function
+
+
+
+  // Note that we're not doing this in prototype.createEl() because
+  // it won't be called by Component.init (due to name obfuscation).
+      var createLCLogoButton = function() {
+        var logo_link = '<img src="/assets/fb_app/images/player/small-logo.png" />';
+        if( IS_EMBED ){
+           logo_link = '<a href="'+canvas_link+'" target="_blank" style="cursor:pointer"> <img src="/assets/fb_app/images/player/small-logo.png" /> </a>';
+        }
+        var props = {
+          className: 'vjs-resolution-button',
+          innerHTML: '<div class="vjs-control-content-logo" ><span style="display: table-cell; vertical-align: middle; height: 30px;">'+logo_link+'</span></div>',
+          role: 'button',
+          'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+          tabIndex: 0
+        };
+        return videojs.Component.prototype.createEl(null, props);
+      };
+
+      var LCLogo;
+      videojs.plugin('LCLogo', function() {
+        var options = {'el': createLCLogoButton()};
+        LCLogo = new videojs.LCLogo(this, options);
+        this.controlBar.el().appendChild(LCLogo.el());
+      });
+
+      videojs.About = videojs.Button.extend({
+        /** @constructor */
+        init: function(player, options) {
+          videojs.Button.call(this, player, options);
+
+        }
+      });
+  // Note that we're not doing this in prototype.createEl() because
+  // it won't be called by Component.init (due to name obfuscation).
+      var createAboutButton = function() {
+        var props = {
+          className: 'vjs-resolution-button',
+          innerHTML: '<div class="vjs-control-content-about", id="about-btn" > <span "> About </span></div>',
+          role: 'button',
+          'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+          tabIndex: 0
+        };
+        return videojs.Component.prototype.createEl(null, props);
+      };
+
+      var About;
+      videojs.plugin('About', function() {
+        var options = {'el': createAboutButton()};
+        About = new videojs.About(this, options);
+        this.controlBar.el().appendChild(About.el());
+      });
+
+
+      /** HD-SD buttons */
+
+      videojs.HdSd = videojs.Button.extend({
+        /** @constructor */
+        init: function(player, options) {
+          videojs.Button.call(this, player, options);
+
+        }
+      });
+  // Note that we're not doing this in prototype.createEl() because
+  // it won't be called by Component.init (due to name obfuscation).
+      function hideHdSd() {
+
+      }
+      function dispHdSd() {
+
+      }
+      var createHdSdButton = function() {
+        var props = {
+          className: 'vjs-resolution-button',
+          innerHTML: '<div class="vjs-control-content-hdsd", id="hdsd" onmouseover="dispHdSd();" onmouseout="hideHdSd();"> <span "> <img src="/fb_app/images/player/hd-sd.png" /> </span></div>',
+          role: 'button',
+          'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+          tabIndex: 0
+        };
+        return videojs.Component.prototype.createEl(null, props);
+      };
+
+      var HdSd;
+      videojs.plugin('HdSd', function() {
+        var options = {'el': createHdSdButton()};
+        HdSd = new videojs.LCLogo(this, options);
+        this.controlBar.el().appendChild(HdSd.el());
+      });

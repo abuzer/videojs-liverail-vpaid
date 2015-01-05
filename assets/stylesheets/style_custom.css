@@ -1,0 +1,15 @@
+.hide{
+  display: none;
+}
+
+.inner-content-outer-container-full{
+  min-height: 260px;
+}
+
+.clear{
+  clear: both;
+}
+
+#account_name_div{
+  width:150px;
+}

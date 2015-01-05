@@ -1,0 +1,156 @@
+li {
+    list-style:none;
+}
+ul {padding:0;}
+
+footer {
+    overflow: hidden;
+    display: block;
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#212121), to(#000000));
+    background: -webkit-linear-gradient(#212121 0%, #000000 100%);
+    background: -moz-linear-gradient(#212121 0%, #000000 100%);
+    background: -o-linear-gradient(#212121 0%, #000000 100%);
+    background: linear-gradient(#212121 0%, #000000 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#212121', endColorstr='#000000'); /* for IE */
+    -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#212121', endColorstr='#000000'); /* for IE */
+	padding: 35px 0;
+	clear: both;
+	position: relative;
+    }
+footer .container {
+    width: 1140px;
+    position: relative;
+    margin: 0 auto;
+    padding: 0px 10px;
+}
+footer section#logo-footer {
+    width: 211px;
+    float: left;
+    margin-right: 100px;
+    margin-left: 30px;
+}
+footer section#logo-footer a {
+    color: #c0c0c0;
+    text-decoration: underline;
+    font-size: 13px;
+    padding-right: 5px;
+}
+footer section#logo-footer h1 {
+    margin-top: 0px;
+}
+footer section#logo-footer h1 a.logo {
+    float: left;
+    background: url("/assets/white-logo-120.png") 0 0 no-repeat;
+    width: 201px;
+    height: 34px;
+    margin-top: 10px;
+}
+footer section#logo-footer p {
+    color: #e0e0e0;
+    float: left;
+    margin: 0px;
+    clear: both;
+    font-size: 11px;
+    line-height: 16px;
+    margin-bottom: 10px;
+    margin-top:10px;
+}
+footer ul {
+    float: left;
+    width: 150px;
+}
+footer ul li a {
+    color: #e0e0e0;
+    line-height: 26px;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 11px;
+    padding: 3px;
+}
+footer ul li a:hover {
+    background: #484848;
+    border-bottom: 1px solid #212121;
+    text-decoration: none;
+    color:#e0e0e0
+}
+footer ul li a.ico-fb, footer ul li a.ico-twitter, footer ul li a.ico-youtube, footer ul li a.ico-google {
+  color: #e0e0e0;
+  text-decoration: none;
+  font-size: 11px;
+  background: url("/assets/social-icons.png") no-repeat; display:block; height:19px;
+  line-height:19px;
+  margin:0;
+  padding:0 0 0 25px;
+  margin-bottom:8px;
+}
+
+footer ul li a.ico-fb {
+  background-position:left top;
+}
+footer ul li a.ico-twitter {
+  background-position:left -42px;
+}
+footer ul li a.ico-youtube {
+  background-position:left -84px;
+}
+footer ul li a.ico-google {
+  background-position:left -126px;
+}
+
+footer ul li a.ico-fb:hover {
+  background-position: left -19px;
+  border-bottom:none;
+}
+footer ul li a.ico-twitter:hover {
+  background-position: left -61px;
+  border-bottom:none;
+}
+footer ul li a.ico-youtube:hover {
+  background-position: left -103px;
+  border-bottom:none;
+}
+footer ul li a.ico-google:hover {
+  background-position: left -145px;
+  border-bottom:none;
+}
+footer ul li a a#facebook {
+    background: url("/assets/sprite.png") 0 -200px no-repeat;
+}
+footer section#app-store-wrapper ul {
+    background: url("/assets/sprite.png") 0 -343px no-repeat;
+    padding-left: 20px;
+}
+footer section#app-store-wrapper ul li a {
+    display: block;
+    text-decoration: none;
+    padding: 0px;
+    margin: 3px;
+    background: url("/assets/sprite.png") 0 0 no-repeat;
+}
+footer section#app-store-wrapper a#apple-store-footer {
+    background-position: 0 -43px;
+    width: 114px;
+    height: 39px;
+}
+footer section#app-store-wrapper a#apple-store-footer:hover {
+    opacity: 0.7;
+    margin: 3px;
+    padding: 0px;
+    border: none;
+}
+footer section#app-store-wrapper a#google-play-footer {
+    background-position: left top;
+    width: 114px;
+    height: 38px;
+}
+footer section#app-store-wrapper a#google-play-footer:hover {
+    opacity: 0.7;
+    margin: 3px;
+    padding: 0px;
+    border: none;
+}
+footer .terms-privacy { display:block; clear:both; text-align:center; padding-top:37px;}
+footer .terms-privacy ol.notice{ list-style-type:none; margin:0 auto;}
+footer .terms-privacy ol.notice li{ display:inline;  color: #aaaaaa; margin-right:7px;}
+footer .terms-privacy ol.notice li a{ color: #aaaaaa; text-decoration: none; font-size: 13px;}
+footer .terms-privacy ol.notice li a:hover{ color: #fff;}

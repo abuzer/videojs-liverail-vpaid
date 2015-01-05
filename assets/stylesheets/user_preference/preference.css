@@ -1,0 +1,46 @@
+/*
+ *= require  new/ladda.min
+*/
+
+.tab-content {
+    display: none;
+}
+#preference {
+    display: block;
+}
+.branding-container table th {
+    background: #d8d8d8;
+    height: 46px;
+    padding: 0 5px;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+.branding-container table {
+    width: 100%;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+}
+.branding-container table td{
+  height: 40px;
+  padding: 0 5px;
+  vertical-align: middle;
+  color: #666;
+  border-bottom: 1px solid #dcdcdc;
+}
+#banner_image_form_holder #file{
+  width: 0px !important;
+}
+.helping_text{
+  font-size: 0.85em;
+}
+.logo-container .left{
+  float: left;
+  padding-right: 10px;
+}
+.ladda-button:hover{
+  color: #fff;
+}
+.preference-error{
+  color: red;
+  padding-left: 5px;
+}

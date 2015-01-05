@@ -1,0 +1,22 @@
+
+$(document).ready(function () {
+    FB.init({
+        appId: '<%=APP_CONFIG["THIRD_PARTY"]["FACEBOOK"]["APP_KEY"] %>',
+        cookie: true
+    });
+
+    $(".auth-logoutlink").click(function () {
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
+                FB.logout(function (response) {
+                    document.location = "/signout";
+                });
+            }
+            else {
+                document.location = "/signout";
+            }
+        });
+        $('#account-menu').hide();
+        return false;
+    });
+});

@@ -1,0 +1,363 @@
+@import "new/rules";
+
+#about {
+	min-height:1px;
+	.about-background {
+		background: url('new/bg.jpg') no-repeat top;
+		background-color: $white;
+		height:auto;
+		width:100%;
+		padding-top:80px;
+		padding-bottom:150px;
+	}
+
+	.white-underlay {
+		border-radius:8px;
+		min-height:100px;
+		background: $white;
+		border: $border 1px solid;
+	}
+
+	.about-content {
+		border-left: $border solid 1px;
+		padding-bottom:50px;
+
+		h3 {
+			margin-top:0;
+			font-size:1.5em;
+			font-weight:bold;
+		}
+
+	}
+
+	.about-list {
+		margin:.3em 0;
+	}
+
+	.about-nav {
+		a {
+			font-size:22px;
+			color:black;
+			&:hover {
+				color:$red;
+				text-decoration:none;
+			}
+		}
+		li {
+			list-style:none;
+			a{
+				color:$lightgray;
+				font-size:14px;
+				&:hover {
+					color:$red;
+					text-decoration:none;
+				}
+			}
+		}
+		ul {
+			padding-left:25px;
+		}
+	}
+
+	#sell {
+		li {list-style-image: url("new/right-bullet.png");line-height:1.5;}
+		ul{padding:0 0 0 40px;}
+	}
+
+	#about-refund {
+		#zip-code, #city {
+			display:inline-block;
+		}
+	}
+
+	#team{
+		li {list-style: none;}
+		ul {padding:0;}
+		.slidingDiv {
+
+			min-height: 100px;
+			background-color: #a60404;
+			/*padding: 20px;*/
+			margin-top: 30px;
+			position: absolute;
+			width: 295px;
+			padding: 20px;
+			color: #ffffff;
+			z-index: 999;
+		}
+
+		.slidingDiv .text-contents {
+			width: 285px;
+		}
+
+		.cross-icon {
+
+			float: right;
+			position: relative;
+			margin-right: -20px;
+			margin-top: -20px;
+		}
+		article ul li .teamplayer {
+			border: 1px solid #cacaca;
+			float: left;
+			margin: 26px;
+			width: 145px;
+		}
+		article ul li .teamplayer:hover {
+			border: 1px solid #a60404;
+			transition: all 0.3s ease-in-out 0s;
+		}
+		article ul li .teamplayer a.iframe-about {
+			display: block;
+			height: 145px;
+			/*overflow: hidden;*/
+			width: 145px;
+		}
+		article ul li .teamplayer .team-box-img {
+			display: block;
+			float: left;
+			height: 145px;
+			width: 145px;
+		}
+		article ul li .teamplayer .team-box-img img {
+			width: 145px;
+			height: 145px;
+		}
+		article ul li .teamplayer .teamplayer-detail {
+			background-color: #f3f3f3;
+			float: left;
+			padding: 5px;
+			width: 135px;
+		}
+		article ul li .teamplayer .teamplayer-detail .lft-info {
+			border-right: 1px solid #cacaca;
+			float: left;
+			width: 116px;
+		}
+		article ul li .teamplayer .teamplayer-detail .lft-info .teamplayer-name {
+			color: #333333;
+			font-size: 12px;
+			line-height: 18px;
+			font-weight: bold;
+		}
+		article ul li .teamplayer .teamplayer-detail .show-detail {
+			background: url("/assets/sprite.png") no-repeat scroll -49px -442px transparent;
+			display: block;
+			float: right;
+			height: 14px;
+			margin-top: 5px;
+			width: 14px;
+		}
+		article ul detail {
+			padding: 30px;
+			width: 250px;
+			background: #a60404;
+			position: absolute;
+			opacity: 0.96;
+			transition-property: width;
+			transition-duration: 2s;
+			-moz-transition-property: width;
+			/* Firefox 4 */
+			-moz-transition-duration: 2s;
+			-webkit-transition-property: width;
+			/* Safari and Chrome */
+			-webkit-transition-duration: 2s;
+			-o-transition-property: width;
+			/* Opera */
+			-o-transition-duration: 2s;
+			/* Opera */
+
+		}
+		article ul detail:hover {
+			width: 500px;
+		}
+		article ul detail p {
+			line-height: 18px;
+			color: white;
+			font-size: 13px;
+			margin-bottom: 30px;
+		}
+		article ul detail .close-detail {
+			-moz-box-sizing: border-box;
+			border-color: #750000 #750000 transparent transparent;
+			border-style: solid;
+			border-width: 30px;
+			cursor: pointer;
+			height: 0px;
+			position: absolute;
+			right: 0;
+			top: 0;
+			width: 0px;
+			transition: all 0.3s ease-in-out 0s;
+		}
+		article ul detail .close-detail:before {
+			background: url("/assets/sprite.png") no-repeat scroll -68px -440px transparent;
+			content: "";
+			display: block;
+			height: 12px;
+			margin-left: 8px;
+			margin-top: -16px;
+			width: 12px;
+		}
+		article ul detail .close-detail:hover:before {
+			background: url("/assets/sprite.png") no-repeat scroll -68px -452px transparent;
+			transition: all 0.3s ease-in-out 0s;
+		}
+	}
+
+// CONTACT PAGE START
+
+	button {
+		background-color:$red;
+		font-size:1.3em;
+		padding: 10px 15px;
+		&:hover {background:rgba(197, 51, 44,.9)}
+	}
+
+	#fee-share{
+		ul{padding:0;}
+	}
+
+	.contact-info{
+		padding-top:0;
+	}
+
+	.form-fields {
+		margin: 8px 0;
+		position: relative;
+	}
+	.form-fields h4 {
+		margin: 0;
+		color:#787878;
+		margin-bottom: 5px;
+	}
+	.form-fields p {
+		color:#666;
+	}
+
+	.form-fields label {
+		color: #333;
+		font-size: 13px;
+		left: 13px;
+		position: absolute;
+		top: 15px;
+	}
+	.form-fields input[type="text"] {
+		background-color: white;
+		border: 1px solid #cacaca;
+		border-radius: 4px 4px 4px 4px;
+		color: #333;
+		font-size: 13px;
+		height: 19px;
+		padding: 11px 38px 12px 12px;
+		width: 266px;
+	}
+	.form-fields select {
+		background-color: white;
+		border: 1px solid #cacaca;
+		border-radius: 4px 4px 4px 4px;
+		color: #787878;
+		font-size: 13px;
+		height: 44px;
+		padding: 11px 12px 12px 12px;
+		width: 318px;
+	}
+	textarea {
+		background-color: white;
+		border: 1px solid #cacaca;
+		border-radius: 4px 4px 4px 4px;
+		color: #333;
+		font-size: 13px;
+		padding: 11px 12px 12px 12px;
+		width: 292px;
+	}
+	.form-fields #fullname {
+		background: url("/assets/sprite.png") right -1582px no-repeat;
+	}
+	.form-fields #fullname:focus {
+		background: url("/assets/sprite.png") right -1622px no-repeat;
+	}
+	.form-fields #email {
+		background: url("/assets/sprite.png") right -1667px no-repeat;
+	}
+	.form-fields #email:focus {
+		background: url("/assets/sprite.png") right -1702px no-repeat;
+	}
+	.form-fields #phone {
+		background: url("/assets/sprite.png") right -1741px no-repeat;
+	}
+	.form-fields #phone:focus {
+		background: url("/assets/sprite.png") right -1780px no-repeat;
+	}
+	.form-fields #ordernumber {
+		background: url("/assets/sprite.png") right -1823px no-repeat;
+	}
+	.form-fields #ordernumber:focus {
+		background: url("/assets/sprite.png") right -1866px no-repeat;
+	}
+	.form-fields #facebook-id {
+		background: url("/assets/sprite.png") right -1984px no-repeat;
+	}
+	.form-fields #facebook-id:focus {
+		background: url("/assets/sprite.png") right -2026px no-repeat;
+	}
+	.form-fields #street-address {
+		background: url("/assets/sprite.png") right -2072px no-repeat;
+	}
+	.form-fields #street-address:focus {
+		background: url("/assets/sprite.png") right -2114px no-repeat;
+	}
+	.form-fields #city {
+		background: url("/assets/sprite.png") right -2160px no-repeat;
+	}
+	.form-fields #city:focus {
+		background: url("/assets/sprite.png") right -2202px no-repeat;
+	}
+	.form-fields #zip-code {
+		background: url("/assets/sprite.png") right -2240px no-repeat;
+	}
+	.form-fields #zip-code:focus {
+		background: url("/assets/sprite.png") right -2271px no-repeat;
+	}
+	.form-fields #problemtype {
+		background: url("/assets/sprite.png") right -2306px no-repeat;
+		cursor:pointer;
+	}
+	.form-fields #problemtype:focus {
+		background: url("/assets/sprite.png") right -2346px no-repeat;
+	}
+	 .stay-connected {
+    padding-top: 10px;
+
+	}
+	 .stay-connected a {
+    line-height: 24px;
+    color: #333;
+    text-decoration: none;
+    padding: 5px 5px 5px 25px;
+}
+ .stay-connected a:hover {
+    color: #a60404;
+}
+ .stay-connected a#facebook {
+    background: url("/assets/sprite.png") no-repeat scroll -20px -292px transparent;
+}
+ .stay-connected a#twitter {
+    background: url("/assets/sprite.png") no-repeat scroll -20px -315px transparent;
+}
+
+.set-price { display:block; padding:25px 0;}
+.set-price h6{ display:block; color: #333333; font-size: 17px; font-weight: normal; margin:0;}
+.set-price ul.share{ display:block; list-style-type:none;}
+.set-price ul.share li{ display:block; margin-top:15px;}
+.set-price ul.share li label{ display:block; color: #333; font-size: 13px; margin-bottom:5px; font-weight:bold;}
+.set-price ul.share li .drop-down{  background-color: white; border: 1px solid #CACACA; border-radius: 4px 4px 4px 4px; box-shadow: 0 0 8px #CCCCCC inset; color: #787878; font-size: 13px; height: 44px; padding: 11px 12px 12px; width: 390px;}
+.set-price ul.share li .method{ background-color: white; border: 1px solid #CACACA; border-radius: 4px 4px 4px 4px; box-shadow: 0 0 8px #CCCCCC inset; color: #787878; font-size: 13px; height: 19px; padding: 11px 38px 12px 12px; width: 340px;}
+
+.ml33 {
+    margin-left: 33px !important;
+}
+
+li {list-style:none;}
+ul {padding:0;}
+}

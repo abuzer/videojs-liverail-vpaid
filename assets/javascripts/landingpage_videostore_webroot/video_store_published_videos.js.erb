@@ -1,0 +1,90 @@
+var uid = "";
+var signed_request = "";
+var LC_USER;	// LC SESSION
+var DEVICE_AUTH;
+
+$(document).ready(function () {
+    signed_request = $('#fb_signed_request').data('url');
+});
+
+function video_store_published_videos(show_how_to_video) {
+    if (show_how_to_video == false) {
+        $("#videos-loading").show();
+        FB.init({
+            appId: FB_APP_ID,
+            status: true,
+            cookie: true,
+            xfbml: true,
+            oauth: true
+        });
+        FB.Canvas.setAutoGrow();
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
+                FB.api('/me', function (response) {
+                    console.log(response)
+                    uid = response.id;
+                    me = response;
+                    if(me){
+                        var access_token =  FB.getAuthResponse()['accessToken'];
+                        setTimeout(function () {
+                            var data = 'fb_id=' + me.id + '&user[first_name]=' + me.first_name + '&user[last_name]=' + me.last_name + '&user[email]=' + me.email + '&user[name]=' + me.username + '&accessToken='+access_token;
+
+                            DataCall (data, SERVER + REGISTER, "POST", false,
+                                    function (data){
+                                        console.log(data)
+                                        if (data.success == true){
+                                            console.log ('login success');
+                                            LC_USER = data.data.user;
+                                            DEVICE_AUTH = data.data.user.device_auth_token;
+                                            console.log(LC_USER)
+                                        }else
+                                            Error ("Sign In", "Invalid information.");
+                                    },
+                                    function (){
+                                        Error ("Sign In", "An error occured.");
+                                    }
+                            );
+                            get_publisher_videos();
+                        }, 2000);
+                    } else {
+                        get_publisher_videos();
+                    }
+                });
+            } else {
+                get_publisher_videos();
+            }
+        });
+    }
+    else {
+        $("#videos-loading").show();
+        FB.init({
+            appId: FB_APP_ID,
+            status: true,
+            cookie: true,
+            xfbml: true,
+            oauth: true
+        });
+        FB.Canvas.setAutoGrow();
+        $('#load-how-to').show();
+        $("#videos-loading").hide();
+    }
+}
+
+function get_publisher_videos() {
+    $.ajax({
+        type: "GET",
+        url: "/videos/publisher_videos_video_store",
+        data: {uid: uid, signed_request: signed_request },
+        datatype: "html",
+        success: function (data) {
+            $("#videoSec").html(data);
+            $("#owl-demo").owlCarousel({ itemsCustom:[ [650, 3] ] });
+        },
+        complete: function () {
+            $('#videos-loading').hide();
+        },
+        error: function () {
+            alert("Looks like there is some problem with the server. Please try again in a few moment");
+        }
+    });
+}

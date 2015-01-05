@@ -1,0 +1,29 @@
+#toTop {
+	display:none;
+	text-decoration:none;
+	position:fixed;
+	bottom:10px;
+	right:10px;
+	overflow:hidden;
+	width:25px;
+	height:25px;
+	border:none;
+	text-indent:100%;
+	background:url(../../new/ui.totop.png) no-repeat left top;
+}
+
+#toTopHover {
+	background:url(../../new/ui.totop.png) no-repeat left -25px;
+	width:25px;
+	height:25px;
+	display:block;
+	overflow:hidden;
+	float:left;
+	opacity: 0;
+	-moz-opacity: 0;
+	filter:alpha(opacity=0);
+}
+
+#toTop:active, #toTop:focus {
+	outline:none;
+}

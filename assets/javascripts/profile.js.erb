@@ -1,0 +1,146 @@
+$(function() {
+             var VIDEO_ID;
+  VIDEO_ID = $('#video_id').prop("value");
+        if ($('#video_title').prop("value")) {
+                                             VIDEO_ID = $('#video_id').prop("value");
+            setTimeout((function() {
+                                   Stripe.setPublishableKey('<%=APP_CONFIG["THIRD_PARTY"]["STRIPE"]["APP_KEY"]%>');
+                       VIDEO_ID = $('#video_id').prop("value");
+                       FB.init({
+                               appId: '<%= APP_CONFIG["THIRD_PARTY"]["FACEBOOK"]["APP_KEY"] %>',
+                               cookie: true,
+                               status: true,
+                               xfml: true,
+                               oauth: true
+                               });
+                       fb_login();
+            return LoadHTMLPlayer(
+              $('#new_hd_preview_thumbnail_url_for_video_store').prop("value"),
+              $('#hd_video_url').prop("value"),
+              $('#video_title').prop("value"),
+              $('#video_details_is_buy').prop("value") === "true",
+              $('#html_player_id').prop("value"),
+              $('#video_id').prop("value"),
+              $('#hd_video_url').prop("value"),
+              $('#sd_video_url').prop("value"),
+              $('#showtos').prop("value") === "true",
+              $('#buy_link').prop("value") === "true",
+              $('#buy_url').prop("value"),
+              $('#showtos').prop("value") === "true",
+              false,
+              $('#video_width').prop("value"),
+              $('#video_height').prop("value"),
+              true,
+              $('#controller_action_name').prop("value"), 0,
+            false, null, null, null,$('#video_uuid').prop("value"), 'LCWebsite' );
+            }), 1);
+}
+
+$('#follow_unfollow_link').bind('ajax:complete', function(data, textStatus, jqXHR) {
+    if (textStatus.responseText === "UserFollowed") {
+      $('.followers').first().children("h3").html(parseInt($('.followers').first().children("h3").html()) + 1);
+      $('#follow_unfollow_link').prop('href', "/users/" + $('#profile_page_user_id').prop('value') + "/unfollow");
+      $('#follow_unfollow_link').html("<span class='minus'>-</span><span class='text'>Following</span>");
+      $('#follow_unfollow_link').removeClass("updates-button");
+      $('#follow_unfollow_link').addClass("following");
+    } else {
+      $('.followers').first().children("h3").html(parseInt($('.followers').first().children("h3").html()) - 1);
+      $('#follow_unfollow_link').prop('href', "/users/" + $('#profile_page_user_id').prop('value') + "/follow");
+      $('#follow_unfollow_link').html("<span class='plus'>+</span><span class='follow'>Follow</span>");
+      $('#follow_unfollow_link').removeClass("following");
+      $('#follow_unfollow_link').addClass("updates-button");
+
+    }
+}).bind('ajax:before', function() {
+    $('#follow_unfollow_link').html('<%=image_tag("ajax-loader-white.gif", style: "padding:10px 33px;")%>');
+}).bind('ajax:failure', function() {
+    $('#follow_unfollow_link').html("<span class='plus'>-</span><span class='follow'>Following</span>");
+  });
+});
+
+$(document).ready(function() {
+                             var state, _i, _len, _ref;
+        if ($('#user_country_id option:selected').text() === "UNITED STATES") {
+                                                                              $('#state_div').show();
+            _ref = $.masterStatesList;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                                                              state = _ref[_i];
+$('#user_state_id').append($("<option></option>").attr("value", state.id).text(state.name));
+}
+}
+$('#user_country_id').change(function() {
+                                        var _j, _len1, _ref1, _results;
+                             _ref1 = $.masterStatesList;
+                             _results = [];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                                                             state = _ref1[_j];
+if ($('#user_country_id option:selected').text() === "UNITED STATES") {
+                                                                      $('#state_div').show();
+    _results.push($('#user_state_id').append($("<option></option>").attr("value", state.id).text(state.name)));
+} else {
+$('#state_div').hide();
+_results.push($('#user_state_id').empty());
+}
+}
+return _results;
+});
+
+$("#profile_file_field").change(function() {
+  $('#pic_upload_form').submit();
+});
+
+$("#bg_profile_file_field").change(function() {
+  $('#background_pic_upload_form').submit();
+});
+
+  $('#background_pic_upload_form').ajaxForm({
+    beforeSend: function() {
+     $('#profile_background_pic').fadeTo("slow", 0.55);
+     $("#bg_pic_loading_icon").css({
+      "position": "absolute"
+    });
+    $("#bg_pic_loading_icon").css("left", $('#profile_background_pic').width() / 2 + "px");
+    $("#bg_pic_loading_icon").css("top", $('#profile_background_pic').height() / 2 + 43 + "px");
+    return $("#bg_pic_loading_icon").show();
+  },
+  
+  uploadProgress: function(event, position, total, percentComplete) {
+    return console.log("upload in progress");
+  },
+  
+    complete: function(xhr) {
+      if(xhr.status == 200){
+        $('#profile_background_pic').css("background-image", "url(" + xhr.responseText + ")");
+        $('#bg_pic_loading_icon').hide();
+        $('#profile_background_pic').fadeTo("slow", 1);
+        $('.del-btn').removeClass("hide");
+      }
+    }
+});
+
+$('#pic_upload_form').ajaxForm({
+    beforeSend: function() {
+      $('#profile_image').fadeTo("slow", 0.55);
+      $("#profile_pic_loading_icon").css({"display": "block"});
+      $("#profile_pic_loading_icon").css("bottom", 70 + "px");
+      $("#profile_pic_loading_icon").css("left", $('#profile_image').width() / 2 + "px");
+      return $("#profile_pic_loading_icon").show();
+    },
+    uploadProgress: function(event, position, total, percentComplete) {
+      return console.log("upload in progress");
+    },
+    complete: function(xhr) {
+      if(xhr.status == 200){
+          var new_image_url;          
+          new_image_url = xhr.responseText + "?" + Math.random().toString(36).substring(7);
+          $('#profile_image').prop("src", new_image_url);
+          return $('#profile_image').load(function() {
+            $('#profile_pic_loading_icon').hide();
+            $('#profile_image').fadeTo("slow", 1);
+            $('.profile_link').children("img").prop("src", new_image_url);
+          });
+      }
+    }
+  });
+
+});

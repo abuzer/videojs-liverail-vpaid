@@ -1,0 +1,566 @@
+//= require javascript_settings.js
+//= require jquery.js
+//= require fb_app/md5.js
+//= require fb_app/date.format.js
+//= require fb_app/browser.js
+//= require fb_app/social-likes.min.js
+//= require public_videos/login
+//= require public_videos/common
+//= require public_videos/LiveRail.AdManager-1.0
+//= require public_videos/services
+//= require owl-carousel/owl.carousel.js
+//= require js-functions
+
+
+
+var LiveRailVPAID;
+var SERVER = SERVER_URL;
+var SERVER_WITHOUT_API_VERSION = '<%= APP_CONFIG["APP_INFORMATION"]["BASE_URI_WITHOUT_PROTOCOL"] %>';
+
+// SERVICES
+var IS_UNPUBLISHED = "can_purchase.json";
+var IS_DELETED = "is_deleted.json";
+var VIDEO_INFORMATION = "detail_information.json";
+var VIDEO_COMMENTS = "make_payment/";
+var COMMENT = "add_comment.json";
+var VIDEO_LIKES = "video_likes.json";
+var LIKE = "liked.json";                  // >> VIDEOS
+var UNLIKE = "unliked.json";                // >> VIDEOS
+var VIDEO_ACCESS = "detail_information.json";       // >> LIBRARY
+var PUBLISHER_VIDEOS = "make_purchase.json";
+var MY_VIDEOS = "videos.json";                // NO METHOD. USING <LIBRARY>.json INSTEAD
+var REGISTER = "device_signup/";
+var SETUP_PAYMENT = "started.json";             // >> PAYMENTS
+var PAYMENT_SUCCESS = "success.json";           // >> PAYMENTS
+var PAYMENT_FAIL = "cancel.json";             // >> PAYMENTS
+var PAYMENT_STATUS = "status";                // >> PAYMENTS
+var STREAM_REQUEST = "stream_request.json";         // >> VIDEOS
+var PREVIEWED = "/previewed.json";
+var UPDATE_STREAM = "/update_stream_stats.json";
+var IS_MOBILE_VIEW = false;
+//log preview
+var IS_EMBED = false;
+var videoPlayer;
+var AD_COMPLETED = true;
+var PlayAdOnFirstLoad = false;
+var INIT_Ad = false;
+var canvas_link = '';
+//introduce these becasue videojs fire timeupdate event more than once for same sec.
+var is_preview_logged_3_sec = false;
+var is_played = false;
+var is_preview_logged_10_sec = false;
+
+var activityId = 0;
+var postId = "";
+var social_sharing = false;
+var SUBSCRIBE_CLICLED_FROM = '';
+VIDEOS = 'videos/';
+PUBLIC_VIDEOS= 'freevideo-upload/';
+SUBSCRIPTION_ID = 0;
+POSTER = '';
+
+VIDEO_ID = '';
+var DEBUG = true;
+var DEVICE_AUTH = ""
+
+$(function() {
+    VIDEO_ID = getParameterByName('watch');
+    if( typeof(FB)  !=  undefined ){
+      FB.init({
+          appId      : FB_APP_ID,
+          status     : true,
+          cookie     : true,
+          xfbml      : true,
+          oauth      : true
+      });
+      FB.Canvas.setAutoGrow(1000);
+    }
+    sub = getCookie("subscribed");
+    if(LC_USER.id  && !IS_SUBSCRIBED && getParameterByName('subscribe')){
+      PlayAdOnFirstLoad = true;
+      $('.thankyou-cancel').hide();
+      subscribe();
+      SUBSCRIBE_CLICLED_FROM = 'page_load';
+    }else if(sub != "" ){
+        console.log( ' auto sub ');
+        PlayAdOnFirstLoad = true;
+        subscribe();
+        SUBSCRIBE_CLICLED_FROM = 'page_load';
+        deleteCookie("subscribed");
+    }
+    if(getParameterByName('subscribe') == 1 && !LC_USER.id ){
+      console.log( "not logged int LC_USER is null");
+      c_expiry = 1/24/58;
+      setCookie("subscribed", true, c_expiry);
+      fbLogin();
+    }
+    //fbLoginStatus();
+    BROWSER = Browser();
+
+    comment_text = getCookie("comment_text");
+    if(comment_text != ""){
+        deleteCookie("comment_text")
+        evt = new Event("keydown");
+        evt.keyCode = 13;
+        $('#comment_text').val(comment_text);
+        addComment(evt);
+    }
+
+    like_video = getCookie("like_video");
+    if(like_video == "like"){
+        deleteCookie("like_video");
+        $('#video-like').click();
+    }
+
+    //only for Mobile view if user coming form mobile browser than call devise signup call
+    if(IS_MOBILE_VIEW) {
+        fbLoginStatus();
+    }
+    var doPoster = function() { jQuery(".vjs-poster").css("display","inline"); };
+    try {
+        var lvID = videojs("liveRail", {
+            plugins : {  SubscribeBtn : {}, LCLogo : {} }
+        }, function() {
+            $('#liveRail').append($('#about-section').html());
+            if(!PlayAdOnFirstLoad){
+                try{
+                    initilize_add();
+                }catch( ex ){ }
+            }
+            this.on('ended', function(){
+                this.dispose();
+            });
+            this.on('play', function(){
+                $('#about-video-in').hide();
+                $('#about-header-info').hide();
+            });
+            $('#liveRail').append('<div id="" class="ad-element skipAdButton hide">Skip Ad</div><div class="videoInSec hide"></div>');
+        });
+    } catch( ex ){ }
+
+
+
+ var vid = videojs("player", {
+        plugins : {  SubscribeBtn : {}, LCLogo : {}, About : {}, resolutionSelector: {} }
+      }, function() {
+          /*if(getParameterByName('subscribe') == 1 && !IS_SUBSCRIBED ){
+            Subscribe();
+          } else */
+         videoPlayer = this;
+          $('.vjs-control-bar').show(); // show player every time when we open canvas app
+          $('.videocontent').css("background", 'black');
+          $('.video-js').css("z-index", '9999')
+          //$('.vjs-fullscreen-control').addClass('full-scrn').removeClass('vjs-fullscreen-control');
+          videoPlayer.on("ended", function() {
+            if( AD_COMPLETED ){
+              logWatchActivity('true', 'false', <%= Video::PREVIEW_DURATION[:full_watched]%>);
+              setTimeout(function() {
+                videoPlayer.posterImage.show();
+                $('.vjs-big-play-button').css('display', 'block');
+                videoPlayer.bigPlayButton.show();
+                videoPlayer.cancelFullScreen();
+                videoPlayer.pause();
+                if( BROWSER.browser != 'IE'){
+                  videoPlayer.currentTime(0);
+                }
+               }, 500);
+
+                is_preview_logged_3_sec = false;
+                is_played = false;
+                ga('send', 'event', 'FreeVideo', 'Finished Video', VIDEO_ID + ':' + $('#video-title-in').html());
+              }
+          });
+
+          videoPlayer.on("ended", function(){
+            if( AD_COMPLETED ){
+              $('#player_html5_api').attr('poster', POSTER);
+              $(".video-js .vjs-poster").css('background-image', 'url('+POSTER+')').show();
+              doPoster();
+              if( !IS_SUBSCRIBED ){
+                showSubscription('videoEnded');
+              }
+
+            }
+          });
+          videoPlayer.on("stopped", function(){
+            
+          });
+          videoPlayer.on('pause', function(e)
+          {
+            console.log( 'pause');
+          });
+
+          videoPlayer.on('play', function(e)
+          {
+
+            if(AD_COMPLETED){
+              $('.vjs-res-button').show();
+              $('#about-btn').show();
+            }
+            videoPlayer.posterImage.hide();
+            videoPlayer.bigPlayButton.hide();
+            if (is_played == false && AD_COMPLETED) {
+                console.log('------ played  ----    ');
+                is_played = true;
+                ga('send', 'event', 'FreeVideo', 'Video Play', VIDEO_ID + ':' + $('#video-title-in').html());
+            }
+            console.log('play');
+            $('#about-video-in').hide();
+            $('#about-header-info').hide();
+          });
+
+          videoPlayer.on('resize', function(e)
+          {
+            console.log( 'resize');
+          });
+
+          videoPlayer.on("timeupdate", function() {
+            var currentTime = Math.ceil(videoPlayer.currentTime());
+            if( currentTime == 6)
+              removeFixedControls('player');
+            if(Math.ceil(videoPlayer.currentTime()) == 3 && is_preview_logged_3_sec==false && AD_COMPLETED)
+            {
+                is_preview_logged_3_sec = true;
+                ga('send', 'event', 'FreeVideo', 'Video View', VIDEO_ID + ':' + $('#video-title-in').html());
+                console.log('------ timeupdate  ----    3' + AD_COMPLETED);
+                logWatchActivity('true', 'false',<%=Video::PREVIEW_DURATION[:three_sec_preview]%>);
+            }
+
+            if(Math.ceil(videoPlayer.currentTime()) == 10 && is_preview_logged_10_sec == false && AD_COMPLETED)
+            {
+                is_preview_logged_10_sec = true;
+                console.log('------ timeupdate  ----    10' + AD_COMPLETED);
+                logWatchActivity('false', 'true',<%=Video::PREVIEW_DURATION[:ten_sec_preview]%> );
+            }
+          });
+        $('#player').append($('#about-section').html());
+        $('#about-section').html('');
+        $('#about-header-info').fadeIn();
+
+
+
+        }); //End of video player initialization
+    if( !INIT_Ad) {
+      // vid.ads();
+      // vid.vast({
+      //   url: vastArray[Math.floor(Math.random() * vastArray.length)]
+      // });
+      INIT_Ad = true;
+    }
+
+    $('.vjs-control-content-about').click(function(){
+      if( $('#about-video-in').is(":visible")) {
+        $('#about-video-in, #video-information-in, #about-header-info').fadeOut('slow');
+        if (videoPlayer.paused() && is_played)
+            videoPlayer.play();
+      } else {
+        videoPlayer.pause();
+        $('#about-video-in, #video-information-in, #about-header-info').fadeIn();
+      }
+    });
+
+    $('#toggle-share').click(function(){
+      if($('#prev-text-for-user').is(":visible"))
+      {
+          $('#prev-text-for-user').hide();
+      }
+      $('.share-video').fadeToggle(300);
+    });
+    $('.vjs-control-content-subscribe-btn').click(function(event) {
+      if(IS_FACEBOOK_PAGE_STORE || IS_EMBED){
+        window.open(canvas_link_with_subscribe,'_blank');
+        return ;
+      }
+    });
+}); // end ready function
+
+  // Note that we're not doing this in prototype.createEl() because
+  // it won't be called by Component.init (due to name obfuscation).
+    var createLCLogoButton = function() {
+
+        if( typeof(LogoLink) == 'undefined')
+            logo_link = '/assets/fb_app/images/player/small-logo.png';
+        else
+            logo_link = LogoLink;
+        var logo = '<img src= "' + logo_link +'"  />';
+
+        IS_FACEBOOK_PAGE_STORE = typeof (IS_FACEBOOK_PAGE_STORE) != undefined ? IS_FACEBOOK_PAGE_STORE : false;
+        IS_EMBED = typeof (IS_EMBED) != undefined ? IS_EMBED : false;
+        if( IS_EMBED || IS_FACEBOOK_PAGE_STORE  )
+            logo = '<a href="'+canvas_link+'" target="_blank" style="cursor:pointer">' + logo +' </a>';
+        var props = {
+            className: 'vjs-resolution-button',
+            innerHTML: '<div class="vjs-control-content-logo" ><span style="display: table-cell; vertical-align: middle; height: 30px;">'+ logo +'</span></div>',
+            role: 'button',
+            'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+            tabIndex: 0
+        };
+        return videojs.Component.prototype.createEl(null, props);
+    };
+
+      var LCLogo;
+      videojs.plugin('LCLogo', function() {
+        var options = {'el': createLCLogoButton()};
+        LCLogo = new videojs.LCLogo(this, options);
+        this.controlBar.el().appendChild(LCLogo.el());
+      });
+
+      videojs.About = videojs.Button.extend({
+        /** @constructor */
+        init: function(player, options) {
+          videojs.Button.call(this, player, options);
+
+        }
+      });
+      // Note that we're not doing this in prototype.createEl() because
+      // it won't be called by Component.init (due to name obfuscation).
+      var createAboutButton = function() {
+        var props = {
+          className: 'vjs-resolution-button',
+          innerHTML: '<div class="vjs-control-content-about", id="about-btn" > <span> About </span></div>',
+          role: 'button',
+          'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+          tabIndex: 0
+        };
+        return videojs.Component.prototype.createEl(null, props);
+      };
+
+      var About;
+      videojs.plugin('About', function() {
+        var options = {'el': createAboutButton()};
+        About = new videojs.About(this, options);
+        this.controlBar.el().appendChild(About.el());
+      });
+
+      videojs.SubscribeBtn = videojs.Button.extend({
+        init: function(player, options) {
+            videojs.Button.call(this, player, options);
+        }
+      });
+      var Subscribe;
+      videojs.plugin('SubscribeBtn', function() {
+          var options = {'el': createSubscribeButton()};
+          Subscribe = new videojs.SubscribeBtn(this, options);
+          this.controlBar.el().appendChild(Subscribe.el());
+        if( IS_SUBSCRIBED )
+          $('.vjs-control-content-subscribe-btn').hide();
+      });
+      var createSubscribeButton = function() {
+        var props = {
+          className: 'vjs-subscribe-button',
+          innerHTML: '<div  class="button btn-default vjs-control-content-subscribe-btn" id="player-buy-button" onclick="showSubscription(\'button\');"> <span> Subscribe </span></div>',
+          role: 'button',
+          'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+          tabIndex: 0
+        };
+        return videojs.Component.prototype.createEl(null, props);
+      };
+      
+      var showSubscription = function( clicked_from){
+        SUBSCRIBE_CLICLED_FROM  =  clicked_from;
+        if($('.endscreen').hasClass('subscribe-show') ){
+            $('.endscreen').removeClass('subscribe-show');
+        }else{
+          videojs("player").pause();
+           $('.endscreen').fadeTo('slow', 1);
+           $('.endscreen').css('z-index', 10)
+           $('.endscreen').addClass('subscribe-show');
+         }
+      }
+      var cancelSubscriptionOverlay = function(){
+
+        if($('.endscreen').hasClass('subscribe-show') ){
+            $('.endscreen').removeClass('subscribe-show');
+        }
+        //$('.endscreen').fadeTo('slow', 0);
+        $('.endscreen').css('z-index', -1)
+        if(!PlayAdOnFirstLoad){
+            try{
+                  initilize_add();
+                }catch( ex ){ }
+        }
+
+      }
+      var showThankYou = function( ){
+        videojs("player").pause();
+        $('.vjs-big-play-button').css('display', 'none');
+        $('.thankyou-screen').fadeTo('slow', 1);
+        $('.thankyou-screen').css('z-index', 10)
+        $('.thankyou-screen').addClass('subscribe-show');
+        ///$('.thankyou-screen').show();
+      } 
+      var hideThankYou = function(){
+        $('.ad-element').hide();
+        $('#player').removeClass('ads');
+        //$('.vjs-big-play-button').css('display', 'block');
+        $('.thankyou-screen').fadeTo('slow', 0);
+        $('.thankyou-screen').css('z-index', -1)
+        if(PlayAdOnFirstLoad){
+            try{
+                  initilize_add();
+            }catch( ex ){ }
+        }
+      }
+      var replayVideo = function(){
+        $('.thankyou-screen').hide();
+        if( getCookie('doNotPlayPreRoll')  ){
+          PlayAdOnFirstLoad = false;
+          deleteCookie( 'doNotPlayPreRoll' );
+        }
+        if( SUBSCRIBE_CLICLED_FROM  == 'page_load'){
+            if(PlayAdOnFirstLoad){
+                $('.endscreen').css('z-index', -1)
+                try{
+                  initilize_add();
+                  PlayAdOnFirstLoad =  false;
+                }catch( ex ){}
+                return true;
+            }
+            //resetPlayer();
+        }
+        videojs("liveRail").dispose();
+        if( SUBSCRIBE_CLICLED_FROM  == 'button' || SUBSCRIBE_CLICLED_FROM == 'videoEnded')
+            videojs("player").play();
+        else
+            videojs("player").play();
+      }
+      videojs.HdSd = videojs.Button.extend({
+        /** @constructor */
+        init: function(player, options) {
+          videojs.Button.call(this, player, options);
+
+        }
+      });
+  // Note that we're not doing this in prototype.createEl() because
+  // it won't be called by Component.init (due to name obfuscation).
+      function hideHdSd() {
+
+      }
+      function dispHdSd() {
+
+      }
+      var createHdSdButton = function() {
+        var props = {
+          className: 'vjs-resolution-button',
+          innerHTML: '<div class="vjs-control-content-hdsd", id="hdsd" onmouseover="dispHdSd();" onmouseout="hideHdSd();"> <span "> <img src="/fb_app/images/player/hd-sd.png" /> </span></div>',
+          role: 'button',
+          'aria-live': 'polite', // let the screen reader user know that the text of the button may change
+          tabIndex: 0
+        };
+        return videojs.Component.prototype.createEl(null, props);
+      };
+
+      var HdSd;
+      videojs.plugin('HdSd', function() {
+        var options = {'el': createHdSdButton()};
+        HdSd = new videojs.LCLogo(this, options);
+        this.controlBar.el().appendChild(HdSd.el());
+      });
+
+function subscribeSuccessCallBack(){
+
+      }
+      function resetPlayer(){
+        try{
+          videojs("liveRail").dispose();
+        }catch(ex){ console.log( ex); }
+        $('.ad-element').hide();
+        AD_COMPLETED = true;
+        videojs("player").play();
+      }
+      $(function(){
+          $('.skipAdButton').on('click', function() {
+            if(skipEnabled){
+                $("#liveRail").removeClass("vjs-playing").addClass("vjs-paused");
+                videojs("liveRail").dispose();
+                resetPlayer();
+                LiveRailVPAID.skipAd();
+              }
+          });
+          videojs("liveRail").on("timeupdate", function() {
+            var current_time = Math.ceil(videojs("liveRail").currentTime());
+            if( current_time == 10 )
+                removeFixedControls('liveRail');
+            if( AD_COMPLETED ){
+              $('.videoInSec').hide();
+            }else{
+              if( videojs("liveRail").duration() ){
+                $('.videoInSec').show();
+                  remaining =  Math.ceil( videojs("liveRail").duration() - current_time ) ;
+                  $('.videoInSec').html( "Advertising - Your video in " + remaining  + " seconds" );
+              }
+            }
+           $('.ad-element').show();
+            if( current_time <= 5 ){
+                $('.skipAdButton').html( 'Skip in ' + (5- current_time));
+            }else{
+                skipEnabled = true;
+                $('.skipAdButton').html( 'Skip Ad');
+                $('.skipAdButton').attr('id', 'skipAd');
+            }
+          });
+      });
+      videojs.LCLogo = videojs.Button.extend({
+        /** @constructor */
+        init: function(player, options) {
+          videojs.Button.call(this, player, options);
+
+        }
+      });
+
+      function initilize_add() {
+          PlayAdOnFirstLoad = true;
+          try{
+              LiveRailVPAID = getVPAIDAd();
+              LiveRailVPAID.handshakeVersion('2.0');
+              var creativeData = {},
+                      environmentVars = {
+                          slot: player,
+                          videoSlot: liveRail_html5_api,
+                          videoSlotCanAutoPlay: true,
+                          adSkippableState: true,
+                          LR_TITLE:'littlecast',
+                          LR_VIDEO_ID:'littlecast',
+                          LR_PUBLISHER_ID: 1331,
+                          LR_TAGS: 'demo',
+                          LR_AUTOPLAY:1,
+                          LR_MUTED: 1,
+                          LR_DEBUG: 1,
+                          LR_SKIP_MESSAGE: 'Advertising - Your video in {COUNTDOWN} seconds',
+                      };
+              //Initializean ad
+              LiveRailVPAID.initAd(liveRail_html5_api.offsetWidth, liveRail_html5_api.offsetHeight, 'normal', 512, creativeData, environmentVars);
+
+              LiveRailVPAID.subscribe(function() {
+                  AD_COMPLETED = false;
+                  setTimeout(function() {
+                      LiveRailVPAID.startAd();
+                      videojs("liveRail").on("timeupdate", function() {
+                      });
+                      console.log('ad loaded');
+                  }, 0);
+              }, 'AdLoaded');
+              LiveRailVPAID.subscribe(function() {
+                $('.videoInSec').hide();
+                  resetPlayer()
+              }, 'AdStopped');
+              LiveRailVPAID.subscribe(function() {
+                $('.videoInSec').hide();
+                  resetPlayer();
+                  console.log( '-------- AdError -------' );
+              }, 'AdError');
+              LiveRailVPAID.subscribe(function(message) {
+                  console.log(message);
+              }, 'AdLog');
+              LiveRailVPAID.subscribe(function(message) {
+                  console.log('------------ complete');
+              }, 'AdComplete');
+          }catch( ex ){
+              console.log( ex );
+              $('.ad-element').hide();
+              $('#liveRail').removeClass('ads');
+              AD_COMPLETED = true;
+              videojs("player").play();
+          }
+
+      }

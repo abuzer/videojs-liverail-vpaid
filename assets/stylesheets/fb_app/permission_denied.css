@@ -1,0 +1,8 @@
+#fb_get_permissions_button {width: 302px;display: block;height: 39px;background: #3c5a96;border-radius: 3px;line-height: 36px;margin: 0 auto;}
+.head-title {float: left;font-size: 23px;color: #fff;font-weight: bold;text-align: center;width: 40px;font-family: 'Helvetica', Arial, Sans-Serif;}
+.authorize-text {float: left;font-size: 12px;color: #fff;font-weight: bold;margin-left: 31px;font-family: 'Helvetica', Arial, Sans-Serif;}
+#fb_get_permissions_button:hover {background: #0f3597;}
+.autorize-block {padding-top: 250px;display: block;width: 333px;margin: 0 auto;text-align: center;}
+.autorize-block p {margin: 10px 0;}
+.rmv_underline {text-decoration: initial;color: gray;}
+.auth-container p {font-family: 'Helvetica', Arial, Sans-Serif;}
