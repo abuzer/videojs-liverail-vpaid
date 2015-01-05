@@ -44,6 +44,9 @@
                 $('#videoElement')[0].play();
                 video2Played = true;
             }
+            if( video1Played && video2Played ){
+                $('#videoElement')[0].webkitExitFullScreen()
+            }
         });
         $('.videoElement').bind('progress', function(e) {
             $('#state').hide();
